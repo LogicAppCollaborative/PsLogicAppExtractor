@@ -5,15 +5,15 @@
 *TempPoint*
 
 # Ignore staging info from Visual Studio
-library/d365fo.tools/.vs/*
-library/d365fo.tools/d365fo.tools/bin/*
-library/d365fo.tools/d365fo.tools/obj/*
+library/PsLogicAppExtractor/.vs/*
+library/PsLogicAppExtractor/PsLogicAppExtractor/bin/*
+library/PsLogicAppExtractor/PsLogicAppExtractor/obj/*
 
 # ignore PowerShell Studio MetaData
-d365fo.tools/d365fo.tools.psproj
-d365fo.tools/d365fo.tools.psproj.bak
-d365fo.tools/d365fo.tools.psprojs
-d365fo.tools/d365fo.tools.psproj
+PsLogicAppExtractor/PsLogicAppExtractor.psproj
+PsLogicAppExtractor/PsLogicAppExtractor.psproj.bak
+PsLogicAppExtractor/PsLogicAppExtractor.psprojs
+PsLogicAppExtractor/PsLogicAppExtractor.psproj
 
 # ignore the TestResults
 TestResults/*
