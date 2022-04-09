@@ -16,7 +16,7 @@ Describe 'Testing ConvertTo-Arm' {
         
         $props = @{}
         $props.PsLaWorkPath = $WorkPath
-        $props.PsLaFilePath = "C:\GIT\GITHUB\PsLogicAppExtractor.Workspace\PsLogicAppExtractor\PsLogicAppExtractor\tests\functions\tasks\ConvertTo-Arm.task.test.json"
+        $props.PsLaFilePath = "C:\GIT\GITHUB\PsLogicAppExtractor.Workspace\PsLogicAppExtractor\PsLogicAppExtractor\tests\functions\tasks\_ConvertTo.Arm.json"
 
         Invoke-psake @parms -properties $props -taskList "ConvertTo-Arm"
 
@@ -30,16 +30,25 @@ Describe 'Testing ConvertTo-Arm' {
 
     It "Should be a valid LogicApp class" {
         "$($armObj.GetType())" | Should -BeExactly "ArmTemplate"
-        # $temp.name | Should -BeExactly "LA-TEST-Exporter"
-        # $temp | Should -Not -Be $null
     }
 
-    It "Should have the correct Logic App name" {
-        $armObj.name | Should -BeExactly "LA-TEST-Exporter"
+    It "Should have the correct ARM `$schema" {
+        $armObj.'$schema' | Should -BeExactly "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#"
     }
 
-    It "Should be of the type 'Microsoft.Logic/workflows'" {
-        $armObj.type | Should -BeExactly "Microsoft.Logic/workflows"
+    It "Should have a parameters property" {
+        $armObj.parameters | Should -Not -Be $null
     }
     
+    It "Should have a variables property" {
+        $armObj.variables | Should -Not -Be $null
+    }
+
+    It "Should have a resources property" {
+        $armObj.resources | Should -Not -Be $null
+    }
+
+    It "Should contain a single object in the resources property" {
+        $armObj.resources.Count | Should -BeExactly 1
+    }
 }

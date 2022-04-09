@@ -16,7 +16,7 @@ Describe 'Testing ConvertTo-LogicApp.Basic' {
         
         $props = @{}
         $props.PsLaWorkPath = $WorkPath
-        $props.PsLaFilePath = "C:\GIT\GITHUB\PsLogicAppExtractor.Workspace\PsLogicAppExtractor\PsLogicAppExtractor\tests\functions\tasks\ConvertTo-LogicApp.Basic.task.test.json"
+        $props.PsLaFilePath = "C:\GIT\GITHUB\PsLogicAppExtractor.Workspace\PsLogicAppExtractor\PsLogicAppExtractor\tests\functions\tasks\_ConvertTo.Basic.json"
 
         Invoke-psake @parms -properties $props -taskList "ConvertTo-LogicApp.Basic"
 
@@ -30,8 +30,6 @@ Describe 'Testing ConvertTo-LogicApp.Basic' {
 
     It "Should be a valid LogicApp class" {
         "$($lgObj.GetType())" | Should -BeExactly "LogicApp"
-        # $temp.name | Should -BeExactly "LA-TEST-Exporter"
-        # $temp | Should -Not -Be $null
     }
 
     It "Should have the correct Logic App name" {
