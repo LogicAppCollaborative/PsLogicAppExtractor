@@ -41,7 +41,33 @@
 	# FormatsToProcess = @('xml\PsLogicAppExtractor.Format.ps1xml')
 	
 	# Functions to export from this module
-	FunctionsToExport = ''
+	FunctionsToExport = @(
+		'Get-PsLaTask'
+		, 'Get-PsLaTaskByFile'
+		, 'Get-PsLaTaskByPath'
+		, 'Get-PsLaTaskOrderByFile'
+		
+		, 'Invoke-PsLaExtractor'
+		
+		, 'New-PsLaBuildByPath'
+		, 'New-PsLaBuildByTask'
+
+		# The internal functions that needs to be available for the tasks
+		, 'Add-ArmParameter'
+		, 'Add-ArmVariable'
+		, 'Add-LogicAppParm'
+		, 'Get-ArmParameterValue'
+		, 'Get-BuildOutput'
+		, 'Get-TaskWorkFilePath'
+		, 'Get-TaskWorkObject'
+		, 'Get-TaskWorkRaw'
+		, 'Out-TaskFile'
+		, 'Format-Name'
+		, 'Remove-ArmParameter'
+		, 'Remove-ArmVariable'
+		, 'Remove-LogicAppParm'
+		, 'Set-TaskWorkDirectory'
+	)
 	
 	# Cmdlets to export from this module
 	CmdletsToExport   = ''

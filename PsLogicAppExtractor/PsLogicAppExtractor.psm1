@@ -1,5 +1,5 @@
 ﻿$script:ModuleRoot = $PSScriptRoot
-$script:ModuleVersion = (Import-PowerShellDataFile -Path "$($script:ModuleRoot)\PsLogicAppExtractor.psd1").ModuleVersion
+$script:ModuleVersion = "1.0.0"
 
 # Detect whether at some level dotsourcing was enforced
 $script:doDotSource = Get-PSFConfigValue -FullName PsLogicAppExtractor.Import.DoDotSource -Fallback $false
@@ -78,6 +78,7 @@ if ($importIndividualFiles)
 	# End it here, do not load compiled code below
 	return
 }
+
 #endregion Load individual files
 
 #region Load compiled code
