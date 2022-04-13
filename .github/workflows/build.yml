@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-
+    name: Push to Gallery
     runs-on: windows-latest
 
     steps:
