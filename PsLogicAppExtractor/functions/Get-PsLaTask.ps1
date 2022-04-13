@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
 Get tasks that are part of the module
 
@@ -23,7 +23,7 @@ Category   Name                                                  Description
 Arm        Set-Arm.Connections.ManagedApis.AsParameter           Loops all $connections childs…
 Arm        Set-Arm.Connections.ManagedApis.AsVariable            Loops all $connections childs…
 Arm        Set-Arm.Connections.ManagedApis.IdFormatted           Loops all $connections childs…
-Arm        Set-Arm.IntegrationAccount.FormattedId.AsVariable     Creates an Arm variable: integrationAccount…
+Arm        Set-Arm.IntegrationAccount.IdFormatted.Simple.AsParameter.AsVariable     Creates an Arm variable: integrationAccount…
 
 .EXAMPLE
 PS C:\> Get-PsLaTask -Category Converter
@@ -35,7 +35,7 @@ Output example:
 Category  Name                     Description
 --------  ----                     -----------
 Converter ConvertTo-Arm            Converts the LogicApp json structure into a valid ARM template json
-Converter ConvertTo-LogicApp.Basic Converts the raw LogicApp json structure into the a valid LogicApp json,…
+Converter ConvertTo-Raw Converts the raw LogicApp json structure into the a valid LogicApp json,…
 
 .EXAMPLE
 PS C:\> Get-PsLaTask -Detailed
@@ -68,7 +68,7 @@ Author: Mötz Jensen (@Splaxi)
 function Get-PsLaTask {
     [CmdletBinding()]
     param (
-        [ValidateSet('Arm', 'Converter', 'Exporter', 'LogicApp')]
+        [ValidateSet('Arm', 'Converter', 'Exporter', 'Raw')]
         [string] $Category,
 
         [switch] $Detailed

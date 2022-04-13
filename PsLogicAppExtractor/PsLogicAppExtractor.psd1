@@ -49,24 +49,27 @@
 		
 		, 'Invoke-PsLaExtractor'
 		
-		, 'New-PsLaBuildByPath'
-		, 'New-PsLaBuildByTask'
+		, 'New-PsLaRunbookByPath'
+		, 'New-PsLaRunbookByTask'
 
 		# The internal functions that needs to be available for the tasks
 		, 'Add-ArmParameter'
 		, 'Add-ArmVariable'
 		, 'Add-LogicAppParm'
 		, 'Get-ArmParameterValue'
-		, 'Get-BuildOutput'
-		, 'Get-TaskWorkFilePath'
+		, 'Get-ExtractOutput'
+		, 'Get-ActionsByType'
 		, 'Get-TaskWorkObject'
 		, 'Get-TaskWorkRaw'
 		, 'Out-TaskFile'
+		, 'Out-TaskFileArm'
+		, 'Out-TaskFileLogicApp'
 		, 'Format-Name'
 		, 'Remove-ArmParameter'
 		, 'Remove-ArmVariable'
 		, 'Remove-LogicAppParm'
 		, 'Set-TaskWorkDirectory'
+		# , 'Set-TaskWorkDirectoryPester'
 	)
 	
 	# Cmdlets to export from this module

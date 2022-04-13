@@ -1,11 +1,11 @@
-<#
+﻿<#
 .SYNOPSIS
-Get the header for a build file
+Get the header for a runbook file
 
 .DESCRIPTION
-Gets the header for a build file, containing the sane defaults
+Gets the header for a runbook file, containing the sane defaults
 
-Allows you to prepare the build file as much as possible, based on the parameters that you pass to it
+Allows you to prepare the runbook file as much as possible, based on the parameters that you pass to it
 
 .PARAMETER SubscriptionId
 Id of the subscription that you want to work against
@@ -36,24 +36,24 @@ The default value is: "2019-05-01"
 .PARAMETER IncludePrefixSuffix
 Instruct the cmdlet to add the different prefix and suffix options, with the default values that comes with the module
 
-This make it easier to make the build file work across different environments, without having to worry about prepping different prefix and suffix value prior
+This make it easier to make the runbook file work across different environments, without having to worry about prepping different prefix and suffix value prior
 
 .EXAMPLE
 PS C:\> Get-BuildHeader
 
-Creates the bare minimum header for the build file
+Creates the bare minimum header for the runbook file
 Prepares the Properties object with sane defaults, allowing you to edit them after the file has been created
 
 .EXAMPLE
 PS C:\> Get-BuildHeader -SubscriptionId "f5608f3d-ab28-49d8-9b4e-1b1f812d12e0" -ResourceGroup "TestRg"
 
-Creates the bare minimum header for the build file
+Creates the bare minimum header for the runbook file
 Prepares the Properties object with SubscriptionId and ResourceGroup, and sane defaults for the remaining objects, allowing you to edit them after the file has been created
 
 .EXAMPLE
 PS C:\> Get-BuildHeader -Name "TestLogicApp" -ApiVersion "2019-05-01"
 
-Creates the bare minimum header for the build file
+Creates the bare minimum header for the runbook file
 Prepares the Properties object with Name and ApiVersion, and sane defaults for the remaining objects, allowing you to edit them after the file has been created
 
 .NOTES
@@ -98,17 +98,15 @@ function Get-BuildHeader {
         $res.Add('$Name = "{0}"' -f $Name)
     }
     else {
-        $res.Add('$Name = "ChangeThis"')
+        $res.Add('$Name = ""')
     }
 
     if ($ApiVersion) {
         $res.Add('$ApiVersion = "{0}"' -f $ApiVersion)
     }
     else {
-        $res.Add('$ApiVersion = "ChangeThis"')
+        $res.Add('$ApiVersion = ""')
     }
-
-    $res.Add('$PsLaWorkPath = ""')
     
     if ($IncludePrefixSuffix) {
         $res.Add('$Tag_Prefix = "{0}"' -f $(Get-PSFConfigValue -FullName PsLogicAppExtractor.prefixsuffix.tag.prefix))
@@ -131,8 +129,12 @@ function Get-BuildHeader {
     $res.Add('# Used to import the needed classes into the powershell session, to help with the export of the Logic App')
     $res.Add('."$(Get-PSFConfigValue -FullName PsLogicAppExtractor.ModulePath.Classes)\PsLogicAppExtractor.class.ps1"')
     $res.Add('')
-    $res.Add('# Used to keep track of the tasks, and their sequence of execution. Usefull for diagnostics and troubleshooting')
-    $res.Add('$Script:TaskCounter = 0')
+    $res.Add("# Path variable for all the tasks that is available from the PsLogicAppExtractor module")
+    $res.Add('$pathTasks = $(Get-PSFConfigValue -FullName PsLogicAppExtractor.ModulePath.Tasks)')
+
+    $res.Add('')
+    $res.Add("# Include all the tasks that is available from the PsLogicAppExtractor module")
+    $res.Add("Include `"`$pathTasks\All\All.task.ps1`"")
     $res.Add('')
 
     $res

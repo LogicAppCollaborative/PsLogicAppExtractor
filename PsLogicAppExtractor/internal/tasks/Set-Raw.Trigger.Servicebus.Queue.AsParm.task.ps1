@@ -1,4 +1,4 @@
-$parm = @{
+﻿$parm = @{
     Description = @"
 Creates a LogicApp parm (parameter): TriggerQueue
 -Sets the default value to the original value, extracted from inputs.path
@@ -8,10 +8,9 @@ Creates a LogicApp parm (parameter): TriggerQueue
 }
 
 Task -Name "Set-Raw.Trigger.Servicebus.Queue.AsParm" @parm -Action {
-    if ($PsLaFilePath) { $Script:filePath = $PsLaFilePath }
-    $filePath = Set-TaskWorkDirectory -Path $PsLaWorkPath -FilePath $Script:filePath
+    Set-TaskWorkDirectory
 
-    $lgObj = Get-TaskWorkObject -FilePath $Script:filePath
+    $lgObj = Get-TaskWorkObject
 
     if ($lgObj.properties.definition.triggers.PsObject.Properties.Value.type -eq "ApiConnection" -and
         $lgObj.properties.definition.triggers.PsObject.Properties.Value.inputs.path -like "*messages*") {
@@ -29,5 +28,5 @@ Task -Name "Set-Raw.Trigger.Servicebus.Queue.AsParm" @parm -Action {
         }
     }
 
-    Out-TaskFile -Path $filePath -InputObject $([LogicApp]$lgObj)
+    Out-TaskFileLogicApp -InputObject $lgObj
 }

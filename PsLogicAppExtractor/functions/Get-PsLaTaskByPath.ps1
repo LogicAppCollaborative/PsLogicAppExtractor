@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
 Get tasks based on files from a directory
 

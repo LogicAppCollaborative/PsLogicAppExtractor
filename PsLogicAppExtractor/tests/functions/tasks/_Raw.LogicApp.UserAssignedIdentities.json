@@ -1,0 +1,52 @@
+﻿{
+    "type": "Microsoft.Logic/workflows",
+    "apiVersion": null,
+    "name": "LA-TEST-Exporter",
+    "location": "westeurope",
+    "tags": {},
+    "identity": {
+      "type": "UserAssigned",
+      "userAssignedIdentities": {
+        "/subscriptions/b466443d-6eac-4513-a7f0-3579502929f00/resourceGroups/rgTest/providers/Microsoft.ManagedIdentity/userAssignedIdentities/Test-ManagedIdentity": {
+          "clientId": "39083073-11bc-425c-9186-f4ee3de5ccd1",
+          "principalId": "6c41d8d4-43a0-47ee-9fd6-e1d72ad5eb4d"
+        }
+      }
+    },
+    "properties": {
+      "state": "Enabled",
+      "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "contentVersion": "1.0.0.0",
+        "parameters": {},
+        "triggers": {
+          "manual": {
+            "inputs": {
+              "schema": {}
+            },
+            "kind": "Http",
+            "type": "Request"
+          }
+        },
+        "actions": {
+          "HTTP": {
+            "inputs": {
+              "authentication": {
+                "audience": "https://www.google.com",
+                "identity": "/subscriptions/b466443d-6eac-4513-a7f0-3579502929f00/resourceGroups/rgTest/providers/Microsoft.ManagedIdentity/userAssignedIdentities/Test-ManagedIdentity",
+                "type": "ManagedServiceIdentity"
+              },
+              "method": "GET",
+              "uri": "https://www.google.com"
+            },
+            "runAfter": {},
+            "type": "Http"
+          }
+        },
+        "outputs": {}
+      },
+      "parameters": {},
+      "integrationAccount": null
+    }
+  }
+  

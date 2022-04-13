@@ -1,4 +1,4 @@
-$parm = @{
+﻿$parm = @{
     Description = @"
 Loops all identity childs, which are UserAssigned
 -Sets the value to an empty object
@@ -7,15 +7,14 @@ Loops all identity childs, which are UserAssigned
 }
 
 Task -Name "Set-Raw.UserAssignedIdentities.EmptyValue" @parm -Action {
-    if ($PsLaFilePath) { $Script:filePath = $PsLaFilePath }
-    $filePath = Set-TaskWorkDirectory -Path $PsLaWorkPath -FilePath $Script:filePath
+    Set-TaskWorkDirectory
     
-    $lgObj = Get-TaskWorkObject -FilePath $Script:filePath
+    $lgObj = Get-TaskWorkObject
     $lgObj.identity | Where-Object type -eq UserAssigned | ForEach-Object {
         Foreach ($item in $_.userAssignedIdentities.PsObject.Properties) {
             $item.Value = @{}
         }
     }
 
-    Out-TaskFile -Path $filePath -InputObject $([LogicApp]$lgObj)
+    Out-TaskFileLogicApp -InputObject $lgObj
 }

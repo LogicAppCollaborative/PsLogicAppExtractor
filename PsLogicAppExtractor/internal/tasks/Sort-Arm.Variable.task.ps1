@@ -1,4 +1,4 @@
-$parm = @{
+﻿$parm = @{
     Description = @"
 Loops all Arm variables
 Identity known variables and gives them a sorting value
@@ -9,10 +9,9 @@ Sorts variables and re-assign them to the Arm template
 }
 
 Task -Name "Sort-Arm.Variable" @parm -Action {
-    if ($PsLaFilePath) { $Script:filePath = $PsLaFilePath }
-    $filePath = Set-TaskWorkDirectory -Path $PsLaWorkPath -FilePath $Script:filePath
+    Set-TaskWorkDirectory
     
-    $armObj = Get-TaskWorkObject -FilePath $Script:filePath
+    $armObj = Get-TaskWorkObject
 
     $connectionPattern = Format-Name -Type "Connection" -Prefix $Connection_Prefix -Suffix $Connection_Suffix -Value "*"
     $parmPattern = Format-Name -Type "Parm" -Prefix $Parm_Prefix -Suffix $Parm_Suffix -Value "*"
@@ -42,5 +41,5 @@ Task -Name "Sort-Arm.Variable" @parm -Action {
 
     $armObj.variables = [PsCustomObject]$orderedParms
 
-    Out-TaskFile -Path $filePath -InputObject $([ArmTemplate]$armObj)
+    Out-TaskFileArm -InputObject $armObj
 }

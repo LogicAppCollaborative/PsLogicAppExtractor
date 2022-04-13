@@ -1,4 +1,4 @@
-$parm = @{
+﻿$parm = @{
     Description = @"
 Loops all actions
 -Identifies all Servicebus
@@ -10,30 +10,31 @@ Loops all actions
 }
 
 Task -Name "Set-Raw.Actions.Servicebus.Queue.AsParm" @parm -Action {
-    if ($PsLaFilePath) { $Script:filePath = $PsLaFilePath }
-    $filePath = Set-TaskWorkDirectory -Path $PsLaWorkPath -FilePath $Script:filePath
+    Set-TaskWorkDirectory
 
-    $lgObj = Get-TaskWorkObject -FilePath $Script:filePath
+    $lgObj = Get-TaskWorkObject
     
     $counter = 0
-    $lgObj.properties.definition.actions.PsObject.properties | ForEach-Object {
-        if ($_.Value.type -eq "ApiConnection" -and $_.Value.inputs.path -like "*messages*") {
-            
-            if (-not ($_.Value.inputs.path -like "*parameters('*')*")) {
 
-                if ($_.Value.inputs.path -match "'(.*)'") {
+    $actions = $lgObj.properties.definition.actions.PsObject.Properties | ForEach-Object { Get-ActionsByType -InputObject $_ -Type "ApiConnection" }
+
+    foreach ($item in $actions) {
+        if ($item.Value.inputs.path -like "*messages*") {
+            if (-not ($item.Value.inputs.path -like "*parameters('*')*")) {
+
+                if ($item.Value.inputs.path -match "'(.*)'") {
                     $counter += 1
-                    
+                                
                     $parmName = "Queue$($counter.ToString().PadLeft(3, "0"))"
                     $lgObj = Add-LogicAppParm -InputObject $lgObj -Name $parmName `
                         -Type "string" `
                         -Value "$($Matches[1])"
-
-                    $_.Value.inputs.path = $_.Value.inputs.path.Replace($Matches[0], "parameters('$parmName')")
+            
+                    $item.Value.inputs.path = $item.Value.inputs.path.Replace($Matches[0], "parameters('$parmName')")
                 }
             }
         }
     }
 
-    Out-TaskFile -Path $filePath -InputObject $([LogicApp]$lgObj)
+    Out-TaskFileLogicApp -InputObject $lgObj
 }

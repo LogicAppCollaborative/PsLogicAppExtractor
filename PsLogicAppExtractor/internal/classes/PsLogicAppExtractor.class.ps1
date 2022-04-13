@@ -1,4 +1,4 @@
-class Helper {
+﻿class Helper {
     Helper([object] $values) {
         if ($values -is [System.Collections.IDictionary]) {
             foreach ($key in $values.Keys) {
@@ -33,6 +33,7 @@ class Properties : Helper {
     [Definition] $definition
     [object] $parameters
     [object] $integrationAccount
+    [object] $accessControl
     
     Properties([object] $values) : base($values) { }
 }

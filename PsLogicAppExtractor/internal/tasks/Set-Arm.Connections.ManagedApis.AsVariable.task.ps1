@@ -1,4 +1,4 @@
-$parm = @{
+﻿$parm = @{
     Description = @"
 Loops all `$connections childs
 -Creates an Arm variable, with prefix & suffix
@@ -10,10 +10,9 @@ Loops all `$connections childs
 }
 
 Task -Name "Set-Arm.Connections.ManagedApis.AsVariable" @parm -Action {
-    if ($PsLaFilePath) { $Script:filePath = $PsLaFilePath }
-    $filePath = Set-TaskWorkDirectory -Path $PsLaWorkPath -FilePath $Script:filePath
+    Set-TaskWorkDirectory
 
-    $armObj = Get-TaskWorkObject -FilePath $Script:filePath
+    $armObj = Get-TaskWorkObject
 
     $armObj.resources[0].properties.parameters.'$connections'.value.PsObject.Properties | ForEach-Object {
         if ($_.Value.id -like "*managedApis*") {
@@ -27,5 +26,5 @@ Task -Name "Set-Arm.Connections.ManagedApis.AsVariable" @parm -Action {
         }
     }
 
-    Out-TaskFile -Path $filePath -InputObject $([ArmTemplate]$armObj)
+    Out-TaskFileArm -InputObject $armObj
 }

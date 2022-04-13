@@ -1,26 +1,28 @@
-Describe 'Testing ConvertTo-Arm' {
+﻿Describe 'Testing ConvertTo-Arm' {
 
     BeforeAll {
-        Import-Module C:\GIT\GITHUB\PsLogicAppExtractor.Workspace\PsLogicAppExtractor\PsLogicAppExtractor -Force
+        # Import-Module C:\GIT\GITHUB\PsLogicAppExtractor.Workspace\PsLogicAppExtractor\PsLogicAppExtractor -Force
 
-        ."$(Get-PSFConfigValue -FullName PsLogicAppExtractor.ModulePath.Classes)\PsLogicAppExtractor.class.ps1"
-        
+        ."$PSScriptRoot\..\..\..\internal\classes\PsLogicAppExtractor.class.ps1"
+        #."$PSScriptRoot\..\..\Set-TaskWorkDirectoryPester.ps1"
+
         $parms = @{}
-        $parms.buildFile = "C:\GIT\GITHUB\PsLogicAppExtractor.Workspace\PsLogicAppExtractor\PsLogicAppExtractor\tests\functions\tasks\all.psakefile.ps1"
+        $parms.buildFile = "$PSScriptRoot\all.psakefile.ps1"
         $parms.nologo = $true
         
-        $Script:TaskCounter = 0
+        Set-PSFConfig -FullName PsLogicAppExtractor.Execution.TaskCounter -Value 0
 
+        $logicAppName = "LA-TEST-Exporter"
         $WorkPath = "$([System.IO.Path]::GetTempPath())PsLogicAppExtractor\$([System.Guid]::NewGuid().Guid)"
         New-Item -Path $WorkPath -ItemType Directory -Force -ErrorAction Ignore > $null
-        
-        $props = @{}
-        $props.PsLaWorkPath = $WorkPath
-        $props.PsLaFilePath = "C:\GIT\GITHUB\PsLogicAppExtractor.Workspace\PsLogicAppExtractor\PsLogicAppExtractor\tests\functions\tasks\_ConvertTo.Arm.json"
 
-        Invoke-psake @parms -properties $props -taskList "ConvertTo-Arm"
+        Set-PSFConfig -FullName PsLogicAppExtractor.Execution.WorkPath -Value $WorkPath
+        Set-PSFConfig -FullName PsLogicAppExtractor.Execution.TaskInputNext -Value "$PSScriptRoot\_ConvertTo.Arm.json"
+        Set-PSFConfig -FullName PsLogicAppExtractor.Pester.FileName -Value "$logicAppName.json"
 
-        $resPath = Get-BuildOutput -Path $WorkPath
+        Invoke-psake @parms -taskList "ConvertTo-Arm"
+
+        $resPath = Get-ExtractOutput -Path $WorkPath
         $armObj = [ArmTemplate]$(Get-Content -Path $resPath -Raw | ConvertFrom-Json)
     }
 
@@ -28,7 +30,7 @@ Describe 'Testing ConvertTo-Arm' {
         $resPath | Should -Exist
     }
 
-    It "Should be a valid LogicApp class" {
+    It "Should be a valid ArmTemplate class" {
         "$($armObj.GetType())" | Should -BeExactly "ArmTemplate"
     }
 
@@ -51,4 +53,8 @@ Describe 'Testing ConvertTo-Arm' {
     It "Should contain a single object in the resources property" {
         $armObj.resources.Count | Should -BeExactly 1
     }
+
+    # AfterAll {
+    #     Write-Host "$resPath"
+    # }
 }

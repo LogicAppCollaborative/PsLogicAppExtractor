@@ -1,4 +1,4 @@
-$parm = @{
+﻿$parm = @{
     Description = @"
 Loops all `$connections childs
 -Sets the id value to: [format('/subscriptions/{0}/providers/Microsoft.Web/locations/{1}/managedApis/XYZ',subscription().subscriptionId,parameters('logicAppLocation'))]
@@ -8,12 +8,11 @@ Creates the Arm parameter logicAppLocation if it doesn't exists
 }
 
 Task -Name "Set-Arm.Connections.ManagedApis.IdFormatted" @parm -Action {
-    if ($PsLaFilePath) { $Script:filePath = $PsLaFilePath }
-    $filePath = Set-TaskWorkDirectory -Path $PsLaWorkPath -FilePath $Script:filePath
+    Set-TaskWorkDirectory
     
     $found = $false
 
-    $armObj = Get-TaskWorkObject -FilePath $Script:filePath
+    $armObj = Get-TaskWorkObject
 
     $armObj.resources[0].properties.parameters.'$connections'.value.PsObject.Properties | ForEach-Object {
         if ($_.Value.id -like "*managedApis*") {
@@ -32,5 +31,5 @@ Task -Name "Set-Arm.Connections.ManagedApis.IdFormatted" @parm -Action {
         }
     }
 
-    Out-TaskFile -Path $filePath -InputObject $([ArmTemplate]$armObj)
+    Out-TaskFileArm -InputObject $armObj
 }

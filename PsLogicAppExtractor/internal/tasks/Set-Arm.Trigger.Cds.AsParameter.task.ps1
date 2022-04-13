@@ -1,4 +1,4 @@
-$parm = @{
+﻿$parm = @{
     Description = @"
 Creates an Arm parameter: apostrophe - with prefix & suffix
 -Sets the default value to: '
@@ -11,10 +11,9 @@ Sets the inputs.path value to: [concat('/v2/datasets/...., parameters('apostroph
 }
 
 Task -Name "Set-Arm.Trigger.Cds.AsParameter" @parm -Action {
-    if ($PsLaFilePath) { $Script:filePath = $PsLaFilePath }
-    $filePath = Set-TaskWorkDirectory -Path $PsLaWorkPath -FilePath $Script:filePath
+    Set-TaskWorkDirectory
 
-    $armObj = Get-TaskWorkObject -FilePath $Script:filePath
+    $armObj = Get-TaskWorkObject
 
     if ($armObj.resources[0].properties.definition.triggers.PsObject.Properties.Value.type -eq "ApiConnectionWebhook" -and
         $armObj.resources[0].properties.definition.triggers.PsObject.Properties.Value.inputs.path -like "*/tables/*" -and
@@ -45,5 +44,5 @@ Task -Name "Set-Arm.Trigger.Cds.AsParameter" @parm -Action {
         }
     }
 
-    Out-TaskFile -Path $filePath -InputObject $([ArmTemplate]$armObj)
+    Out-TaskFileArm -InputObject $armObj
 }

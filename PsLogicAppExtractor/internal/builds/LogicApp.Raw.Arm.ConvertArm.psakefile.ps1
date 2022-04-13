@@ -1,4 +1,4 @@
-# Object to store the needed parameters for when running the export
+﻿# Object to store the needed parameters for when running the export
 Properties {
     $SubscriptionId = $null
     $ResourceGroup = $null
@@ -9,9 +9,6 @@ Properties {
     
 # Used to import the needed classes into the powershell session, to help with the export of the Logic App
 ."$(Get-PSFConfigValue -FullName PsLogicAppExtractor.ModulePath.Classes)\PsLogicAppExtractor.class.ps1"
-    
-# Used to keep track of the tasks, and their sequence of execution. Usefull for diagnostics and troubleshooting
-$Script:TaskCounter = 0
     
 # Path to where the task files are located
 $pathTasks = $(Get-PSFConfigValue -FullName PsLogicAppExtractor.ModulePath.Tasks)

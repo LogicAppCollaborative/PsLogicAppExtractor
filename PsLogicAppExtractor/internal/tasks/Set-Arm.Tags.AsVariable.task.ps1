@@ -1,4 +1,4 @@
-$parm = @{
+﻿$parm = @{
     Description = @"
 Loops all tags
 -Creates an Arm variable, with prefix & suffix
@@ -9,10 +9,9 @@ Loops all tags
 }
 
 Task -Name "Set-Arm.Tags.AsVariable" @parm -Action {
-    if ($PsLaFilePath) { $Script:filePath = $PsLaFilePath }
-    $filePath = Set-TaskWorkDirectory -Path $PsLaWorkPath -FilePath $Script:filePath
+    Set-TaskWorkDirectory
 
-    $armObj = Get-TaskWorkObject -FilePath $Script:filePath
+    $armObj = Get-TaskWorkObject
 
     $armObj.resources[0].tags.PsObject.Properties | ForEach-Object {
         $namePreSuf = Format-Name -Type "Tag" -Prefix $Tag_Prefix -Suffix $Tag_Suffix -Value $($_.Name)
@@ -21,5 +20,5 @@ Task -Name "Set-Arm.Tags.AsVariable" @parm -Action {
         $_.Value = "[variables('$namePreSuf')]"
     }
 
-    Out-TaskFile -Path $filePath -InputObject $([ArmTemplate]$armObj)
+    Out-TaskFileArm -InputObject $armObj
 }

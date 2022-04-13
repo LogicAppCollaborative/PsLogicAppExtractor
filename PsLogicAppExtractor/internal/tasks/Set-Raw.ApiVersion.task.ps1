@@ -1,4 +1,4 @@
-$parm = @{
+﻿$parm = @{
     Description = @"
 Creates / assigns the ApiVersion property in the LogicApp json structure
 -Sets the value to: `$ApiVersion (property passed as argument)
@@ -7,11 +7,10 @@ Creates / assigns the ApiVersion property in the LogicApp json structure
 }
 
 Task -Name "Set-Raw.ApiVersion" @parm -Action {
-    if ($PsLaFilePath) { $Script:filePath = $PsLaFilePath }
-    $filePath = Set-TaskWorkDirectory -Path $PsLaWorkPath -FilePath $Script:filePath
+    Set-TaskWorkDirectory
 
-    $lgObj = Get-TaskWorkObject -FilePath $Script:filePath
+    $lgObj = Get-TaskWorkObject
     $lgObj.apiVersion = $ApiVersion
 
-    Out-TaskFile -Path $filePath -InputObject $([LogicApp]$lgObj)
+    Out-TaskFileLogicApp -InputObject $lgObj
 }

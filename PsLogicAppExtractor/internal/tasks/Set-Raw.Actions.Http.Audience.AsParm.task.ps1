@@ -1,4 +1,4 @@
-$parm = @{
+﻿$parm = @{
     Description = @"
 Loops all actions
 -Identifies all HTTP
@@ -10,29 +10,28 @@ Loops all actions
 }
 
 Task -Name "Set-Raw.Actions.Http.Audience.AsParm" @parm -Action {
-    if ($PsLaFilePath) { $Script:filePath = $PsLaFilePath }
-    $filePath = Set-TaskWorkDirectory -Path $PsLaWorkPath -FilePath $Script:filePath
-
-    $lgObj = Get-TaskWorkObject -FilePath $Script:filePath
+    Set-TaskWorkDirectory
+    
+    $lgObj = Get-TaskWorkObject
     
     $counter = 0
-    $lgObj.properties.definition.actions.PsObject.properties | ForEach-Object {
-        if ($_.Value.type -eq "Http" -and $_.Value.inputs.authentication) {
-            
-            if (-not [System.String]::IsNullOrEmpty($_.Value.inputs.authentication.audience)) {
+    $actions = $lgObj.properties.definition.actions.PsObject.Properties | ForEach-Object { Get-ActionsByType -InputObject $_ -Type "Http" }
+
+    foreach ($item in $actions) {
+        if ($item.Value.inputs.authentication -and (-not ($item.Value.inputs.authentication.audience -like "*parameters('*')*"))) {
+            if (-not [System.String]::IsNullOrEmpty($item.Value.inputs.authentication.audience)) {
                 $counter += 1
-                
-                $orgAudience = $_.Value.inputs.authentication.audience
+                            
+                $orgAudience = $item.Value.inputs.authentication.audience
                 $parmName = "EndpointAudience$($counter.ToString().PadLeft(3, "0"))"
-                $lgObj = Remove-LogicAppParm -InputObject $lgObj -Name $parmName
                 $lgObj = Add-LogicAppParm -InputObject $lgObj -Name $parmName `
                     -Type "string" `
                     -Value $orgAudience
-
-                $_.Value.inputs.authentication.audience = "@{parameters('$parmName')}"
+            
+                $item.Value.inputs.authentication.audience = "@{parameters('$parmName')}"
             }
         }
     }
 
-    Out-TaskFile -Path $filePath -InputObject $([LogicApp]$lgObj)
+    Out-TaskFileLogicApp -InputObject $lgObj
 }

@@ -1,4 +1,4 @@
-$parm = @{
+﻿$parm = @{
     Description = @"
 Loops all `$connections childs
 -Sets connectionName to the name of the connection, extracted from the connectionId
@@ -7,10 +7,9 @@ Loops all `$connections childs
 }
 
 Task -Name "Set-Raw.Connections.ManagedApis.Name" @parm -Action {
-    if ($PsLaFilePath) { $Script:filePath = $PsLaFilePath }
-    $filePath = Set-TaskWorkDirectory -Path $PsLaWorkPath -FilePath $Script:filePath
+    Set-TaskWorkDirectory
     
-    $lgObj = Get-TaskWorkObject -FilePath $Script:filePath
+    $lgObj = Get-TaskWorkObject
     $lgObj.properties.parameters.'$connections'.value.PsObject.Properties | ForEach-Object {
         if ($_.Value.id -like "*managedApis*") {
             $conName = $_.Value.connectionId.Split("/") | Select-Object -Last 1
@@ -18,5 +17,5 @@ Task -Name "Set-Raw.Connections.ManagedApis.Name" @parm -Action {
         }
     }
 
-    Out-TaskFile -Path $filePath -InputObject $([LogicApp]$lgObj)
+    Out-TaskFileLogicApp -InputObject $lgObj
 }

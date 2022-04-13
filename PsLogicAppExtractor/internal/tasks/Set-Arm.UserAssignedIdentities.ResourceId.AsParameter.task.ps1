@@ -1,4 +1,4 @@
-$parm = @{
+﻿$parm = @{
     Description = @"
 Creates an Arm parameter: userAssignedIdentityName
 -Sets the default value to the original name, extracted from Microsoft.ManagedIdentity/userAssignedIdentities/XYZ
@@ -8,8 +8,7 @@ Sets the value for all references to: [resourceId('Microsoft.ManagedIdentity/use
 }
 
 Task -Name "Set-Arm.UserAssignedIdentities.ResourceId.AsParameter" @parm -Action {
-    if ($PsLaFilePath) { $Script:filePath = $PsLaFilePath }
-    $filePath = Set-TaskWorkDirectory -Path $PsLaWorkPath -FilePath $Script:filePath
+    Set-TaskWorkDirectory
 
     $raw = Get-TaskWorkRaw
 
@@ -27,5 +26,5 @@ Task -Name "Set-Arm.UserAssignedIdentities.ResourceId.AsParameter" @parm -Action
         $armObj = $raw | ConvertFrom-Json
     }
 
-    Out-TaskFile -Path $filePath -InputObject $([ArmTemplate]$armObj)
+    Out-TaskFileArm -InputObject $armObj
 }
