@@ -68,6 +68,7 @@ Author: Mötz Jensen (@Splaxi)
 
 #>
 function Get-PsLaTaskByFile {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseOutputTypeCorrectly', '')]
     [CmdletBinding()]
     param (
         [Alias('Runbook')]

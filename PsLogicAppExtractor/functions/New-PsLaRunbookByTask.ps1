@@ -98,6 +98,7 @@ Author: Mötz Jensen (@Splaxi)
 
 #>
 function New-PsLaRunbookByTask {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]
     [CmdletBinding()]
     param (
         [Parameter(Mandatory = $true)]

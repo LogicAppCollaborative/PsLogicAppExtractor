@@ -31,6 +31,7 @@ Author: Mötz Jensen (@Splaxi)
 
 #>
 function Set-TaskWorkDirectory {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]
     [CmdletBinding()]
     param (
         [string] $Path = $(Get-PSFConfigValue -FullName PsLogicAppExtractor.Execution.WorkPath),

@@ -26,6 +26,7 @@ Author: Mötz Jensen (@Splaxi)
 
 #>
 function Remove-LogicAppParm {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]
     [CmdletBinding()]
     param (
         [Parameter(Mandatory = $true)]
