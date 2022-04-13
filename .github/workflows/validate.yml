@@ -1,4 +1,6 @@
-﻿on:
+﻿name: Validate Module (Unit Tests)
+
+on:
   workflow_dispatch:
   pull_request:
 
