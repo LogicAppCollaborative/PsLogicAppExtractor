@@ -1,6 +1,7 @@
 ﻿on:
-  [pull_request]
-  [push]
+  push:
+  pull_request:
+    types: [opened]
 
 jobs:
   validate:
