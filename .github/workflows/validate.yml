@@ -1,24 +1,15 @@
-﻿on:
-  workflow_dispatch:
-
-  push:
+﻿on: [pull_request]
 
 jobs:
   validate:
-    runs-on: windows-latest
+
+    runs-on: windows-2019
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Setup PowerShell module cache
-    id: cacher
-    uses: actions/cache@v2
-    with:
-      path: "C:\\Users\\runneradmin\\Documents\\PowerShell\\Modules"
-      key: ${{ runner.os }}-PSFramework-PSScriptAnalyzer
+    - uses: actions/checkout@v1
     - name: Install Prerequisites
-      if: steps.cacher.outputs.cache-hit != 'true'
       run: .\build\vsts-prerequisites.ps1
-      shell: pwsh
+      shell: powershell
     - name: Validate
       run: .\build\vsts-validate.ps1
-      shell: pwsh
+      shell: powershell
