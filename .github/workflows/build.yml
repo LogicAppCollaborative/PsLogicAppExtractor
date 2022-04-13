@@ -1,11 +1,12 @@
-﻿on:
+﻿name: Publish to PowerShell Gallery
+on:
   push:
     branches:
       - main
 
 jobs:
   build:
-
+    name: Push to Gallery
     runs-on: windows-latest
 
     steps:
