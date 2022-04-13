@@ -1,0 +1,30 @@
+﻿on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup PowerShell module cache
+      id: cacher
+      uses: actions/cache@v2
+      with:
+        path: "C:\\Users\\runneradmin\\Documents\\PowerShell\\Modules"
+        key: ${{ runner.os }}-PSFramework-PSScriptAnalyzer
+    - name: Install Prerequisites
+      if: steps.cacher.outputs.cache-hit != 'true'
+      run: .\build\vsts-prerequisites.ps1
+      shell: pwsh
+    - name: Validate
+      run: .\build\vsts-validate.ps1
+      shell: pwsh
+    - name: Build
+      run: .\build\vsts-build.ps1 -ApiKey $env:APIKEY
+      shell: pwsh
+      env:
+        APIKEY: ${{ secrets.ApiKey }}

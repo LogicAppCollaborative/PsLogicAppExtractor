@@ -1,0 +1,215 @@
+﻿{
+    "id": "/subscriptions/b466443d-6eac-4513-a7f0-3579502929f00/resourceGroups/rgTest/providers/Microsoft.Logic/workflows/LA-TEST-Exporter",
+    "location": "westeurope",
+    "name": "LA-TEST-Exporter",
+    "properties": {
+        "accessEndpoint": "https://prod-171.westeurope.logic.azure.com:443/workflows/c79b54f831744781b8e0933eb7c693cc",
+        "changedTime": "2022-04-08T22:21:39.8454777Z",
+        "createdTime": "2022-04-08T22:21:21.1455018Z",
+        "definition": {
+            "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+            "actions": {},
+            "contentVersion": "1.0.0.0",
+            "outputs": {},
+            "parameters": {},
+            "triggers": {
+                "manual": {
+                    "inputs": {
+                        "schema": {}
+                    },
+                    "kind": "Http",
+                    "type": "Request"
+                }
+            }
+        },
+        "endpointsConfiguration": {
+            "connector": {
+                "outgoingIpAddresses": [
+                    {
+                        "address": "52.174.88.118"
+                    },
+                    {
+                        "address": "40.91.208.65"
+                    },
+                    {
+                        "address": "13.69.64.208/28"
+                    },
+                    {
+                        "address": "13.69.71.192/27"
+                    },
+                    {
+                        "address": "13.93.36.78"
+                    },
+                    {
+                        "address": "20.86.93.32/27"
+                    },
+                    {
+                        "address": "20.86.93.64/28"
+                    },
+                    {
+                        "address": "20.126.243.151"
+                    },
+                    {
+                        "address": "20.126.241.238"
+                    },
+                    {
+                        "address": "20.103.132.139"
+                    },
+                    {
+                        "address": "20.103.131.1"
+                    }
+                ]
+            },
+            "workflow": {
+                "accessEndpointIpAddresses": [
+                    {
+                        "address": "13.95.155.53"
+                    },
+                    {
+                        "address": "52.174.54.218"
+                    },
+                    {
+                        "address": "52.174.49.6"
+                    },
+                    {
+                        "address": "20.103.21.113"
+                    },
+                    {
+                        "address": "20.103.18.84"
+                    },
+                    {
+                        "address": "20.103.57.210"
+                    },
+                    {
+                        "address": "20.101.174.52"
+                    },
+                    {
+                        "address": "20.93.236.81"
+                    },
+                    {
+                        "address": "20.103.94.255"
+                    },
+                    {
+                        "address": "20.82.87.229"
+                    },
+                    {
+                        "address": "20.76.171.34"
+                    },
+                    {
+                        "address": "20.103.84.61"
+                    }
+                ],
+                "outgoingIpAddresses": [
+                    {
+                        "address": "40.68.222.65"
+                    },
+                    {
+                        "address": "40.68.209.23"
+                    },
+                    {
+                        "address": "13.95.147.65"
+                    },
+                    {
+                        "address": "23.97.218.130"
+                    },
+                    {
+                        "address": "51.144.182.201"
+                    },
+                    {
+                        "address": "23.97.211.179"
+                    },
+                    {
+                        "address": "104.45.9.52"
+                    },
+                    {
+                        "address": "23.97.210.126"
+                    },
+                    {
+                        "address": "13.69.71.160"
+                    },
+                    {
+                        "address": "13.69.71.161"
+                    },
+                    {
+                        "address": "13.69.71.162"
+                    },
+                    {
+                        "address": "13.69.71.163"
+                    },
+                    {
+                        "address": "13.69.71.164"
+                    },
+                    {
+                        "address": "13.69.71.165"
+                    },
+                    {
+                        "address": "13.69.71.166"
+                    },
+                    {
+                        "address": "13.69.71.167"
+                    },
+                    {
+                        "address": "20.103.21.81"
+                    },
+                    {
+                        "address": "20.103.17.247"
+                    },
+                    {
+                        "address": "20.103.17.223"
+                    },
+                    {
+                        "address": "20.103.16.47"
+                    },
+                    {
+                        "address": "20.103.58.116"
+                    },
+                    {
+                        "address": "20.103.57.29"
+                    },
+                    {
+                        "address": "20.101.174.49"
+                    },
+                    {
+                        "address": "20.101.174.23"
+                    },
+                    {
+                        "address": "20.93.236.26"
+                    },
+                    {
+                        "address": "20.93.235.107"
+                    },
+                    {
+                        "address": "20.103.94.250"
+                    },
+                    {
+                        "address": "20.76.174.72"
+                    },
+                    {
+                        "address": "20.82.87.192"
+                    },
+                    {
+                        "address": "20.82.87.16"
+                    },
+                    {
+                        "address": "20.76.170.145"
+                    },
+                    {
+                        "address": "20.103.91.39"
+                    },
+                    {
+                        "address": "20.103.84.41"
+                    },
+                    {
+                        "address": "20.76.161.156"
+                    }
+                ]
+            }
+        },
+        "parameters": {},
+        "provisioningState": "Succeeded",
+        "state": "Enabled",
+        "version": "08585521503856786480"
+    },
+    "tags": {},
+    "type": "Microsoft.Logic/workflows"
+}

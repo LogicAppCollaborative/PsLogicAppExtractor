@@ -1,0 +1,22 @@
+﻿
+# ignore the settings folder and files for VSCode and PSS
+.vscode/*
+*.psproj
+*TempPoint*
+
+# Ignore staging info from Visual Studio
+library/PsLogicAppExtractor/.vs/*
+library/PsLogicAppExtractor/PsLogicAppExtractor/bin/*
+library/PsLogicAppExtractor/PsLogicAppExtractor/obj/*
+
+# ignore PowerShell Studio MetaData
+PsLogicAppExtractor/PsLogicAppExtractor.psproj
+PsLogicAppExtractor/PsLogicAppExtractor.psproj.bak
+PsLogicAppExtractor/PsLogicAppExtractor.psprojs
+PsLogicAppExtractor/PsLogicAppExtractor.psproj
+
+# ignore the TestResults
+TestResults/*
+
+# ignore the publishing Directory
+publish/*

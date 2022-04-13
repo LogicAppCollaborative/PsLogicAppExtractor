@@ -1,0 +1,63 @@
+﻿{
+    "type": "Microsoft.Logic/workflows",
+    "apiVersion": null,
+    "name": "LA-TEST-Exporter",
+    "location": "westeurope",
+    "tags": {},
+    "identity": null,
+    "properties": {
+        "state": "Enabled",
+        "definition": {
+            "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+            "contentVersion": "1.0.0.0",
+            "parameters": {
+                "$connections": {
+                    "defaultValue": {},
+                    "type": "Object"
+                }
+            },
+            "triggers": {
+                "manual": {
+                    "inputs": {
+                        "schema": {}
+                    },
+                    "kind": "Http",
+                    "type": "Request"
+                }
+            },
+            "actions": {
+                "Get_messages_from_a_queue_(peek-lock)": {
+                    "inputs": {
+                        "host": {
+                            "connection": {
+                                "name": "@parameters('$connections')['servicebus']['connectionId']"
+                            }
+                        },
+                        "method": "get",
+                        "path": "/@{encodeURIComponent(encodeURIComponent('Inbound-Queue'))}/messages/batch/peek",
+                        "queries": {
+                            "maxMessageCount": 20,
+                            "queueType": "Main",
+                            "sessionId": ""
+                        }
+                    },
+                    "runAfter": {},
+                    "type": "ApiConnection"
+                }
+            },
+            "outputs": {}
+        },
+        "parameters": {
+            "$connections": {
+                "value": {
+                    "servicebus": {
+                        "connectionId": "/subscriptions/b466443d-6eac-4513-a7f0-3579502929f00/resourceGroups/rgTest/providers/Microsoft.Web/connections/servicebus",
+                        "connectionName": "SB-Inbound-Queue",
+                        "id": "/subscriptions/b466443d-6eac-4513-a7f0-3579502929f00/providers/Microsoft.Web/locations/westeurope/managedApis/servicebus"
+                    }
+                }
+            }
+        },
+        "integrationAccount": null
+    }
+}
