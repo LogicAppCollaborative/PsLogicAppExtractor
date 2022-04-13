@@ -1,0 +1,57 @@
+﻿{
+    "type": "Microsoft.Logic/workflows",
+    "apiVersion": null,
+    "name": "LA-TEST-Exporter",
+    "location": "westeurope",
+    "tags": {},
+    "identity": null,
+    "properties": {
+        "state": "Enabled",
+        "definition": {
+            "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+            "contentVersion": "1.0.0.0",
+            "parameters": {
+                "$connections": {
+                    "defaultValue": {},
+                    "type": "Object"
+                }
+            },
+            "triggers": {
+                "When_a_message_is_received_in_a_queue_(peek-lock)": {
+                    "inputs": {
+                        "host": {
+                            "connection": {
+                                "name": "@parameters('$connections')['servicebus']['connectionId']"
+                            }
+                        },
+                        "method": "get",
+                        "path": "/@{encodeURIComponent(encodeURIComponent('Inbound-Queue'))}/messages/head/peek",
+                        "queries": {
+                            "queueType": "Main",
+                            "sessionId": "None"
+                        }
+                    },
+                    "recurrence": {
+                        "frequency": "Minute",
+                        "interval": 1
+                    },
+                    "type": "ApiConnection"
+                }
+            },
+            "actions": {},
+            "outputs": {}
+        },
+        "parameters": {
+            "$connections": {
+                "value": {
+                    "servicebus": {
+                        "connectionId": "/subscriptions/b466443d-6eac-4513-a7f0-3579502929f00/resourceGroups/rgTest/providers/Microsoft.Web/connections/servicebus",
+                        "connectionName": "SB-Inbound-Queue",
+                        "id": "/subscriptions/b466443d-6eac-4513-a7f0-3579502929f00/providers/Microsoft.Web/locations/westeurope/managedApis/servicebus"
+                    }
+                }
+            }
+        },
+        "integrationAccount": null
+    }
+}

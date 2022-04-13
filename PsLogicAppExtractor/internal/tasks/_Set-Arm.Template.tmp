@@ -1,0 +1,14 @@
+﻿$parm = @{
+    Description = @"
+Write a high level step by step overview of what the task solves
+"@
+    Alias       = "Arm.Set-Arm.Template" #The first "Arm." is used as a hack for making tasks having a category - You need to apply this pattern, if you want the category support across your tasks
+}
+
+Task -Name "Set-Arm.Template" @parm -Action {
+    Set-TaskWorkDirectory
+
+    $armObj = Get-TaskWorkObject
+    
+    Out-TaskFileArm -InputObject $armObj
+}

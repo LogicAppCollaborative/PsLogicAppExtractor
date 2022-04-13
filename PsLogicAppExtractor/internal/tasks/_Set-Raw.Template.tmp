@@ -1,0 +1,14 @@
+﻿$parm = @{
+    Description = @"
+Write a high level step by step overview of what the task solves
+"@
+    Alias       = "Raw.Set-Arm.Template" #The first "Raw." is used as a hack for making tasks having a category - You need to apply this pattern, if you want the category support across your tasks
+}
+
+Task -Name "Raw.Template" @parm -Action {
+    Set-TaskWorkDirectory
+
+    $lgObj = Get-TaskWorkObject
+
+    Out-TaskFileLogicApp -InputObject $lgObj
+}

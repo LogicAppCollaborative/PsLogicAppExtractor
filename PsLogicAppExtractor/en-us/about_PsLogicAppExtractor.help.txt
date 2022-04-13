@@ -1,0 +1,11 @@
+﻿TOPIC
+	about_PsLogicAppExtractor
+	
+SHORT DESCRIPTION
+	Explains how to use the PsLogicAppExtractor powershell module
+	
+LONG DESCRIPTION
+	<Insert Content here>
+
+KEYWORDS
+	PsLogicAppExtractor
