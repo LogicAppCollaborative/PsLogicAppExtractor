@@ -6,7 +6,7 @@ on:
 
 jobs:
   validate:
-
+    name: Run Pester Unit Tests
     runs-on: windows-latest
 
     steps:
