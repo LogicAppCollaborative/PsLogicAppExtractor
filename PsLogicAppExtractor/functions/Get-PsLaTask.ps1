@@ -74,7 +74,7 @@ function Get-PsLaTask {
         [switch] $Detailed
     )
 
-    $res = Get-PsLaTaskByPath -Path "$($MyInvocation.MyCommand.Module.ModuleBase)\internal\tasks" | Where-Object Category -like "*$Category*"
+    $res = Get-PsLaTaskByPath -Path "$($MyInvocation.MyCommand.Module.ModuleBase)\internal\tasks" | Where-Object Category -like "*$Category*" | Select-Object -Property * -ExcludeProperty Path
 
     if ($Detailed) {
         $res | Format-List

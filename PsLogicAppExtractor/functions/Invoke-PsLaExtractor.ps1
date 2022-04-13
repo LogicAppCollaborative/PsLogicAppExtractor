@@ -88,9 +88,10 @@ Author: Mötz Jensen (@Splaxi)
 
 #>
 function Invoke-PsLaExtractor {
-    [CmdletBinding(DefaultParameterSetName = "ResourceGroup")]
+    [CmdletBinding(DefaultParameterSetName = "NameOnly")]
     param (
         [Alias('File')]
+        [Parameter(Mandatory = $true, ParameterSetName = "NameOnly")]
         [Parameter(Mandatory = $true, ParameterSetName = "PreppedFile")]
         [Parameter(Mandatory = $true, ParameterSetName = "ResourceGroup")]
         [Parameter(Mandatory = $true, ParameterSetName = "Subscription")]
@@ -103,6 +104,7 @@ function Invoke-PsLaExtractor {
         [Parameter(Mandatory = $true, ParameterSetName = "Subscription")]
         [string] $ResourceGroup,
 
+        [Parameter(Mandatory = $true, ParameterSetName = "NameOnly")]
         [Parameter(Mandatory = $true, ParameterSetName = "ResourceGroup")]
         [Parameter(Mandatory = $true, ParameterSetName = "Subscription")]
         [string] $Name,
