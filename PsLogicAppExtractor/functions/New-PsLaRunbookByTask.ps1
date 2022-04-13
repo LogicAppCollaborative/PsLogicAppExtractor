@@ -140,7 +140,7 @@ function New-PsLaRunbookByTask {
 
         $path = Join-Path -Path $OutputPath -ChildPath "PsLaExtractor.default.psakefile.ps1"
 
-        $encoding = New-Object System.Text.UTF8Encoding($false)
+        $encoding = New-Object System.Text.UTF8Encoding($true)
         [System.IO.File]::WriteAllLines($path, $($res.ToArray() -join "`r`n"), $encoding)
 
         Get-Item -Path $path | Select-Object -ExpandProperty FullName
