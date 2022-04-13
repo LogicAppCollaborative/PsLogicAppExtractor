@@ -566,7 +566,7 @@ Task -Name "Set-Arm.Trigger.ApiConnection.Recurrence.AsParameter" @parm -Action 
         $armObj = Add-ArmParameter -InputObject $armObj -Name "$frequencyPreSuf" `
             -Type "string" `
             -Value $orgFrequency `
-            -Description "The frequency used for the trigger to evalutate / run."
+            -Description "The frequency used for the trigger to evaluate / run."
 
         $armObj.resources[0].properties.definition.triggers.PsObject.Properties.Value.recurrence.frequency = "[parameters('$frequencyPreSuf')]"
         
@@ -574,7 +574,7 @@ Task -Name "Set-Arm.Trigger.ApiConnection.Recurrence.AsParameter" @parm -Action 
         $armObj = Add-ArmParameter -InputObject $armObj -Name "$intervalPreSuf" `
             -Type "int" `
             -Value $orgInterval `
-            -Description "The interval used for the trigger to evalutate / run."
+            -Description "The interval used for the trigger to evaluate / run."
 
         $armObj.resources[0].properties.definition.triggers.PsObject.Properties.Value.recurrence.interval = "[parameters('$intervalPreSuf')]"
     }

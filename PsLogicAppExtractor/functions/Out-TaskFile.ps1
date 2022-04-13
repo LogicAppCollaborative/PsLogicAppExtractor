@@ -53,7 +53,7 @@ function Out-TaskFile {
         $Content = $InputObject | ConvertTo-Json -Depth 20
     }
 
-    $encoding = New-Object System.Text.UTF8Encoding($false)
+    $encoding = New-Object System.Text.UTF8Encoding($true)
     [System.IO.File]::WriteAllLines($Path, $Content, $encoding)
     
     if ($(Get-PSFConfigValue -FullName PsLogicAppExtractor.Execution.TaskInputNext)) {

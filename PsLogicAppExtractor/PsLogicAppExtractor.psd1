@@ -21,14 +21,13 @@
 	Description       = 'A set of tools that will assist you with extracting / exporting Azure Logic Apps, and turn them into a fully working ARM template. It contains of several small tasks, which can be configured to meet your needs.'
 	
 	# Minimum version of the Windows PowerShell engine required by this module
-	PowerShellVersion = '5.0'
+	PowerShellVersion = '7.0'
 	
 	# Modules that must be imported into the global environment prior to importing
 	# this module
 	RequiredModules   = @(
 		@{ ModuleName = 'PSFramework'; ModuleVersion = '1.6.214' }
 		, @{ ModuleName = 'psake'; ModuleVersion = '4.9.0' }
-		, @{ ModuleName = 'newtonsoft.json'; ModuleVersion = '1.0.2.201' }
 	)
 	
 	# Assemblies that must be loaded prior to importing this module
@@ -42,11 +41,12 @@
 	
 	# Functions to export from this module
 	FunctionsToExport = @(
-		'Get-PsLaTask'
+		'Get-PsLaArmParameter'
+		, 'Get-PsLaTask'
 		, 'Get-PsLaTaskByFile'
 		, 'Get-PsLaTaskByPath'
 		, 'Get-PsLaTaskOrderByFile'
-		
+		, 'Get-PsLaTaskTemplate'
 		, 'Invoke-PsLaExtractor'
 		
 		, 'New-PsLaRunbookByPath'
