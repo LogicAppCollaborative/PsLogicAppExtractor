@@ -5,7 +5,6 @@
 
 jobs:
   validate:
-
     runs-on: windows-latest
 
     steps:
