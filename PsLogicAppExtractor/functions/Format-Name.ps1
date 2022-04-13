@@ -46,6 +46,7 @@ Author: Mötz Jensen (@Splaxi)
 
 #>
 function Format-Name {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseOutputTypeCorrectly', '')]
     [CmdletBinding()]
     param (
         [ValidateSet('Tag', 'Connection', 'Parameter', 'Parm', 'Trigger')]

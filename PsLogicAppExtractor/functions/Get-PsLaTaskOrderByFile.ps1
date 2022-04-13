@@ -55,6 +55,7 @@ Description    : Converts the LogicApp json structure into a valid ARM template 
 General notes
 #>
 function Get-PsLaTaskOrderByFile {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseOutputTypeCorrectly', '')]
     [CmdletBinding()]
     param (
         [Alias('Runbook')]
