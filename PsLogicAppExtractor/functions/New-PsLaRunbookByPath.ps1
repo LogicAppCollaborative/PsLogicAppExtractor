@@ -106,6 +106,7 @@ Author: Mötz Jensen (@Splaxi)
 
 #>
 function New-PsLaRunbookByPath {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]
     [CmdletBinding()]
     param (
         [string] $Path = $(Get-PSFConfigValue -FullName PsLogicAppExtractor.ModulePath.Tasks),
