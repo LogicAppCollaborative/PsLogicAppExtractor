@@ -10,7 +10,7 @@ The PsLogicAppExtractor project is deeply inspired by [LogicAppTemplateCreator](
 
 PsLogicAppExtractor offers a different approach to extract a LogicApp, where the module should be considered an orchestration engine, that comes with a lot of tools, and makes it possible for the end user to design their own export orchestration runbook.
 
-The core idea is that a single operation that you want to have applied against your LogicApp while exporting it / converting it to an ARM template is a task. Put in other words, you should view the exporting / converting to an ARM template as a series of micro steps, which breaks down the complexity for building the ARM template. The tradeoff is that you have to orchestrate the steps and their execution sequence, and ones you have done that - you're ready to fully automated things.
+The core idea is that a single operation that you want to have applied against your LogicApp while exporting it / converting it to an ARM template is a task. Put in other words, you should view the exporting / converting to an ARM template as a series of micro steps, which breaks down the complexity for building the ARM template. The tradeoff is that you have to orchestrate the steps and their execution sequence, and ones you have done that - you're ready to fully automate things.
 
 The key difference of PsLogicAppExtractor is that it **encourages** the end user to have custom tasks, that handles their specific needs and build a runbook that they can share across their team and that way makes the export process as smooth as possible.
 

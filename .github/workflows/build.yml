@@ -1,11 +1,12 @@
-﻿on:
+﻿name: Publish to PowerShell Gallery
+on:
   push:
     branches:
       - main
 
 jobs:
   build:
-
+    name: Push to Gallery
     runs-on: windows-latest
 
     steps:
@@ -24,7 +25,7 @@ jobs:
       run: .\build\vsts-validate.ps1
       shell: pwsh
     - name: Build
-      run: .\build\vsts-build.ps1 -ApiKey $env:APIKEY
+      run: .\build\vsts-build.ps1 -ApiKey $env:APIKEY -AutoVersion
       shell: pwsh
       env:
         APIKEY: ${{ secrets.ApiKey }}
