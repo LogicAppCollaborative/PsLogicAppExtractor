@@ -1,27 +1,28 @@
-﻿<#
-.SYNOPSIS
-Get action from the object, filtered by the type of the action
-
-.DESCRIPTION
-Get actions and all nested actions, filtered by type
-
-.PARAMETER InputObject
-The object that you want to work against
-
-Will by analyzed to see if it has nested actions, and will be recursively traversed to fetch all actions
-
-.PARAMETER Type
-The action type that will be outputted
-
-.EXAMPLE
-PS C:\> Get-ActionsByType -InputObject $obj -Type "Http"
-
-Will traverse the $obj and filter actions to only output the ones of the type Http
-
-.NOTES
-
-Author: Mötz Jensen (@Splaxi)
-
+﻿
+<#
+    .SYNOPSIS
+        Get action from the object, filtered by the type of the action
+        
+    .DESCRIPTION
+        Get actions and all nested actions, filtered by type
+        
+    .PARAMETER InputObject
+        The object that you want to work against
+        
+        Will by analyzed to see if it has nested actions, and will be recursively traversed to fetch all actions
+        
+    .PARAMETER Type
+        The action type that will be outputted
+        
+    .EXAMPLE
+        PS C:\> Get-ActionsByType -InputObject $obj -Type "Http"
+        
+        Will traverse the $obj and filter actions to only output the ones of the type Http
+        
+    .NOTES
+        
+        Author: Mötz Jensen (@Splaxi)
+        
 #>
 function Get-ActionsByType {
     param (
