@@ -3,7 +3,7 @@
 	RootModule        = 'PsLogicAppExtractor.psm1'
 	
 	# Version number of this module.
-	ModuleVersion     = '1.0.0'
+	ModuleVersion     = '0.5.0'
 	
 	# ID used to uniquely identify this module
 	GUID              = 'a8d35904-1748-4271-9970-a0520b13c9c4'
