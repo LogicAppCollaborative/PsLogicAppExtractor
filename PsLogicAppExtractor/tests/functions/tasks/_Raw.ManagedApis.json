@@ -1,0 +1,10 @@
+{
+    "kind": "V1",
+    "properties": {
+        "displayName": "APICON-SB-INBOUND"
+    },
+    "id": "/subscriptions/b466443d-6eac-4513-a7f0-3579502929f00/resourceGroups/rgTest/providers/Microsoft.Web/connections/servicebus-16",
+    "name": "servicebus-16",
+    "type": "Microsoft.Web/connections",
+    "location": "westeurope"
+}

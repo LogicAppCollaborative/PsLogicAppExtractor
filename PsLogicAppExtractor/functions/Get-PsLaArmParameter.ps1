@@ -1,80 +1,81 @@
-﻿<#
-.SYNOPSIS
-Get parameters from ARM template
-
-.DESCRIPTION
-Get parameters from the ARM template
-
-You can include / exclude parameters, so your parameter file only contains the parameters you want to handle at deployment
-
-The default value is promoted as the initial value of the parameter
-
-.PARAMETER Path
-Path to the ARM template that you want to work against
-
-.PARAMETER Exclude
-Instruct the cmdlet to exclude the given set of parameter names
-
-Supports array / list
-
-.PARAMETER Include
-Instruct the cmdlet to include the given set of parameter names
-
-Supports array / list
-
-.PARAMETER AsFile
-Instruct the cmdlet to save a valid ARM template parameter file next to the ARM template file
-
-.PARAMETER BlankValues
-Instructs the cmdlet to blank the values in the parameter file
-
-.PARAMETER CopyMetadata
-Instructs the cmdlet to copy over the metadata property from the original parameter in the ARM template, if present
-
-.EXAMPLE
-PS C:\> Get-PsLaArmParameter -Path "C:\temp\work_directory\TestLogicApp.json"
-
-Gets all parameters from the "TestLogicApp.json" ARM template
-The output is written to the console
-
-.EXAMPLE
-PS C:\> Get-PsLaArmParameter -Path "C:\temp\work_directory\TestLogicApp.json" -Exclude "logicAppLocation","trigger_Frequency"
-
-Gets all parameters from the "TestLogicApp.json" ARM template
-Will exclude the parameters "logicAppLocation" & "trigger_Frequency" if present
-The output is written to the console
-
-.EXAMPLE
-PS C:\> Get-PsLaArmParameter -Path "C:\temp\work_directory\TestLogicApp.json" -Include "trigger_Interval","trigger_Frequency"
-
-Gets all parameters from the "TestLogicApp.json" ARM template
-Will only copy over the parameters "trigger_Interval" & "trigger_Frequency" if present
-The output is written to the console
-
-.EXAMPLE
-PS C:\> Get-PsLaArmParameter -Path "C:\temp\work_directory\TestLogicApp.json" -AsFile
-
-Gets all parameters from the "TestLogicApp.json" ARM template
-The output is written the "C:\temp\work_directory\TestLogicApp.parameters.json" file
-
-.EXAMPLE
-PS C:\> Get-PsLaArmParameter -Path "C:\temp\work_directory\TestLogicApp.json" -BlankValues
-
-Gets all parameters from the "TestLogicApp.json" ARM template
-Blank all values for each parameter
-The output is written to the console
-
-.EXAMPLE
-PS C:\> Get-PsLaArmParameter -Path "C:\temp\work_directory\TestLogicApp.json" -CopyMetadata
-
-Gets all parameters from the "TestLogicApp.json" ARM template
-Copies over the metadata property from the original parameter, if present
-The output is written to the console
-
-.NOTES
-
-Author: Mötz Jensen (@Splaxi)
-
+﻿
+<#
+    .SYNOPSIS
+        Get parameters from ARM template
+        
+    .DESCRIPTION
+        Get parameters from the ARM template
+        
+        You can include / exclude parameters, so your parameter file only contains the parameters you want to handle at deployment
+        
+        The default value is promoted as the initial value of the parameter
+        
+    .PARAMETER Path
+        Path to the ARM template that you want to work against
+        
+    .PARAMETER Exclude
+        Instruct the cmdlet to exclude the given set of parameter names
+        
+        Supports array / list
+        
+    .PARAMETER Include
+        Instruct the cmdlet to include the given set of parameter names
+        
+        Supports array / list
+        
+    .PARAMETER AsFile
+        Instruct the cmdlet to save a valid ARM template parameter file next to the ARM template file
+        
+    .PARAMETER BlankValues
+        Instructs the cmdlet to blank the values in the parameter file
+        
+    .PARAMETER CopyMetadata
+        Instructs the cmdlet to copy over the metadata property from the original parameter in the ARM template, if present
+        
+    .EXAMPLE
+        PS C:\> Get-PsLaArmParameter -Path "C:\temp\work_directory\TestLogicApp.json"
+        
+        Gets all parameters from the "TestLogicApp.json" ARM template
+        The output is written to the console
+        
+    .EXAMPLE
+        PS C:\> Get-PsLaArmParameter -Path "C:\temp\work_directory\TestLogicApp.json" -Exclude "logicAppLocation","trigger_Frequency"
+        
+        Gets all parameters from the "TestLogicApp.json" ARM template
+        Will exclude the parameters "logicAppLocation" & "trigger_Frequency" if present
+        The output is written to the console
+        
+    .EXAMPLE
+        PS C:\> Get-PsLaArmParameter -Path "C:\temp\work_directory\TestLogicApp.json" -Include "trigger_Interval","trigger_Frequency"
+        
+        Gets all parameters from the "TestLogicApp.json" ARM template
+        Will only copy over the parameters "trigger_Interval" & "trigger_Frequency" if present
+        The output is written to the console
+        
+    .EXAMPLE
+        PS C:\> Get-PsLaArmParameter -Path "C:\temp\work_directory\TestLogicApp.json" -AsFile
+        
+        Gets all parameters from the "TestLogicApp.json" ARM template
+        The output is written the "C:\temp\work_directory\TestLogicApp.parameters.json" file
+        
+    .EXAMPLE
+        PS C:\> Get-PsLaArmParameter -Path "C:\temp\work_directory\TestLogicApp.json" -BlankValues
+        
+        Gets all parameters from the "TestLogicApp.json" ARM template
+        Blank all values for each parameter
+        The output is written to the console
+        
+    .EXAMPLE
+        PS C:\> Get-PsLaArmParameter -Path "C:\temp\work_directory\TestLogicApp.json" -CopyMetadata
+        
+        Gets all parameters from the "TestLogicApp.json" ARM template
+        Copies over the metadata property from the original parameter, if present
+        The output is written to the console
+        
+    .NOTES
+        
+        Author: Mötz Jensen (@Splaxi)
+        
 #>
 function Get-PsLaArmParameter {
     [CmdletBinding()]

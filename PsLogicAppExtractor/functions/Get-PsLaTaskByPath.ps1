@@ -1,43 +1,44 @@
-﻿<#
-.SYNOPSIS
-Get tasks based on files from a directory
-
-.DESCRIPTION
-Get tasks from individual files, that are located in a directory
-
-.PARAMETER Path
-Path to the directory where there are valid PSake tasks saved as ps1 files
-
-.EXAMPLE
-PS C:\> Get-PsLaTaskByPath -Path c:\temp\tasks
-
-List all available tasks, based on the files in the directory
-All files has to be valid PSake files saved as ps1 files
-
-Output example:
-
-Category    : Arm
-Name        : Set-Arm.Connections.ManagedApis.AsParameter
-Description : Loops all $connections childs
-              -Creates an Arm parameter, with prefix & suffix
-              --Sets the default value to the original name, extracted from connectionId property
-              -Sets the connectionId to: [resourceId('Microsoft.Web/connections', parameters('XYZ'))]
-              -Sets the connectionName to: [parameters('XYZ')]
-Path        : c:\temp\tasks\Set-Arm.Connections.ManagedApis.AsParameter.task.ps1
-File        : Set-Arm.Connections.ManagedApis.AsParameter.task.ps1
-
-Category    : Arm
-Name        : Set-Arm.Connections.ManagedApis.AsVariable
-Description : Loops all $connections childs
-              -Creates an Arm variable, with prefix & suffix
-              --Sets the value to the original name, extracted from connectionId property
-              -Sets the connectionId to: [resourceId('Microsoft.Web/connections', variables('XYZ'))]
-              -Sets the connectionName to: [variables('XYZ')]
-Path        : c:\temp\tasks\Set-Arm.Connections.ManagedApis.AsVariable.task.ps1
-File        : Set-Arm.Connections.ManagedApis.AsVariable.task.ps1
-
-.NOTES
-General notes
+﻿
+<#
+    .SYNOPSIS
+        Get tasks based on files from a directory
+        
+    .DESCRIPTION
+        Get tasks from individual files, that are located in a directory
+        
+    .PARAMETER Path
+        Path to the directory where there are valid PSake tasks saved as ps1 files
+        
+    .EXAMPLE
+        PS C:\> Get-PsLaTaskByPath -Path c:\temp\tasks
+        
+        List all available tasks, based on the files in the directory
+        All files has to be valid PSake files saved as ps1 files
+        
+        Output example:
+        
+        Category    : Arm
+        Name        : Set-Arm.Connections.ManagedApis.AsParameter
+        Description : Loops all $connections childs
+        -Creates an Arm parameter, with prefix & suffix
+        --Sets the default value to the original name, extracted from connectionId property
+        -Sets the connectionId to: [resourceId('Microsoft.Web/connections', parameters('XYZ'))]
+        -Sets the connectionName to: [parameters('XYZ')]
+        Path        : c:\temp\tasks\Set-Arm.Connections.ManagedApis.AsParameter.task.ps1
+        File        : Set-Arm.Connections.ManagedApis.AsParameter.task.ps1
+        
+        Category    : Arm
+        Name        : Set-Arm.Connections.ManagedApis.AsVariable
+        Description : Loops all $connections childs
+        -Creates an Arm variable, with prefix & suffix
+        --Sets the value to the original name, extracted from connectionId property
+        -Sets the connectionId to: [resourceId('Microsoft.Web/connections', variables('XYZ'))]
+        -Sets the connectionName to: [variables('XYZ')]
+        Path        : c:\temp\tasks\Set-Arm.Connections.ManagedApis.AsVariable.task.ps1
+        File        : Set-Arm.Connections.ManagedApis.AsVariable.task.ps1
+        
+    .NOTES
+        General notes
 #>
 function Get-PsLaTaskByPath {
     [CmdletBinding()]
