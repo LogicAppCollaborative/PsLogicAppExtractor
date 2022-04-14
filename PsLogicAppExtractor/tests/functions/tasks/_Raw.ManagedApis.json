@@ -1,9 +1,9 @@
 {
     "kind": "V1",
     "properties": {
-        "displayName": "APICON-GNA-MI-SB-GNH-BIZTALK-AIS-WEU-POC"
+        "displayName": "APICON-SB-INBOUND"
     },
-    "id": "/subscriptions/2ad7553b-5074-4d71-af03-9a5e30834820/resourceGroups/rg-int-hip-ais-weu-poc/providers/Microsoft.Web/connections/servicebus-16",
+    "id": "/subscriptions/b466443d-6eac-4513-a7f0-3579502929f00/resourceGroups/rgTest/providers/Microsoft.Web/connections/servicebus-16",
     "name": "servicebus-16",
     "type": "Microsoft.Web/connections",
     "location": "westeurope"
