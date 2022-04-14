@@ -1,49 +1,50 @@
-﻿<#
-.SYNOPSIS
-Format the name with the prefix and suffix
-
-.DESCRIPTION
-Format the name with the prefix and suffix
-
-If the passed prefix and suffix is not $null, then they are used
-
-Otherwise the cmdlet will default back to the configuration for each type, that is persisted in the configuration store
-
-.PARAMETER Type
-The type of name that you want to work against
-
-Allowed values:
-Tag
-Connection
-Parameter
-Parm
-
-.PARAMETER Prefix
-The prefix that you want to append to the name
-
-If empty / $null - then the cmdlet will use the prefix that is stored for the specific type
-
-.PARAMETER Suffix
-The suffix that you want to append to the name
-
-If empty / $null - then the cmdlet will use the suffix that is stored for the specific type
-
-.PARAMETER Value
-The string value that you want to have the prefix and suffix concatenated with
-
-.EXAMPLE
-PS C:\> Format-Name -Type "Tag" -Value "CostCenter"
-
-Formats the value: CostCenter with the default prefix and suffix for the type: Tag
-The default prefix is: tag_
-The default suffix is: $null
-
-The output will be: tag_CostCenter
-
-.NOTES
-
-Author: Mötz Jensen (@Splaxi)
-
+﻿
+<#
+    .SYNOPSIS
+        Format the name with the prefix and suffix
+        
+    .DESCRIPTION
+        Format the name with the prefix and suffix
+        
+        If the passed prefix and suffix is not $null, then they are used
+        
+        Otherwise the cmdlet will default back to the configuration for each type, that is persisted in the configuration store
+        
+    .PARAMETER Type
+        The type of name that you want to work against
+        
+        Allowed values:
+        Tag
+        Connection
+        Parameter
+        Parm
+        
+    .PARAMETER Prefix
+        The prefix that you want to append to the name
+        
+        If empty / $null - then the cmdlet will use the prefix that is stored for the specific type
+        
+    .PARAMETER Suffix
+        The suffix that you want to append to the name
+        
+        If empty / $null - then the cmdlet will use the suffix that is stored for the specific type
+        
+    .PARAMETER Value
+        The string value that you want to have the prefix and suffix concatenated with
+        
+    .EXAMPLE
+        PS C:\> Format-Name -Type "Tag" -Value "CostCenter"
+        
+        Formats the value: CostCenter with the default prefix and suffix for the type: Tag
+        The default prefix is: tag_
+        The default suffix is: $null
+        
+        The output will be: tag_CostCenter
+        
+    .NOTES
+        
+        Author: Mötz Jensen (@Splaxi)
+        
 #>
 function Format-Name {
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseOutputTypeCorrectly', '')]
