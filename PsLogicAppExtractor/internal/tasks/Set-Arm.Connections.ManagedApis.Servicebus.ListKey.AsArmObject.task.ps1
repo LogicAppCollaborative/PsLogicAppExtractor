@@ -23,7 +23,6 @@ Task -Name "Set-Arm.Connections.ManagedApis.Servicebus.ListKey.AsArmObject" @par
             $found = $true
 
             $pathArms = "$(Get-PSFConfigValue -FullName PsLogicAppExtractor.ModulePath.Base)\internal\arms"
-            # $pathArms = "C:\GIT\GITHUB\PsLogicAppExtractor.Workspace\PsLogicAppExtractor\PsLogicAppExtractor\internal\arms"
 
             $sbObj = Get-Content -Path "$pathArms\API.SB.ConnectionString.json" -Raw | ConvertFrom-Json
 
