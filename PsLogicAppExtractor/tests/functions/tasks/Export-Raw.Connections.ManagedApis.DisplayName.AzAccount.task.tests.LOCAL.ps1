@@ -1,6 +1,6 @@
 BeforeAll {
     mock -ModuleName "psake" Invoke-AzRestMethod {
-        return @{Content = Get-Content -Path "$PSScriptRoot\_Raw.ManagedApis.DisplayName.json" -Raw }
+        @{Content = "{""kind"": ""V1"",""properties"": {""displayName"": ""APICON-SB-INBOUND""},""id"": ""/subscriptions/b466443d-6eac-4513-a7f0-3579502929f00/resourceGroups/rgTest/providers/Microsoft.Web/connections/servicebus"",""name"": ""servicebus"",""type"": ""Microsoft.Web/connections"",""location"": ""westeurope""}" }
     }
 }
 
