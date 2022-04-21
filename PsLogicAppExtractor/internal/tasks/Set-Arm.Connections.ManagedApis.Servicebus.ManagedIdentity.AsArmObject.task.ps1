@@ -1,4 +1,4 @@
-$parm = @{
+﻿$parm = @{
     Description = @"
 Loops all `$connections children
 -Validates that is of the type servicebus
