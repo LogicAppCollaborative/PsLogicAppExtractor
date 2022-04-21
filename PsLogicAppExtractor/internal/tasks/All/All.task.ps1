@@ -100,7 +100,7 @@ Task -Name "Export-LogicApp.AzCli" @parm -Action {
     Out-TaskFile -Content $res
 }
 
-#Original file: Export-Raw.ManagedApis.DisplayName.AzAccount.task.ps1
+#Original file: Export-Raw.Connections.ManagedApis.DisplayName.AzAccount.task.ps1
 $parm = @{
     Description = @"
 Loops all `$connections childs
@@ -108,10 +108,10 @@ Loops all `$connections childs
 --Sets connectionName to the DisplayName, extracted via the ConnectionId
 Requires an authenticated Az.Accounts session
 "@
-    Alias       = "Exporter.Export-Raw.ManagedApis.DisplayName.AzAccount"
+    Alias       = "Exporter.Export-Raw.Connections.ManagedApis.DisplayName.AzAccount"
 }
 
-Task -Name "Export-Raw.ManagedApis.DisplayName.AzAccount" @parm -Action {
+Task -Name "Export-Raw.Connections.ManagedApis.DisplayName.AzAccount" @parm -Action {
     Set-TaskWorkDirectory
     
     $lgObj = Get-TaskWorkObject
@@ -130,7 +130,7 @@ Task -Name "Export-Raw.ManagedApis.DisplayName.AzAccount" @parm -Action {
     Out-TaskFileLogicApp -InputObject $lgObj
 }
 
-#Original file: Export-Raw.ManagedApis.DisplayName.AzCli.task.ps1
+#Original file: Export-Raw.Connections.ManagedApis.DisplayName.AzCli.task.ps1
 $parm = @{
     Description = @"
 Loops all `$connections childs
@@ -138,10 +138,10 @@ Loops all `$connections childs
 --Sets connectionName to the DisplayName, extracted via the ConnectionId
 Requires an authenticated Az.Accounts session
 "@
-    Alias       = "Exporter.Export-Raw.ManagedApis.DisplayName.AzCli"
+    Alias       = "Exporter.Export-Raw.Connections.ManagedApis.DisplayName.AzCli"
 }
 
-Task -Name "Export-Raw.ManagedApis.DisplayName.AzCli" @parm -Action {
+Task -Name "Export-Raw.Connections.ManagedApis.DisplayName.AzCli" @parm -Action {
     Set-TaskWorkDirectory
     
     $lgObj = Get-TaskWorkObject

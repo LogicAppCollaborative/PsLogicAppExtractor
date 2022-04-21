@@ -5,10 +5,10 @@ Loops all `$connections childs
 --Sets connectionName to the DisplayName, extracted via the ConnectionId
 Requires an authenticated Az.Accounts session
 "@
-    Alias       = "Exporter.Export-Raw.ManagedApis.DisplayName.AzAccount"
+    Alias       = "Exporter.Export-Raw.Connections.ManagedApis.DisplayName.AzAccount"
 }
 
-Task -Name "Export-Raw.ManagedApis.DisplayName.AzAccount" @parm -Action {
+Task -Name "Export-Raw.Connections.ManagedApis.DisplayName.AzAccount" @parm -Action {
     Set-TaskWorkDirectory
     
     $lgObj = Get-TaskWorkObject

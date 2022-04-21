@@ -1,10 +1,10 @@
 BeforeAll {
-    mock -ModuleName "psake" Invoke-AzRestMethod {
-        return @{Content = Get-Content -Path "$PSScriptRoot\_Raw.ManagedApis.DisplayName.json" -Raw }
+    mock -ModuleName "psake" az {
+        return Get-Content -Path "$PSScriptRoot\_Raw.ManagedApis.DisplayName.json" -Raw
     }
 }
 
-Describe 'Testing Export-Raw.ManagedApis.DisplayName.AzAccount' {
+Describe 'Testing Export-Raw.Connections.ManagedApis.DisplayName.AzCli' {
 
     BeforeAll {
         ."$PSScriptRoot\..\..\..\internal\classes\PsLogicAppExtractor.class.ps1"
@@ -23,7 +23,7 @@ Describe 'Testing Export-Raw.ManagedApis.DisplayName.AzAccount' {
         Set-PSFConfig -FullName PsLogicAppExtractor.Execution.TaskInputNext -Value "$PSScriptRoot\_Raw.LogicApp.Action.Queue.json"
         Set-PSFConfig -FullName PsLogicAppExtractor.Pester.FileName -Value "$logicAppName.json"
 
-        Invoke-psake @parms -taskList "Export-Raw.ManagedApis.DisplayName.AzAccount"
+        Invoke-psake @parms -taskList "Export-Raw.Connections.ManagedApis.DisplayName.AzCli"
         
         $resPath = Get-ExtractOutput -Path $WorkPath
         $raw = Get-Content -Path $resPath -Raw
