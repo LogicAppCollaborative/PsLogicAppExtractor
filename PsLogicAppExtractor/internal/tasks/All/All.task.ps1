@@ -103,7 +103,7 @@ Task -Name "Export-LogicApp.AzCli" @parm -Action {
 #Original file: Export-Raw.Connections.ManagedApis.DisplayName.AzAccount.task.ps1
 $parm = @{
     Description = @"
-Loops all `$connections childs
+Loops all `$connections children
 -Exports the DisplayName of the ManagedApis based on the ConnectionId / ResourceId
 --Sets connectionName to the DisplayName, extracted via the ConnectionId
 Requires an authenticated Az.Accounts session
@@ -133,7 +133,7 @@ Task -Name "Export-Raw.Connections.ManagedApis.DisplayName.AzAccount" @parm -Act
 #Original file: Export-Raw.Connections.ManagedApis.DisplayName.AzCli.task.ps1
 $parm = @{
     Description = @"
-Loops all `$connections childs
+Loops all `$connections children
 -Exports the DisplayName of the ManagedApis based on the ConnectionId / ResourceId
 --Sets connectionName to the DisplayName, extracted via the ConnectionId
 Requires an authenticated Az.Accounts session
@@ -163,7 +163,7 @@ Task -Name "Export-Raw.Connections.ManagedApis.DisplayName.AzCli" @parm -Action 
 #Original file: Set-Arm.Connections.ManagedApis.AsParameter.task.ps1
 $parm = @{
     Description = @"
-Loops all `$connections childs
+Loops all `$connections children
 -Creates an Arm parameter, with prefix & suffix
 --Sets the default value to the original name, extracted from connectionId property
 -Sets the connectionId to: [resourceId('Microsoft.Web/connections', parameters('XYZ'))]
@@ -198,7 +198,7 @@ Task -Name "Set-Arm.Connections.ManagedApis.AsParameter" @parm -Action {
 #Original file: Set-Arm.Connections.ManagedApis.AsVariable.task.ps1
 $parm = @{
     Description = @"
-Loops all `$connections childs
+Loops all `$connections children
 -Creates an Arm variable, with prefix & suffix
 --Sets the value to the original name, extracted from connectionId property
 -Sets the connectionId to: [resourceId('Microsoft.Web/connections', variables('XYZ'))]
@@ -230,7 +230,7 @@ Task -Name "Set-Arm.Connections.ManagedApis.AsVariable" @parm -Action {
 #Original file: Set-Arm.Connections.ManagedApis.IdFormatted.task.ps1
 $parm = @{
     Description = @"
-Loops all `$connections childs
+Loops all `$connections children
 -Sets the id value to: [format('/subscriptions/{0}/providers/Microsoft.Web/locations/{1}/managedApis/XYZ',subscription().subscriptionId,parameters('logicAppLocation'))]
 Creates the Arm parameter logicAppLocation if it doesn't exists
 "@
@@ -893,7 +893,7 @@ Task -Name "Set-Raw.ApiVersion" @parm -Action {
 #Original file: Set-Raw.Connections.ManagedApis.Id.task.ps1
 $parm = @{
     Description = @"
-Loops all `$connections childs
+Loops all `$connections children
 -Sets connectionId to the name of the connection, extracted from the connectionName
 "@
     Alias       = "Raw.Set-Raw.Connections.ManagedApis.Id"
@@ -916,7 +916,7 @@ Task -Name "Set-Raw.Connections.ManagedApis.Id" @parm -Action {
 #Original file: Set-Raw.Connections.ManagedApis.Name.task.ps1
 $parm = @{
     Description = @"
-Loops all `$connections childs
+Loops all `$connections children
 -Sets connectionName to the name of the connection, extracted from the connectionId
 "@
     Alias       = "Raw.Set-Raw.Connections.ManagedApis.Name"

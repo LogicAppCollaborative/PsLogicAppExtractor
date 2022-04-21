@@ -1,6 +1,6 @@
 ﻿$parm = @{
     Description = @"
-Loops all `$connections childs
+Loops all `$connections children
 -Exports the DisplayName of the ManagedApis based on the ConnectionId / ResourceId
 --Sets connectionName to the DisplayName, extracted via the ConnectionId
 Requires an authenticated Az.Accounts session

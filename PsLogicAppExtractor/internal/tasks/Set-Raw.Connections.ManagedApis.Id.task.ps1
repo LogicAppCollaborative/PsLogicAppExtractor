@@ -1,6 +1,6 @@
 ﻿$parm = @{
     Description = @"
-Loops all `$connections childs
+Loops all `$connections children
 -Sets connectionId to the name of the connection, extracted from the connectionName
 "@
     Alias       = "Raw.Set-Raw.Connections.ManagedApis.Id"
