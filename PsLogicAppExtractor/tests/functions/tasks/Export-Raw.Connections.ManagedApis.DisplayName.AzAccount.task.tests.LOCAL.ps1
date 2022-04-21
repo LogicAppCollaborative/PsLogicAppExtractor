@@ -1,10 +1,10 @@
 BeforeAll {
-    mock -ModuleName "psake" az {
-        return Get-Content -Path "$PSScriptRoot\_Raw.ManagedApis.DisplayName.json" -Raw
+    mock -ModuleName "psake" Invoke-AzRestMethod {
+        @{Content = "{""kind"": ""V1"",""properties"": {""displayName"": ""APICON-SB-INBOUND""},""id"": ""/subscriptions/b466443d-6eac-4513-a7f0-3579502929f00/resourceGroups/rgTest/providers/Microsoft.Web/connections/servicebus"",""name"": ""servicebus"",""type"": ""Microsoft.Web/connections"",""location"": ""westeurope""}" }
     }
 }
 
-Describe 'Testing Export-Raw.ManagedApis.DisplayName.AzCli' {
+Describe 'Testing Export-Raw.Connections.ManagedApis.DisplayName.AzAccount' {
 
     BeforeAll {
         ."$PSScriptRoot\..\..\..\internal\classes\PsLogicAppExtractor.class.ps1"
@@ -23,7 +23,7 @@ Describe 'Testing Export-Raw.ManagedApis.DisplayName.AzCli' {
         Set-PSFConfig -FullName PsLogicAppExtractor.Execution.TaskInputNext -Value "$PSScriptRoot\_Raw.LogicApp.Action.Queue.json"
         Set-PSFConfig -FullName PsLogicAppExtractor.Pester.FileName -Value "$logicAppName.json"
 
-        Invoke-psake @parms -taskList "Export-Raw.ManagedApis.DisplayName.AzCli"
+        Invoke-psake @parms -taskList "Export-Raw.Connections.ManagedApis.DisplayName.AzAccount"
         
         $resPath = Get-ExtractOutput -Path $WorkPath
         $raw = Get-Content -Path $resPath -Raw

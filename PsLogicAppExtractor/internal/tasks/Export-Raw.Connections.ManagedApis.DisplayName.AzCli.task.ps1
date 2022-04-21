@@ -1,14 +1,14 @@
 ﻿$parm = @{
     Description = @"
-Loops all `$connections childs
+Loops all `$connections children
 -Exports the DisplayName of the ManagedApis based on the ConnectionId / ResourceId
 --Sets connectionName to the DisplayName, extracted via the ConnectionId
 Requires an authenticated Az.Accounts session
 "@
-    Alias       = "Exporter.Export-Raw.ManagedApis.DisplayName.AzCli"
+    Alias       = "Exporter.Export-Raw.Connections.ManagedApis.DisplayName.AzCli"
 }
 
-Task -Name "Export-Raw.ManagedApis.DisplayName.AzCli" @parm -Action {
+Task -Name "Export-Raw.Connections.ManagedApis.DisplayName.AzCli" @parm -Action {
     Set-TaskWorkDirectory
     
     $lgObj = Get-TaskWorkObject

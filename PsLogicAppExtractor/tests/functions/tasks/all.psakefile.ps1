@@ -16,7 +16,7 @@ $pathTasks = $(Get-PSFConfigValue -FullName PsLogicAppExtractor.ModulePath.Tasks
 $pathTasks = "C:\GIT\GITHUB\PsLogicAppExtractor.Workspace\PsLogicAppExtractor\PsLogicAppExtractor\internal\tasks"
 # Array to hold all tasks for the default task
 $listTasks = @()
-    
+
 # All tasks that needs to be include based on their path
 Include "$pathTasks\All\All.task.ps1"
     
@@ -24,8 +24,8 @@ Include "$pathTasks\All\All.task.ps1"
 $listTasks += "ConvertTo-Arm"
 $listTasks += "ConvertTo-Raw"
 $listTasks += "Export-LogicApp.AzCli"
-$listTasks += "Export-Raw.ManagedApis.DisplayName.AzAccount.task"
-$listTasks += "Export-Raw.ManagedApis.DisplayName.AzCli.task"
+$listTasks += "Export-Raw.Connections.ManagedApis.DisplayName.AzAccount.task"
+$listTasks += "Export-Raw.Connections.ManagedApis.DisplayName.AzCli.task"
 # $listTasks += "Initialize"
 $listTasks += "Set-Arm.Connections.ManagedApis.AsParameter"
 $listTasks += "Set-Arm.Connections.ManagedApis.AsVariable"

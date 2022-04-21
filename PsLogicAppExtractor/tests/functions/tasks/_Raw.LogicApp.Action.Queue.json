@@ -52,7 +52,7 @@
                 "value": {
                     "servicebus": {
                         "connectionId": "/subscriptions/b466443d-6eac-4513-a7f0-3579502929f00/resourceGroups/rgTest/providers/Microsoft.Web/connections/servicebus",
-                        "connectionName": "servicebus",
+                        "connectionName": "SB-Inbound-Queue",
                         "id": "/subscriptions/b466443d-6eac-4513-a7f0-3579502929f00/providers/Microsoft.Web/locations/westeurope/managedApis/servicebus"
                     }
                 }
