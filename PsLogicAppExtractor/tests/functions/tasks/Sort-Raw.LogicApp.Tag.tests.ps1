@@ -1,8 +1,6 @@
 ﻿Describe 'Testing Sort-Raw.LogicApp.Tag' {
 
     BeforeAll {
-        # Import-Module C:\GIT\GITHUB\PsLogicAppExtractor.Workspace\PsLogicAppExtractor\PsLogicAppExtractor -Force
-
         ."$PSScriptRoot\..\..\..\internal\classes\PsLogicAppExtractor.class.ps1"
         #."$PSScriptRoot\..\..\Set-TaskWorkDirectoryPester.ps1"
 

@@ -1,10 +1,7 @@
 ﻿Describe 'Set-Arm.Connections.ManagedApis.IdFormatted' {
 
     BeforeAll {
-        # Import-Module C:\GIT\GITHUB\PsLogicAppExtractor.Workspace\PsLogicAppExtractor\PsLogicAppExtractor -Force
-
         ."$PSScriptRoot\..\..\..\internal\classes\PsLogicAppExtractor.class.ps1"
-        # #."$PSScriptRoot\..\..\Set-TaskWorkDirectoryPester.ps1"
 
         $parms = @{}
         $parms.buildFile = "$PSScriptRoot\all.psakefile.ps1"
