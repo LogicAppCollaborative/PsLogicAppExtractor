@@ -100,18 +100,18 @@ Task -Name "Export-LogicApp.AzCli" @parm -Action {
     Out-TaskFile -Content $res
 }
 
-#Original file: Export-Raw.ManagedApis.DisplayName.AzAccount.task.ps1
+#Original file: Export-Raw.Connections.ManagedApis.DisplayName.AzAccount.task.ps1
 $parm = @{
     Description = @"
-Loops all `$connections childs
+Loops all `$connections children
 -Exports the DisplayName of the ManagedApis based on the ConnectionId / ResourceId
 --Sets connectionName to the DisplayName, extracted via the ConnectionId
 Requires an authenticated Az.Accounts session
 "@
-    Alias       = "Exporter.Export-Raw.ManagedApis.DisplayName.AzAccount"
+    Alias       = "Exporter.Export-Raw.Connections.ManagedApis.DisplayName.AzAccount"
 }
 
-Task -Name "Export-Raw.ManagedApis.DisplayName.AzAccount" @parm -Action {
+Task -Name "Export-Raw.Connections.ManagedApis.DisplayName.AzAccount" @parm -Action {
     Set-TaskWorkDirectory
     
     $lgObj = Get-TaskWorkObject
@@ -130,18 +130,18 @@ Task -Name "Export-Raw.ManagedApis.DisplayName.AzAccount" @parm -Action {
     Out-TaskFileLogicApp -InputObject $lgObj
 }
 
-#Original file: Export-Raw.ManagedApis.DisplayName.AzCli.task.ps1
+#Original file: Export-Raw.Connections.ManagedApis.DisplayName.AzCli.task.ps1
 $parm = @{
     Description = @"
-Loops all `$connections childs
+Loops all `$connections children
 -Exports the DisplayName of the ManagedApis based on the ConnectionId / ResourceId
 --Sets connectionName to the DisplayName, extracted via the ConnectionId
 Requires an authenticated Az.Accounts session
 "@
-    Alias       = "Exporter.Export-Raw.ManagedApis.DisplayName.AzCli"
+    Alias       = "Exporter.Export-Raw.Connections.ManagedApis.DisplayName.AzCli"
 }
 
-Task -Name "Export-Raw.ManagedApis.DisplayName.AzCli" @parm -Action {
+Task -Name "Export-Raw.Connections.ManagedApis.DisplayName.AzCli" @parm -Action {
     Set-TaskWorkDirectory
     
     $lgObj = Get-TaskWorkObject
@@ -163,7 +163,7 @@ Task -Name "Export-Raw.ManagedApis.DisplayName.AzCli" @parm -Action {
 #Original file: Set-Arm.Connections.ManagedApis.AsParameter.task.ps1
 $parm = @{
     Description = @"
-Loops all `$connections childs
+Loops all `$connections children
 -Creates an Arm parameter, with prefix & suffix
 --Sets the default value to the original name, extracted from connectionId property
 -Sets the connectionId to: [resourceId('Microsoft.Web/connections', parameters('XYZ'))]
@@ -198,7 +198,7 @@ Task -Name "Set-Arm.Connections.ManagedApis.AsParameter" @parm -Action {
 #Original file: Set-Arm.Connections.ManagedApis.AsVariable.task.ps1
 $parm = @{
     Description = @"
-Loops all `$connections childs
+Loops all `$connections children
 -Creates an Arm variable, with prefix & suffix
 --Sets the value to the original name, extracted from connectionId property
 -Sets the connectionId to: [resourceId('Microsoft.Web/connections', variables('XYZ'))]
@@ -230,7 +230,7 @@ Task -Name "Set-Arm.Connections.ManagedApis.AsVariable" @parm -Action {
 #Original file: Set-Arm.Connections.ManagedApis.IdFormatted.task.ps1
 $parm = @{
     Description = @"
-Loops all `$connections childs
+Loops all `$connections children
 -Sets the id value to: [format('/subscriptions/{0}/providers/Microsoft.Web/locations/{1}/managedApis/XYZ',subscription().subscriptionId,parameters('logicAppLocation'))]
 Creates the Arm parameter logicAppLocation if it doesn't exists
 "@
@@ -249,6 +249,132 @@ Task -Name "Set-Arm.Connections.ManagedApis.IdFormatted" @parm -Action {
             $found = $true
             $conType = $_.Value.id.Split("/") | Select-Object -Last 1
             $_.Value.id = "[format('/subscriptions/{0}/providers/Microsoft.Web/locations/{1}/managedApis/$conType',subscription().subscriptionId,parameters('logicAppLocation'))]"
+        }
+    }
+
+    if ($found) {
+        if ($null -eq $armObj.parameters.logicAppLocation) {
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "logicAppLocation" `
+                -Type "string" `
+                -Value "[resourceGroup().location]" `
+                -Description "Location of the Logic App. Best practice recommendation is to make this depending on the Resource Group and its location."
+        }
+    }
+
+    Out-TaskFileArm -InputObject $armObj
+}
+
+#Original file: Set-Arm.Connections.ManagedApis.Servicebus.ListKey.AsArmObject.task.ps1
+$parm = @{
+    Description = @"
+Loops all `$connections children
+-Validates that is of the type servicebus
+--Creates a new resource in the ARM template, for the ApiConnection object
+--With matching ARM Parameters, for the ResourceGroup, Namespace, AccessKey
+--The type is based on ListKey / ConnectionString approach
+--Name & Displayname is extracted from the ConnectionName property
+"@
+    Alias       = "Arm.Set-Arm.Connections.ManagedApis.Servicebus.ListKey.AsArmObject"
+}
+
+Task -Name "Set-Arm.Connections.ManagedApis.Servicebus.ListKey.AsArmObject" @parm -Action {
+    Set-TaskWorkDirectory
+
+    $found = $false
+
+    $armObj = Get-TaskWorkObject
+
+    $armObj.resources[0].properties.parameters.'$connections'.value.PsObject.Properties | ForEach-Object {
+
+        if ($_.Value.id -like "*managedApis/servicebus*") {
+            $found = $true
+
+            $pathArms = "$(Get-PSFConfigValue -FullName PsLogicAppExtractor.ModulePath.Base)\internal\arms"
+
+            $sbObj = Get-Content -Path "$pathArms\API.SB.ConnectionString.json" -Raw | ConvertFrom-Json
+
+            $sbObj.Name = $_.Value.connectionName
+            $sbObj.properties.displayName = $_.Value.connectionName
+
+            $rgPreSuf = Format-Name -Type "Connection" -Prefix $Parm_Prefix -Suffix "_ResourceGroup" -Value "$($_.Name)"
+            $nsPreSuf = Format-Name -Type "Connection" -Prefix $Parm_Prefix -Suffix "_Namespace" -Value "$($_.Name)"
+            $keyPreSuf = Format-Name -Type "Connection" -Prefix $Parm_Prefix -Suffix "_Key" -Value "$($_.Name)"
+
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$rgPreSuf" `
+                -Type "string" `
+                -Value "" `
+                -Description "The resource group where the servicebus namespace is located. ($($_.Name))"
+
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$nsPreSuf" `
+                -Type "string" `
+                -Value "" `
+                -Description "The name of the servicebus namespace. ($($_.Name))"
+
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$keyPreSuf" `
+                -Type "string" `
+                -Value "" `
+                -Description "The name of the namespace access policy key that will be used during the deployment to fetch the connection string based on that key. ($($_.Name))"
+
+            $sbObj.properties.parameterValues.connectionString = $sbObj.properties.parameterValues.connectionString.Replace("'##RESOURCEGROUPNAME##'", "parameters('$rgPreSuf')").Replace("'##NAMESPACE##'", "parameters('$nsPreSuf')").Replace("'##KEYNAME##'", "parameters('$keyPreSuf')")
+
+            $armObj.resources += $sbObj
+        }
+    }
+
+    if ($found) {
+        if ($null -eq $armObj.parameters.logicAppLocation) {
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "logicAppLocation" `
+                -Type "string" `
+                -Value "[resourceGroup().location]" `
+                -Description "Location of the Logic App. Best practice recommendation is to make this depending on the Resource Group and its location."
+        }
+    }
+
+    Out-TaskFileArm -InputObject $armObj
+}
+
+#Original file: Set-Arm.Connections.ManagedApis.Servicebus.ManagedIdentity.AsArmObject.task.ps1
+$parm = @{
+    Description = @"
+Loops all `$connections children
+-Validates that is of the type servicebus
+--Creates a new resource in the ARM template, for the ApiConnection object
+--With matching ARM Parameters, for the Namespace
+--The type is based on the Managed Identity authentication
+--Name & Displayname is extracted from the ConnectionName property
+"@
+    Alias       = "Arm.Set-Arm.Connections.ManagedApis.Servicebus.ManagedIdentity.AsArmObject"
+}
+
+Task -Name "Set-Arm.Connections.ManagedApis.Servicebus.ManagedIdentity.AsArmObject" @parm -Action {
+    Set-TaskWorkDirectory
+    
+    $found = $false
+
+    $armObj = Get-TaskWorkObject
+
+    $armObj.resources[0].properties.parameters.'$connections'.value.PsObject.Properties | ForEach-Object {
+
+        if ($_.Value.id -like "*managedApis/servicebus*") {
+            $found = $true
+
+            $pathArms = "$(Get-PSFConfigValue -FullName PsLogicAppExtractor.ModulePath.Base)\internal\arms"
+
+            $sbObj = Get-Content -Path "$pathArms\API.SB.Managed.json" -Raw | ConvertFrom-Json
+
+            $sbObj.Name = $_.Value.connectionName
+            $sbObj.properties.displayName = $_.Value.connectionName
+
+            $nsPreSuf = Format-Name -Type "Connection" -Prefix $Parm_Prefix -Suffix "_Namespace" -Value "$($_.Name)"
+
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$nsPreSuf" `
+                -Type "string" `
+                -Value "" `
+                -Description "The name of the servicebus namespace. ($($_.Name))"
+
+            $sbObj.properties.parameterValueSet.values.namespaceEndpoint.value = $sbObj.properties.parameterValueSet.values.namespaceEndpoint.value.Replace("'##NAMESPACE##'", "parameters('$nsPreSuf')")
+
+            $armObj.resources += $sbObj
         }
     }
 
@@ -893,7 +1019,7 @@ Task -Name "Set-Raw.ApiVersion" @parm -Action {
 #Original file: Set-Raw.Connections.ManagedApis.Id.task.ps1
 $parm = @{
     Description = @"
-Loops all `$connections childs
+Loops all `$connections children
 -Sets connectionId to the name of the connection, extracted from the connectionName
 "@
     Alias       = "Raw.Set-Raw.Connections.ManagedApis.Id"
@@ -916,7 +1042,7 @@ Task -Name "Set-Raw.Connections.ManagedApis.Id" @parm -Action {
 #Original file: Set-Raw.Connections.ManagedApis.Name.task.ps1
 $parm = @{
     Description = @"
-Loops all `$connections childs
+Loops all `$connections children
 -Sets connectionName to the name of the connection, extracted from the connectionId
 "@
     Alias       = "Raw.Set-Raw.Connections.ManagedApis.Name"

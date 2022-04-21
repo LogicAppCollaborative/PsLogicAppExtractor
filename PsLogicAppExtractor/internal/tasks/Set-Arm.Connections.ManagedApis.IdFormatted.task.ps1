@@ -1,6 +1,6 @@
 ﻿$parm = @{
     Description = @"
-Loops all `$connections childs
+Loops all `$connections children
 -Sets the id value to: [format('/subscriptions/{0}/providers/Microsoft.Web/locations/{1}/managedApis/XYZ',subscription().subscriptionId,parameters('logicAppLocation'))]
 Creates the Arm parameter logicAppLocation if it doesn't exists
 "@

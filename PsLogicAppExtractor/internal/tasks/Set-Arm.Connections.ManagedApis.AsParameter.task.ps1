@@ -1,6 +1,6 @@
 ﻿$parm = @{
     Description = @"
-Loops all `$connections childs
+Loops all `$connections children
 -Creates an Arm parameter, with prefix & suffix
 --Sets the default value to the original name, extracted from connectionId property
 -Sets the connectionId to: [resourceId('Microsoft.Web/connections', parameters('XYZ'))]
