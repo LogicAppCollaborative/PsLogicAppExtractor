@@ -13,10 +13,14 @@ jobs:
     - uses: actions/checkout@v2
     - name: Setup PowerShell module cache
       id: cacher
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: "C:\\Users\\runneradmin\\Documents\\PowerShell\\Modules"
         key: ${{ runner.os }}-PSFramework-PSScriptAnalyzer
+        restore-keys: |
+          ${{ runner.os }}-PSFramework-
+          ${{ runner.os }}-
+          ${{ runner.os }}
     - name: Install Prerequisites
       if: steps.cacher.outputs.cache-hit != 'true'
       run: .\build\vsts-prerequisites.ps1
