@@ -1,4 +1,10 @@
-﻿Describe 'Testing Set-Raw.Actions.Http.Audience.AsParm' {
+BeforeAll {
+    mock -ModuleName "psake" Invoke-AzRestMethod {
+        return @{Content = Get-Content -Path "$PSScriptRoot\_Raw.ManagedApis.DisplayName.json" -Raw }
+    }
+}
+
+Describe 'Testing Export-Raw.ManagedApis.DisplayName.AzAccount' {
 
     BeforeAll {
         ."$PSScriptRoot\..\..\..\internal\classes\PsLogicAppExtractor.class.ps1"
@@ -14,10 +20,10 @@
         New-Item -Path $WorkPath -ItemType Directory -Force -ErrorAction Ignore > $null
 
         Set-PSFConfig -FullName PsLogicAppExtractor.Execution.WorkPath -Value $WorkPath
-        Set-PSFConfig -FullName PsLogicAppExtractor.Execution.TaskInputNext -Value "$PSScriptRoot\_Raw.LogicApp.UserAssignedIdentities.json"
+        Set-PSFConfig -FullName PsLogicAppExtractor.Execution.TaskInputNext -Value "$PSScriptRoot\_Raw.LogicApp.Action.Queue.json"
         Set-PSFConfig -FullName PsLogicAppExtractor.Pester.FileName -Value "$logicAppName.json"
 
-        Invoke-psake @parms -taskList "Set-Raw.Actions.Http.Audience.AsParm"
+        Invoke-psake @parms -taskList "Export-Raw.ManagedApis.DisplayName.AzAccount"
         
         $resPath = Get-ExtractOutput -Path $WorkPath
         $raw = Get-Content -Path $resPath -Raw
@@ -35,29 +41,29 @@
     It "Should have the correct Logic App name" {
         $lgObj.name | Should -BeExactly "LA-TEST-Exporter"
     }
-
+   
     It "Should be of the type 'Microsoft.Logic/workflows'" {
         $lgObj.type | Should -BeExactly "Microsoft.Logic/workflows"
     }
     
-    It "Should have a properties.definition property" {
-        $lgObj.properties.definition | Should -Not -Be $null
+    It "Should have a properties.parameters property" {
+        $lgObj.properties.parameters | Should -Not -Be $null
     }
 
-    It "Should have a properties.definition.parameters property" {
-        $lgObj.properties.definition.parameters | Should -Not -Be $null
+    It 'Should have a properties.parameters.$connections property' {
+        $lgObj.properties.parameters.'$connections' | Should -Not -Be $null
     }
 
-    It "Should have a properties.definition.parameters.EndpointAudience001 property" {
-        $lgObj.properties.definition.parameters.EndpointAudience001 | Should -Not -Be $null
+    It 'Should have a properties.parameters.$connections.value property' {
+        $lgObj.properties.parameters.'$connections'.value | Should -Not -Be $null
     }
 
-    It "Should be 'https://www.google.com' in the properties.definition.parameters.EndpointAudience001.defaultValue property" {
-        $lgObj.properties.definition.parameters.EndpointAudience001.defaultValue | Should -BeExactly "https://www.google.com"
+    It 'Should have a properties.parameters.$connections.value.servicebus property' {
+        $lgObj.properties.parameters.'$connections'.value.servicebus | Should -Not -Be $null
     }
 
-    It 'Should match "@{parameters(''EndpointAudience001'')}" in the LogicApp json' {
-        $raw | Should -match "@{parameters\('EndpointAudience001'\)}"
+    It 'Should be ''APICON-SB-INBOUND'' in the properties.parameters.$connections.value.servicebus.connectionName property' {
+        $lgObj.properties.parameters.'$connections'.value.servicebus.connectionName | Should -BeExactly "APICON-SB-INBOUND"
     }
 
     # AfterAll {
