@@ -74,7 +74,7 @@
         $armObj.resources[1].properties.api.id | Should -BeExactly "[subscriptionResourceId('Microsoft.Web/locations/managedApis', parameters('logicAppLocation'), 'servicebus')]"
     }
 
-    It "Should be 'servicebus' in the parameters.connection_servicebus_id.defaultValue property" {
+    It 'Should be "[listKeys(...)]" in the $armObj.resources[1].properties.parameterValues.connectionString' {
         $armObj.resources[1].properties.parameterValues.connectionString | Should -BeExactly "[listKeys(resourceId(parameters('servicebus_ResourceGroup'),'Microsoft.ServiceBus/namespaces/authorizationRules', parameters('servicebus_Namespace'), parameters('servicebus_Key')), '2017-04-01').primaryConnectionString]"
     }
     
