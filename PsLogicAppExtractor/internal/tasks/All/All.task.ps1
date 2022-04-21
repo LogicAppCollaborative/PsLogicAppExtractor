@@ -359,7 +359,10 @@ Task -Name "Set-Arm.Connections.ManagedApis.Servicebus.ManagedIdentity.AsArmObje
         if ($_.Value.id -like "*managedApis/servicebus*") {
             $found = $true
 
-            $sbObj = Get-Content -Path "C:\GIT\GITHUB\PsLogicAppExtractor.Workspace\PsLogicAppExtractor\PsLogicAppExtractor\internal\arms\API.SB.Managed.json" -Raw | ConvertFrom-Json
+            $pathArms = "$(Get-PSFConfigValue -FullName PsLogicAppExtractor.ModulePath.Base)\internal\arms"
+            # $pathArms = "C:\GIT\GITHUB\PsLogicAppExtractor.Workspace\PsLogicAppExtractor\PsLogicAppExtractor\internal\arms"
+
+            $sbObj = Get-Content -Path "$pathArms\API.SB.Managed.json" -Raw | ConvertFrom-Json
 
             $sbObj.Name = $_.Value.connectionName
             $sbObj.properties.displayName = $_.Value.connectionName
