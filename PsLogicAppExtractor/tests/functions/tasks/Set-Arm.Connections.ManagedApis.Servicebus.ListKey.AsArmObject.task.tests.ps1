@@ -78,7 +78,7 @@
         $armObj.resources[1].properties.parameterValues.connectionString | Should -BeExactly "[listKeys(resourceId(parameters('servicebus_ResourceGroup'),'Microsoft.ServiceBus/namespaces/authorizationRules', parameters('servicebus_Namespace'), parameters('servicebus_Key')), '2017-04-01').primaryConnectionString]"
     }
     
-    # AfterAll {
-    #     Write-Host "$resPath"
-    # }
+    AfterAll {
+        Write-Host "$resPath"
+    }
 }
