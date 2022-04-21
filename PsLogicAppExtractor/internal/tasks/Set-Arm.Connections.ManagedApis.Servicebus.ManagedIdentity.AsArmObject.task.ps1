@@ -2,9 +2,10 @@
     Description = @"
 Loops all `$connections children
 -Validates that is of the type servicebus
---Creates a new resource in the ARM template, for the api connection object
+--Creates a new resource in the ARM template, for the ApiConnection object
 --With matching ARM Parameters, for the Namespace
 --The type is based on the Managed Identity authentication
+--Name & Displayname is extracted from the ConnectionName property
 "@
     Alias       = "Arm.Set-Arm.Connections.ManagedApis.Servicebus.ManagedIdentity.AsArmObject"
 }
@@ -12,11 +13,15 @@ Loops all `$connections children
 Task -Name "Set-Arm.Connections.ManagedApis.Servicebus.ManagedIdentity.AsArmObject" @parm -Action {
     Set-TaskWorkDirectory
     
+    $found = $false
+
     $armObj = Get-TaskWorkObject
 
     $armObj.resources[0].properties.parameters.'$connections'.value.PsObject.Properties | ForEach-Object {
 
         if ($_.Value.id -like "*managedApis/servicebus*") {
+            $found = $true
+
             $sbObj = Get-Content -Path "C:\GIT\GITHUB\PsLogicAppExtractor.Workspace\PsLogicAppExtractor\PsLogicAppExtractor\internal\arms\API.SB.Managed.json" -Raw | ConvertFrom-Json
 
             $sbObj.Name = $_.Value.connectionName
@@ -32,6 +37,15 @@ Task -Name "Set-Arm.Connections.ManagedApis.Servicebus.ManagedIdentity.AsArmObje
             $sbObj.properties.parameterValueSet.values.namespaceEndpoint.value = $sbObj.properties.parameterValueSet.values.namespaceEndpoint.value.Replace("'##NAMESPACE##'", "parameters('$nsPreSuf')")
 
             $armObj.resources += $sbObj
+        }
+    }
+
+    if ($found) {
+        if ($null -eq $armObj.parameters.logicAppLocation) {
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "logicAppLocation" `
+                -Type "string" `
+                -Value "[resourceGroup().location]" `
+                -Description "Location of the Logic App. Best practice recommendation is to make this depending on the Resource Group and its location."
         }
     }
 

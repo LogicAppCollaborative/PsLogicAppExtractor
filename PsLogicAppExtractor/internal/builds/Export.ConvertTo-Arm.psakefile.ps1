@@ -5,24 +5,25 @@ Properties {
     $Name = ""
     $ApiVersion = "2019-05-01"
 }
-    
+
 # Used to import the needed classes into the powershell session, to help with the export of the Logic App
 ."$(Get-PSFConfigValue -FullName PsLogicAppExtractor.ModulePath.Classes)\PsLogicAppExtractor.class.ps1"
-    
-# Path to where the task files are located
+
+# Path variable for all the tasks that is available from the PsLogicAppExtractor module
 $pathTasks = $(Get-PSFConfigValue -FullName PsLogicAppExtractor.ModulePath.Tasks)
-    
+
+# Include all the tasks that is available from the PsLogicAppExtractor module
+Include "$pathTasks\All\All.task.ps1"
+
 # Array to hold all tasks for the default task
 $listTasks = @()
     
-# All tasks that needs to be include based on their path
-Include "$pathTasks\Export-LogicApp.AzCli.task.ps1"
-Include "$pathTasks\ConvertTo-Raw.task.ps1"
-Include "$pathTasks\Set-Raw.ApiVersion.task.ps1"
-Include "$pathTasks\ConvertTo-Arm.task.ps1"
-    
 # Building the list of tasks for the default task
+
+#Pick ONE of these two
 $listTasks += "Export-LogicApp.AzCli"
+# $listTasks += "Export-LogicApp.AzAccount"
+
 $listTasks += "ConvertTo-Raw"
 $listTasks += "Set-Raw.ApiVersion"
 $listTasks += "ConvertTo-Arm"
