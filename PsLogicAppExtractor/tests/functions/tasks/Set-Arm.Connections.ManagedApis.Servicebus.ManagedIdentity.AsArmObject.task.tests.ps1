@@ -72,11 +72,11 @@
         $armObj.resources[1].properties.api.id | Should -BeExactly "[subscriptionResourceId('Microsoft.Web/locations/managedApis', parameters('logicAppLocation'), 'servicebus')]"
     }
 
-    # It "Should be 'servicebus' in the parameters.connection_servicebus_id.defaultValue property" {
-    #     $armObj.resources[1].properties.parameterValues.connectionString | Should -BeExactly "[listKeys(resourceId(parameters('servicebus_ResourceGroup'),'Microsoft.ServiceBus/namespaces/authorizationRules', parameters('servicebus_Namespace'), parameters('servicebus_Key')), '2017-04-01').primaryConnectionString]"
-    # }
-    
-    AfterAll {
-        Write-Host "$resPath"
+    It "Should be 'servicebus' in the parameters.connection_servicebus_id.defaultValue property" {
+        $armObj.resources[1].properties.parameterValues.connectionString | Should -BeExactly "[listKeys(resourceId(parameters('servicebus_ResourceGroup'),'Microsoft.ServiceBus/namespaces/authorizationRules', parameters('servicebus_Namespace'), parameters('servicebus_Key')), '2017-04-01').primaryConnectionString]"
     }
+    
+    # AfterAll {
+    #     Write-Host "$resPath"
+    # }
 }
