@@ -34,9 +34,9 @@ function Show-OAuthConsentWindow {
         [Alias('Uri')]
         [string] $Url
     )
+
     Add-Type -AssemblyName System.Windows.Forms
 
-    Write-Host "$Url"
     #Building the outer body of the form
     $form = New-Object -TypeName System.Windows.Forms.Form -Property @{Width = 600; Height = 800 }
     
