@@ -37,16 +37,18 @@
 	# TypesToProcess = @('xml\PsLogicAppExtractor.Types.ps1xml')
 	
 	# Format files (.ps1xml) to be loaded when importing this module
-	# FormatsToProcess = @('xml\PsLogicAppExtractor.Format.ps1xml')
+	FormatsToProcess = @('xml\PsLogicAppExtractor.Format.ps1xml')
 	
 	# Functions to export from this module
 	FunctionsToExport = @(
 		'Get-PsLaArmParameter'
+		, 'Get-PsLaManagedApiConnection.AzAccount'
 		, 'Get-PsLaTask'
 		, 'Get-PsLaTaskByFile'
 		, 'Get-PsLaTaskByPath'
 		, 'Get-PsLaTaskOrderByFile'
 		, 'Get-PsLaTaskTemplate'
+		, 'Invoke-PsLaConsent.AzAccount'
 		, 'Invoke-PsLaExtractor'
 		
 		, 'New-PsLaRunbookByPath'
