@@ -28,6 +28,8 @@
 #>
 function Show-OAuthConsentWindow {
     [CmdletBinding()]
+    [OutputType('System.String')]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidGlobalVars', '')]
     param (
         [Alias('Uri')]
         [string] $Url
