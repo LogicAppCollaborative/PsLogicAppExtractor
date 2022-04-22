@@ -5,6 +5,7 @@ Loops all `$connections children
 --Creates a new resource in the ARM template, for the ApiConnection object
 --Makes sure the ARM Parameters logicAppLocation exists
 --Name & Displayname is extracted from the ConnectionName property
+--Extends the dependsOn property on the LogicApp resource, to depend on the ApiConnection object
 "@
     Alias       = "Arm.Set-Arm.Connections.ManagedApis.Generic.AsArmObject"
 }
@@ -28,6 +29,7 @@ Task -Name "Set-Arm.Connections.ManagedApis.Generic.AsArmObject" @parm -Action {
             $conObj.Name = $_.Value.connectionName
             $conObj.properties.displayName = $_.Value.connectionName
             $conObj.properties.api.id = $conObj.properties.api.id.Replace("##TYPE##", $Matches[1])
+            
             $armObj.resources += $conObj
 
             if ($null -eq $armObj.resources[0].dependsOn) {

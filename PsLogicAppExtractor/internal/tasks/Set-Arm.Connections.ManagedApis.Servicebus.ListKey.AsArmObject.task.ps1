@@ -4,6 +4,7 @@ Loops all `$connections children
 -Validates that is of the type servicebus
 --Creates a new resource in the ARM template, for the ApiConnection object
 --With matching ARM Parameters, for the ResourceGroup, Namespace, AccessKey
+--Makes sure the ARM Parameters logicAppLocation exists
 --The type is based on ListKey / ConnectionString approach
 --Name & Displayname is extracted from the ConnectionName property
 "@
@@ -51,6 +52,17 @@ Task -Name "Set-Arm.Connections.ManagedApis.Servicebus.ListKey.AsArmObject" @par
             $sbObj.properties.parameterValues.connectionString = $sbObj.properties.parameterValues.connectionString.Replace("'##RESOURCEGROUPNAME##'", "parameters('$rgPreSuf')").Replace("'##NAMESPACE##'", "parameters('$nsPreSuf')").Replace("'##KEYNAME##'", "parameters('$keyPreSuf')")
 
             $armObj.resources += $sbObj
+
+            if ($null -eq $armObj.resources[0].dependsOn) {
+                $armObj.resources[0] | Add-Member -MemberType NoteProperty -Name "dependsOn" -Value @()
+            }
+
+            if ($($_.Value.connectionName) -match "\[(.*)\]") {
+                $armObj.resources[0].dependsOn += "[resourceId('Microsoft.Web/connections', $($Matches[1]))]"
+            }
+            else {
+                $armObj.resources[0].dependsOn += "[resourceId('Microsoft.Web/connections', '$($_.Value.connectionName)')]"
+            }
         }
     }
 

@@ -4,6 +4,7 @@ Loops all `$connections children
 -Validates that is of the type servicebus
 --Creates a new resource in the ARM template, for the ApiConnection object
 --With matching ARM Parameters, for the Namespace
+--Makes sure the ARM Parameters logicAppLocation exists
 --The type is based on the Managed Identity authentication
 --Name & Displayname is extracted from the ConnectionName property
 "@
@@ -39,6 +40,17 @@ Task -Name "Set-Arm.Connections.ManagedApis.Servicebus.ManagedIdentity.AsArmObje
             $sbObj.properties.parameterValueSet.values.namespaceEndpoint.value = $sbObj.properties.parameterValueSet.values.namespaceEndpoint.value.Replace("'##NAMESPACE##'", "parameters('$nsPreSuf')")
 
             $armObj.resources += $sbObj
+
+            if ($null -eq $armObj.resources[0].dependsOn) {
+                $armObj.resources[0] | Add-Member -MemberType NoteProperty -Name "dependsOn" -Value @()
+            }
+
+            if ($($_.Value.connectionName) -match "\[(.*)\]") {
+                $armObj.resources[0].dependsOn += "[resourceId('Microsoft.Web/connections', $($Matches[1]))]"
+            }
+            else {
+                $armObj.resources[0].dependsOn += "[resourceId('Microsoft.Web/connections', '$($_.Value.connectionName)')]"
+            }
         }
     }
 
