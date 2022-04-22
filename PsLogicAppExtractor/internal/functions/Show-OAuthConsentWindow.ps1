@@ -24,8 +24,7 @@
         https://github.com/logicappsio/LogicAppConnectionAuth/blob/master/LogicAppConnectionAuth.ps1
         https://github.com/OfficeDev/microsoft-teams-apps-requestateam/blob/master/Deployment/Scripts/deploy.ps1
         
-        Author: MÃ¶tz Jensen (@Splaxi)
-        
+        Author: Mötz Jensen (@Splaxi)
 #>
 function Show-OAuthConsentWindow {
     [CmdletBinding()]

@@ -33,8 +33,18 @@ Helps to identity ApiConnection objects that are failed or missing an consent / 
 
 ### EXAMPLE 1
 ```
-An example
+Get-PsLaManagedApiConnection.AzAccount -ResourceGroup "TestRg"
 ```
+
+This will fetch all ApiConnection objects from the "TestRg" Resource Group
+
+Output example:
+
+Name             DisplayName      OverallStatus Id                   StatusDetails
+----             -----------      ------------- --                   -------------
+azureblob        TestFtpDownload  Connected     /subscriptions/467c… {"status": "Connect…
+azureeventgrid   TestEventGrid    Error         /subscriptions/467c… {"status": "Error",…
+azurequeues      Test             Connected     /subscriptions/467c… {"status": "Connect…
 
 ## PARAMETERS
 
@@ -129,6 +139,6 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## OUTPUTS
 
 ## NOTES
-General notes
+Author: Mötz Jensen (@Splaxi)
 
 ## RELATED LINKS

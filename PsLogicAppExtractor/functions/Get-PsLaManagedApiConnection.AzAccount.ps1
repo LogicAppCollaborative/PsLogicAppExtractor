@@ -33,21 +33,21 @@
         
     .EXAMPLE
         PS C:\> Get-PsLaManagedApiConnection.AzAccount -ResourceGroup "TestRg"
-
+        
         This will fetch all ApiConnection objects from the "TestRg" Resource Group
         
         Output example:
-
+        
         Name             DisplayName      OverallStatus Id                   StatusDetails
         ----             -----------      ------------- --                   -------------
         azureblob        TestFtpDownload  Connected     /subscriptions/467c… {"status": "Connect…
         azureeventgrid   TestEventGrid    Error         /subscriptions/467c… {"status": "Error",…
         azurequeues      Test             Connected     /subscriptions/467c… {"status": "Connect…
-
+        
     .NOTES
         
-    Author: Mötz Jensen (@Splaxi)
-    
+        Author: Mötz Jensen (@Splaxi)
+        
 #>
 function Get-PsLaManagedApiConnection.AzAccount {
     [CmdletBinding(DefaultParameterSetName = "ResourceGroup")]
