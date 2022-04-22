@@ -76,6 +76,6 @@ Describe 'Testing Export-Raw.Connections.ManagedApis.DisplayName.AzAccount' {
 
     AfterAll {
         # Write-Host "$resPath"
-        $Error
+        Write-Host "$($Error | ConvertTo-Json -Depth 10)"
     }
 }
