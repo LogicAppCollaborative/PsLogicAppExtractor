@@ -2,6 +2,14 @@ BeforeAll {
     mock -ModuleName "psake" Invoke-AzRestMethod {
         @{Content = "{""kind"": ""V1"",""properties"": {""displayName"": ""APICON-SB-INBOUND""},""id"": ""/subscriptions/b466443d-6eac-4513-a7f0-3579502929f00/resourceGroups/rgTest/providers/Microsoft.Web/connections/servicebus"",""name"": ""servicebus"",""type"": ""Microsoft.Web/connections"",""location"": ""westeurope""}" }
     }
+
+    mock -ModuleName "pester" Invoke-AzRestMethod {
+        @{Content = "{""kind"": ""V1"",""properties"": {""displayName"": ""APICON-SB-INBOUND""},""id"": ""/subscriptions/b466443d-6eac-4513-a7f0-3579502929f00/resourceGroups/rgTest/providers/Microsoft.Web/connections/servicebus"",""name"": ""servicebus"",""type"": ""Microsoft.Web/connections"",""location"": ""westeurope""}" }
+    }
+
+    mock -ModuleName "PsLogicAppExtractor" Invoke-AzRestMethod {
+        @{Content = "{""kind"": ""V1"",""properties"": {""displayName"": ""APICON-SB-INBOUND""},""id"": ""/subscriptions/b466443d-6eac-4513-a7f0-3579502929f00/resourceGroups/rgTest/providers/Microsoft.Web/connections/servicebus"",""name"": ""servicebus"",""type"": ""Microsoft.Web/connections"",""location"": ""westeurope""}" }
+    }
 }
 
 Describe 'Testing Export-Raw.Connections.ManagedApis.DisplayName.AzAccount' {
@@ -66,7 +74,8 @@ Describe 'Testing Export-Raw.Connections.ManagedApis.DisplayName.AzAccount' {
         $lgObj.properties.parameters.'$connections'.value.servicebus.connectionName | Should -BeExactly "APICON-SB-INBOUND"
     }
 
-    # AfterAll {
-    #     Write-Host "$resPath"
-    # }
+    AfterAll {
+        # Write-Host "$resPath"
+        $Error
+    }
 }
