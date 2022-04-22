@@ -32,10 +32,22 @@
         Instruct the cmdlet to output with the detailed format directly
         
     .EXAMPLE
-        An example
+        PS C:\> Get-PsLaManagedApiConnection.AzAccount -ResourceGroup "TestRg"
+
+        This will fetch all ApiConnection objects from the "TestRg" Resource Group
         
+        Output example:
+
+        Name             DisplayName      OverallStatus Id                   StatusDetails
+        ----             -----------      ------------- --                   -------------
+        azureblob        TestFtpDownload  Connected     /subscriptions/467c… {"status": "Connect…
+        azureeventgrid   TestEventGrid    Error         /subscriptions/467c… {"status": "Error",…
+        azurequeues      Test             Connected     /subscriptions/467c… {"status": "Connect…
+
     .NOTES
-        General notes
+        
+    Author: Mötz Jensen (@Splaxi)
+    
 #>
 function Get-PsLaManagedApiConnection.AzAccount {
     [CmdletBinding(DefaultParameterSetName = "ResourceGroup")]
@@ -78,7 +90,7 @@ function Get-PsLaManagedApiConnection.AzAccount {
                 $_.properties.Statuses | ConvertTo-Json -Depth 4
             }
             else {
-                $($_.properties.Statuses | ConvertTo-Json -Depth 4).Replace("`r`n","").Replace("  ","")
+                $($_.properties.Statuses | ConvertTo-Json -Depth 4).Replace("`r`n", "").Replace("  ", "")
             }
         }
     }
