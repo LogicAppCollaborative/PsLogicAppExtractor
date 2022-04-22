@@ -70,6 +70,12 @@
     It 'Should be "[subscriptionResourceId(...)]" in the $armObj.resources[1].properties.api.id property' {
         $armObj.resources[1].properties.api.id | Should -BeExactly "[subscriptionResourceId('Microsoft.Web/locations/managedApis', parameters('logicAppLocation'), 'servicebus')]"
     }
+
+    It 'Should have a resources[0].dependsOn property' {
+        $armObj.resources[0].dependsOn | Should -Not -Be $null
+        $armObj.resources[0].dependsOn.Count | Should -BeExactly 1
+        $armObj.resources[0].dependsOn[0] | Should -BeExactly "[resourceId('Microsoft.Web/connections', 'SB-Inbound-Queue')]"
+    }
     
     # AfterAll {
     #     Write-Host "$resPath"

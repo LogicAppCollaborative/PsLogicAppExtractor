@@ -231,10 +231,9 @@ Task -Name "Set-Arm.Connections.ManagedApis.AsVariable" @parm -Action {
 $parm = @{
     Description = @"
 Loops all `$connections children
--Validates that is of the type servicebus
+-Validates that is of the type ManagedApi
 --Creates a new resource in the ARM template, for the ApiConnection object
---With matching ARM Parameters, for the ResourceGroup, Namespace, AccessKey
---The type is based on ListKey / ConnectionString approach
+--Makes sure the ARM Parameters logicAppLocation exists
 --Name & Displayname is extracted from the ConnectionName property
 "@
     Alias       = "Arm.Set-Arm.Connections.ManagedApis.Generic.AsArmObject"
