@@ -1,4 +1,4 @@
-﻿Describe 'Set-Arm.Connections.ManagedApis.Servicebus.ManagedIdentity.AsArmObject' {
+﻿Describe 'Set-Arm.Connections.ManagedApis.Generic.AsArmObject' {
 
     BeforeAll {
         ."$PSScriptRoot\..\..\..\internal\classes\PsLogicAppExtractor.class.ps1"
@@ -17,7 +17,7 @@
         Set-PSFConfig -FullName PsLogicAppExtractor.Execution.TaskInputNext -Value "$PSScriptRoot\_Raw.LogicApp.Action.Queue.json"
         Set-PSFConfig -FullName PsLogicAppExtractor.Pester.FileName -Value "$logicAppName.json"
         
-        Invoke-psake @parms -taskList "Set-Raw.ApiVersion", "ConvertTo-Arm", "Set-Arm.Connections.ManagedApis.Servicebus.ManagedIdentity.AsArmObject"
+        Invoke-psake @parms -taskList "Set-Raw.ApiVersion", "ConvertTo-Arm", "Set-Arm.Connections.ManagedApis.Generic.AsArmObject"
 
         $resPath = Get-ExtractOutput -Path $WorkPath
         $armObj = [ArmTemplate]$(Get-Content -Path $resPath -Raw | ConvertFrom-Json)
@@ -40,7 +40,6 @@
     }
 
     It "Should have the needed parameters" {
-        $armObj.parameters.servicebus_Namespace | Should -Not -Be $null
         $armObj.parameters.logicAppLocation | Should -Not -Be $null
     }
     
@@ -77,7 +76,7 @@
         $armObj.resources[0].dependsOn.Count | Should -BeExactly 1
         $armObj.resources[0].dependsOn[0] | Should -BeExactly "[resourceId('Microsoft.Web/connections', 'SB-Inbound-Queue')]"
     }
-
+    
     # AfterAll {
     #     Write-Host "$resPath"
     # }

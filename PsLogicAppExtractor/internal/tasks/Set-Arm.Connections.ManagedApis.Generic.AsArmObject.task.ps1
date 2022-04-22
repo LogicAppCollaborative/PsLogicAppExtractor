@@ -1,45 +1,36 @@
 ﻿$parm = @{
     Description = @"
 Loops all `$connections children
--Validates that is of the type servicebus
+-Validates that is of the type ManagedApi
 --Creates a new resource in the ARM template, for the ApiConnection object
---With matching ARM Parameters, for the Namespace
 --Makes sure the ARM Parameters logicAppLocation exists
---The type is based on the Managed Identity authentication
 --Name & Displayname is extracted from the ConnectionName property
+--Extends the dependsOn property on the LogicApp resource, to depend on the ApiConnection object
 "@
-    Alias       = "Arm.Set-Arm.Connections.ManagedApis.Servicebus.ManagedIdentity.AsArmObject"
+    Alias       = "Arm.Set-Arm.Connections.ManagedApis.Generic.AsArmObject"
 }
 
-Task -Name "Set-Arm.Connections.ManagedApis.Servicebus.ManagedIdentity.AsArmObject" @parm -Action {
+Task -Name "Set-Arm.Connections.ManagedApis.Generic.AsArmObject" @parm -Action {
     Set-TaskWorkDirectory
-    
+
     $found = $false
 
     $armObj = Get-TaskWorkObject
 
     $armObj.resources[0].properties.parameters.'$connections'.value.PsObject.Properties | ForEach-Object {
 
-        if ($_.Value.id -like "*managedApis/servicebus*") {
+        if ($_.Value.id -match "/managedApis/(.*)") {
             $found = $true
-
+            
             $pathArms = "$(Get-PSFConfigValue -FullName PsLogicAppExtractor.ModulePath.Base)\internal\arms"
 
-            $sbObj = Get-Content -Path "$pathArms\API.SB.Managed.json" -Raw | ConvertFrom-Json
+            $conObj = Get-Content -Path "$pathArms\API.Managed.json" -Raw | ConvertFrom-Json
 
-            $sbObj.Name = $_.Value.connectionName
-            $sbObj.properties.displayName = $_.Value.connectionName
-
-            $nsPreSuf = Format-Name -Type "Connection" -Prefix $Parm_Prefix -Suffix "_Namespace" -Value "$($_.Name)"
-
-            $armObj = Add-ArmParameter -InputObject $armObj -Name "$nsPreSuf" `
-                -Type "string" `
-                -Value "" `
-                -Description "The name of the servicebus namespace. ($($_.Name))"
-
-            $sbObj.properties.parameterValueSet.values.namespaceEndpoint.value = $sbObj.properties.parameterValueSet.values.namespaceEndpoint.value.Replace("'##NAMESPACE##'", "parameters('$nsPreSuf')")
-
-            $armObj.resources += $sbObj
+            $conObj.Name = $_.Value.connectionName
+            $conObj.properties.displayName = $_.Value.connectionName
+            $conObj.properties.api.id = $conObj.properties.api.id.Replace("##TYPE##", $Matches[1])
+            
+            $armObj.resources += $conObj
 
             if ($null -eq $armObj.resources[0].dependsOn) {
                 $armObj.resources[0] | Add-Member -MemberType NoteProperty -Name "dependsOn" -Value @()
