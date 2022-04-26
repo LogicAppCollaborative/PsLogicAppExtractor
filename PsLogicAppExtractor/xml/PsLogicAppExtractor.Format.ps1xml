@@ -94,6 +94,12 @@
 								<PropertyName>DisplayName</PropertyName>
 							</ListItem>
 							<ListItem>
+								<PropertyName>AuthenticatedUser</PropertyName>
+							</ListItem>
+							<ListItem>
+								<PropertyName>ParameterValues</PropertyName>
+							</ListItem>
+							<ListItem>
 								<PropertyName>OverallStatus</PropertyName>
 							</ListItem>
 							<ListItem>

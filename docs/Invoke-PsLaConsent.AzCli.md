@@ -5,7 +5,7 @@ online version:
 schema: 2.0.0
 ---
 
-# Invoke-PsLaConsent.AzAccount
+# Invoke-PsLaConsent.AzCli
 
 ## SYNOPSIS
 Start the consent flow for an ApiConnection object
@@ -13,7 +13,7 @@ Start the consent flow for an ApiConnection object
 ## SYNTAX
 
 ```
-Invoke-PsLaConsent.AzAccount [-Id] <String> [<CommonParameters>]
+Invoke-PsLaConsent.AzCli [-Id] <String> [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -21,13 +21,13 @@ Some of the ApiConnection objects needs an user account to consent / authenticat
 
 This cmdlet helps starting, running and completing the consent flow an ApiConnection object
 
-Uses the current connected Az.Account session to pull the details from the azure portal
+Uses the current connected az cli session to pull the details from the azure portal
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-Invoke-PsLaConsent.AzAccount -Id "/subscriptions/b466443d-6eac-4513-a7f0-3579502929f00/providers/Microsoft.Web/locations/westeurope/managedApis/servicebus"
+Invoke-PsLaConsent.AzCli -Id "/subscriptions/b466443d-6eac-4513-a7f0-3579502929f00/providers/Microsoft.Web/locations/westeurope/managedApis/servicebus"
 ```
 
 This will start the consent flow for the ApiConnection object
@@ -36,12 +36,12 @@ It will confirm the consent directly to the ApiConnection object
 
 ### EXAMPLE 2
 ```
-Get-PsLaManagedApiConnection.AzAccount -ResourceGroup "TestRg" -FilterError Unauthenticated | Invoke-PsLaConsent.AzAccount
+Get-PsLaManagedApiConnection.AzCli -ResourceGroup "TestRg" -FilterError Unauthenticated | Invoke-PsLaConsent.AzCli
 ```
 
 This will fetch all ApiConnection objects from the "TestRg" Resource Group
 Filters the list to show only the ones with error of the type Unauthenticated
-Will pipe the objects to Invoke-PsLaConsent.AzAccount
+Will pipe the objects to Invoke-PsLaConsent.AzCli
 This will start the consent flow for the ApiConnection object
 It will prompt the user to fill in an account / credential
 It will confirm the consent directly to the ApiConnection object
@@ -49,7 +49,7 @@ It will confirm the consent directly to the ApiConnection object
 ## PARAMETERS
 
 ### -Id
-The (resource) id of the ApiConnection object that you want to work against, your current Az.Account powershell session either needs to be "connected" to the subscription/resource group or at least have permissions to work against the subscription/resource group, where the ApiConnection object is located
+The (resource) id of the ApiConnection object that you want to work against, your current az cli session either needs to be "connected" to the subscription/resource group or at least have permissions to work against the subscription/resource group, where the ApiConnection object is located
 
 ```yaml
 Type: String

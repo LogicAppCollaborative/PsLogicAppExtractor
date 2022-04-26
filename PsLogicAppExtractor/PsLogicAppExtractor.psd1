@@ -43,12 +43,14 @@
 	FunctionsToExport = @(
 		'Get-PsLaArmParameter'
 		, 'Get-PsLaManagedApiConnection.AzAccount'
+		, 'Get-PsLaManagedApiConnection.AzCli'
 		, 'Get-PsLaTask'
 		, 'Get-PsLaTaskByFile'
 		, 'Get-PsLaTaskByPath'
 		, 'Get-PsLaTaskOrderByFile'
 		, 'Get-PsLaTaskTemplate'
 		, 'Invoke-PsLaConsent.AzAccount'
+		, 'Invoke-PsLaConsent.AzCli'
 		, 'Invoke-PsLaExtractor'
 		
 		, 'New-PsLaRunbookByPath'

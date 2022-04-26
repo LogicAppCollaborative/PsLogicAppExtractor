@@ -11,7 +11,7 @@
     .PARAMETER SubscriptionId
         Id of the subscription that you want to work against
         
-        At runtime / execution of Invoke-PsLaExtractor - your current powershell / az cli session either needs to "connected" to the subscription or at least have permissions to work against the subscription
+        At runtime / execution of Invoke-PsLaExtractor - your current powershell / az cli session either needs to be "connected" to the subscription or at least have permissions to work against the subscription
         
         Useful when you know upfront what you want to work against, as you don't need to pass the parameter into the Invoke-PsLaExtractor
         
