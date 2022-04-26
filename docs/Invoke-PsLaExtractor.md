@@ -106,7 +106,7 @@ Accept wildcard characters: False
 ```
 
 ### -SubscriptionId
-Id of the subscription that you want to work against, your current powershell / az cli session either needs to "connected" to the subscription or at least have permissions to work against the subscription
+Id of the subscription that you want to work against, your current powershell / az cli session either needs to be "connected" to the subscription or at least have permissions to work against the subscription
 
 ```yaml
 Type: String
