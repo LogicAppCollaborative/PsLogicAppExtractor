@@ -14,7 +14,7 @@
         Path to the PSake valid runbook file that you want to have executed while exporting, sanitizing and converting a LogicApp into a deployable ARM template
         
     .PARAMETER SubscriptionId
-        Id of the subscription that you want to work against, your current powershell / az cli session either needs to "connected" to the subscription or at least have permissions to work against the subscription
+        Id of the subscription that you want to work against, your current powershell / az cli session either needs to be "connected" to the subscription or at least have permissions to work against the subscription
         
     .PARAMETER ResourceGroup
         Name of the resource group that you want to work against, your current powershell / az cli session needs to have permissions to work against the resource group

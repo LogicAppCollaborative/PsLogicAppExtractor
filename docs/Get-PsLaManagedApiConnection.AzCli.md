@@ -5,7 +5,7 @@ online version:
 schema: 2.0.0
 ---
 
-# Get-PsLaManagedApiConnection.AzAccount
+# Get-PsLaManagedApiConnection.AzCli
 
 ## SYNOPSIS
 Get ManagedApi connection objects
@@ -14,13 +14,13 @@ Get ManagedApi connection objects
 
 ### ResourceGroup (Default)
 ```
-Get-PsLaManagedApiConnection.AzAccount -ResourceGroup <String> [-FilterError <String>]
- [-IncludeStatus <String>] [-Detailed] [<CommonParameters>]
+Get-PsLaManagedApiConnection.AzCli -ResourceGroup <String> [-FilterError <String>] [-IncludeStatus <String>]
+ [-Detailed] [<CommonParameters>]
 ```
 
 ### Subscription
 ```
-Get-PsLaManagedApiConnection.AzAccount -SubscriptionId <String> -ResourceGroup <String> [-FilterError <String>]
+Get-PsLaManagedApiConnection.AzCli -SubscriptionId <String> -ResourceGroup <String> [-FilterError <String>]
  [-IncludeStatus <String>] [-Detailed] [<CommonParameters>]
 ```
 
@@ -29,13 +29,13 @@ Get the ApiConnection objects from a resource group
 
 Helps to identity ApiConnection objects that are failed or missing an consent / authentication
 
-Uses the current connected Az.Account session to pull the details from the azure portal
+Uses the current connected az cli session to pull the details from the azure portal
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-Get-PsLaManagedApiConnection.AzAccount -ResourceGroup "TestRg"
+Get-PsLaManagedApiConnection.AzCli -ResourceGroup "TestRg"
 ```
 
 This will fetch all ApiConnection objects from the "TestRg" Resource Group
@@ -54,7 +54,7 @@ Connected     /subscriptions/467c… {"status": "Connect…
 
 ### EXAMPLE 2
 ```
-Get-PsLaManagedApiConnection.AzAccount -ResourceGroup "TestRg" -Detailed
+Get-PsLaManagedApiConnection.AzCli -ResourceGroup "TestRg" -Detailed
 ```
 
 This will fetch all ApiConnection objects from the "TestRg" Resource Group
@@ -126,7 +126,7 @@ StatusDetails     : {
 
 ### EXAMPLE 3
 ```
-Get-PsLaManagedApiConnection.AzAccount -ResourceGroup "TestRg" -IncludeStatus Error -Detailed
+Get-PsLaManagedApiConnection.AzCli -ResourceGroup "TestRg" -IncludeStatus Error -Detailed
 ```
 
 This will fetch all ApiConnection objects from the "TestRg" Resource Group
@@ -177,13 +177,13 @@ StatusDetails     : {
 
 ### EXAMPLE 4
 ```
-Get-PsLaManagedApiConnection.AzAccount -ResourceGroup "TestRg" -FilterError Unauthenticated -Detailed
+Get-PsLaManagedApiConnection.AzCli -ResourceGroup "TestRg" -FilterError Unauthenticated -Detailed
 ```
 
 This will fetch all ApiConnection objects from the "TestRg" Resource Group
 Filters the list to show only the ones with error of the type Unauthenticated
 
-This is useful in combination with the Invoke-PsLaConsent.AzAccount cmdlet
+This is useful in combination with the Invoke-PsLaConsent.AzCli cmdlet
 
 Output example:
 
@@ -205,7 +205,7 @@ StatusDetails     : {
 
 ### EXAMPLE 5
 ```
-Get-PsLaManagedApiConnection.AzAccount -ResourceGroup "TestRg" -FilterError Unauthorized -Detailed
+Get-PsLaManagedApiConnection.AzCli -ResourceGroup "TestRg" -FilterError Unauthorized -Detailed
 ```
 
 This will fetch all ApiConnection objects from the "TestRg" Resource Group
@@ -240,19 +240,19 @@ https://login.windows.net/error?code=700082\"}"
 
 ### EXAMPLE 6
 ```
-Get-PsLaManagedApiConnection.AzAccount -ResourceGroup "TestRg" -FilterError Unauthenticated | Invoke-PsLaConsent.AzAccount
+Get-PsLaManagedApiConnection.AzCli -ResourceGroup "TestRg" -FilterError Unauthenticated | Invoke-PsLaConsent.AzCli
 ```
 
 This will fetch all ApiConnection objects from the "TestRg" Resource Group
 Filters the list to show only the ones with error of the type Unauthenticated
-Will pipe the objects to Invoke-PsLaConsent.AzAccount, which will prompt you to enter a valid user account / credentials
+Will pipe the objects to Invoke-PsLaConsent.AzCli, which will prompt you to enter a valid user account / credentials
 
-Note: Read more about Invoke-PsLaConsent.AzAccount before running this command, to ensure you understand what it does
+Note: Read more about Invoke-PsLaConsent.AzCli before running this command, to ensure you understand what it does
 
 ## PARAMETERS
 
 ### -SubscriptionId
-Id of the subscription that you want to work against, your current Az.Account powershell session either needs to be "connected" to the subscription or at least have permissions to work against the subscription
+Id of the subscription that you want to work against, your current az cli session either needs to be "connected" to the subscription or at least have permissions to work against the subscription
 
 ```yaml
 Type: String
@@ -267,7 +267,7 @@ Accept wildcard characters: False
 ```
 
 ### -ResourceGroup
-Name of the resource group that you want to work against, your current powershell session needs to have permissions to work against the resource group
+Name of the resource group that you want to work against, your current az cli session needs to have permissions to work against the resource group
 
 ```yaml
 Type: String

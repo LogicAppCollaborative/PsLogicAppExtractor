@@ -8,12 +8,24 @@
         
         This cmdlet helps starting, running and completing the consent flow an ApiConnection object
         
+        Uses the current connected Az.Account session to pull the details from the azure portal
+        
     .PARAMETER Id
-        The (resource) id of the ApiConnection object that you want to work against
+        The (resource) id of the ApiConnection object that you want to work against, your current Az.Account powershell session either needs to be "connected" to the subscription/resource group or at least have permissions to work against the subscription/resource group, where the ApiConnection object is located
         
     .EXAMPLE
         PS C:\> Invoke-PsLaConsent.AzAccount -Id "/subscriptions/b466443d-6eac-4513-a7f0-3579502929f00/providers/Microsoft.Web/locations/westeurope/managedApis/servicebus"
         
+        This will start the consent flow for the ApiConnection object
+        It will prompt the user to fill in an account / credential
+        It will confirm the consent directly to the ApiConnection object
+        
+    .EXAMPLE
+        PS C:\> Get-PsLaManagedApiConnection.AzAccount -ResourceGroup "TestRg" -FilterError Unauthenticated | Invoke-PsLaConsent.AzAccount
+        
+        This will fetch all ApiConnection objects from the "TestRg" Resource Group
+        Filters the list to show only the ones with error of the type Unauthenticated
+        Will pipe the objects to Invoke-PsLaConsent.AzAccount
         This will start the consent flow for the ApiConnection object
         It will prompt the user to fill in an account / credential
         It will confirm the consent directly to the ApiConnection object
