@@ -48,7 +48,7 @@ $parm = @{
 }
 
 Task -Name "Export-LogicApp.AzAccount" @parm -Action {
-    Set-TaskWorkDirectory
+    Set-TaskWorkDirectory -FileName "$Name.json"
     
     $params = @{
         ResourceGroupName    = "$ResourceGroup"
@@ -82,6 +82,8 @@ $parm = @{
 
 Task -Name "Export-LogicApp.AzCli" @parm -Action {
     Set-TaskWorkDirectory
+    
+    "$Name.json" | Out-File -FilePath "C:\Temp\_.txt"
     
     if ($SubscriptionId -and $ResourceGroup) {
         $lg = az rest --url "https://management.azure.com/subscriptions/$SubscriptionId/resourceGroups/$ResourceGroup/providers/Microsoft.Logic/workflows/$Name" --url-parameters api-version=2019-05-01
@@ -291,7 +293,7 @@ Task -Name "Set-Arm.Connections.ManagedApis.Generic.AsArmObject" @parm -Action {
 $parm = @{
     Description = @"
 Loops all `$connections children
--Sets the id value to: [format('/subscriptions/{0}/providers/Microsoft.Web/locations/{1}/managedApis/XYZ',subscription().subscriptionId,parameters('logicAppLocation'))]
+-Sets the id value to: [format('/subscriptions/{0}/providers/Microsoft.Web/locations/{1}/managedApis/XYZ', subscription().subscriptionId, parameters('logicAppLocation'))]
 Creates the Arm parameter logicAppLocation if it doesn't exists
 "@
     Alias       = "Arm.Set-Arm.Connections.ManagedApis.IdFormatted"
@@ -308,7 +310,7 @@ Task -Name "Set-Arm.Connections.ManagedApis.IdFormatted" @parm -Action {
         if ($_.Value.id -like "*managedApis*") {
             $found = $true
             $conType = $_.Value.id.Split("/") | Select-Object -Last 1
-            $_.Value.id = "[format('/subscriptions/{0}/providers/Microsoft.Web/locations/{1}/managedApis/$conType',subscription().subscriptionId,parameters('logicAppLocation'))]"
+            $_.Value.id = "[format('/subscriptions/{0}/providers/Microsoft.Web/locations/{1}/managedApis/$conType', subscription().subscriptionId, parameters('logicAppLocation'))]"
         }
     }
 
@@ -474,6 +476,182 @@ Task -Name "Set-Arm.Connections.ManagedApis.Servicebus.ManagedIdentity.AsArmObje
     Out-TaskFileArm -InputObject $armObj
 }
 
+#Original file: Set-Arm.FunctionApp.IdFormatted.Advanced.AsParameter.task.ps1
+$parm = @{
+    Description = @"
+"@
+    Alias       = "Arm.Set-Arm.FunctionApp.IdFormatted.Advanced.AsParameter"
+}
+
+Task -Name "Set-Arm.FunctionApp.IdFormatted.Advanced.AsParameter" @parm -Action {
+    Set-TaskWorkDirectory
+
+    $armObj = Get-TaskWorkObject
+
+    $counter = 0
+    $actions = $armObj.resources[0].properties.definition.actions.PsObject.Properties | ForEach-Object { Get-ActionsByType -InputObject $_ -Type "Function" }
+
+
+    foreach ($item in $actions) {
+        if (-not ($item.Value.inputs.function.id -like "*``[*``]*")) {
+            if ($item.Value.inputs.function.id -match "/subscriptions/.*/resourceGroups/(.*)/providers/Microsoft.Web/sites/(.*)/functions/(.*)") {
+                $counter += 1
+                $parmName = "functionApp$($counter.ToString().PadLeft(3, "0"))"
+                $parmGroup = "functionApp$($counter.ToString().PadLeft(3, "0"))ResourceGroup"
+
+                $functionGroup = $Matches[1]
+                $functionName = $Matches[2]
+                
+                $item.Value.inputs.function.id = "[format('/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Web/sites/{2}/functions/$($Matches[3])', subscription().subscriptionId, parameters('$parmGroup'), parameters('$parmName'))]"
+
+                $armObj = Add-ArmParameter -InputObject $armObj -Name $parmName `
+                    -Type "string" `
+                    -Value "$functionName" `
+                    -Description "The name / id of the FunctionApp that is referenced by the Logic App."
+
+                $armObj = Add-ArmParameter -InputObject $armObj -Name $parmGroup `
+                    -Type "string" `
+                    -Value $functionGroup `
+                    -Description "The resource group where the FunctionApp that is referenced by the Logic App."
+            }
+        }
+    }
+
+    Out-TaskFileArm -InputObject $armObj
+}
+
+#Original file: Set-Arm.FunctionApp.IdFormatted.Advanced.WithMethod.AsParameter.task.ps1
+$parm = @{
+    Description = @"
+"@
+    Alias       = "Arm.Set-Arm.FunctionApp.IdFormatted.Advanced.WithMethod.AsParameter"
+}
+
+Task -Name "Set-Arm.FunctionApp.IdFormatted.Advanced.WithMethod.AsParameter" @parm -Action {
+    Set-TaskWorkDirectory
+
+    $armObj = Get-TaskWorkObject
+
+    $counter = 0
+    $actions = $armObj.resources[0].properties.definition.actions.PsObject.Properties | ForEach-Object { Get-ActionsByType -InputObject $_ -Type "Function" }
+
+
+    foreach ($item in $actions) {
+        if (-not ($item.Value.inputs.function.id -like "*``[*``]*")) {
+            if ($item.Value.inputs.function.id -match "/subscriptions/.*/resourceGroups/(.*)/providers/Microsoft.Web/sites/(.*)/functions/(.*)") {
+                $counter += 1
+                $parmName = "functionApp$($counter.ToString().PadLeft(3, "0"))"
+                $parmGroup = "functionApp$($counter.ToString().PadLeft(3, "0"))ResourceGroup"
+                $parmMethod = "functionApp$($counter.ToString().PadLeft(3, "0"))Method"
+
+                $functionGroup = $Matches[1]
+                $functionName = $Matches[2]
+                $functionMethod = $Matches[3]
+
+                $item.Value.inputs.function.id = "[format('/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Web/sites/{2}/functions/{3})', subscription().subscriptionId, parameters('$parmGroup'), parameters('$parmName'), parameters('$parmMethod'))]"
+
+                $armObj = Add-ArmParameter -InputObject $armObj -Name $parmName `
+                    -Type "string" `
+                    -Value "$functionName" `
+                    -Description "The name / id of the FunctionApp that is referenced by the Logic App."
+
+                $armObj = Add-ArmParameter -InputObject $armObj -Name $parmGroup `
+                    -Type "string" `
+                    -Value $functionGroup `
+                    -Description "The resource group where the FunctionApp that is referenced by the Logic App."
+
+                $armObj = Add-ArmParameter -InputObject $armObj -Name $parmMethod `
+                    -Type "string" `
+                    -Value "$functionMethod" `
+                    -Description "The name the method exposed by the FunctionApp that is referenced by the Logic App."
+            }
+        }
+    }
+
+    Out-TaskFileArm -InputObject $armObj
+}
+
+#Original file: Set-Arm.FunctionApp.IdFormatted.Simple.AsParameter.task.ps1
+$parm = @{
+    Description = @"
+"@
+    Alias       = "Arm.Set-Arm.FunctionApp.IdFormatted.Simple.AsParameter"
+}
+
+Task -Name "Set-Arm.FunctionApp.IdFormatted.Simple.AsParameter" @parm -Action {
+    Set-TaskWorkDirectory
+
+    $armObj = Get-TaskWorkObject
+
+    $counter = 0
+    $actions = $armObj.resources[0].properties.definition.actions.PsObject.Properties | ForEach-Object { Get-ActionsByType -InputObject $_ -Type "Function" }
+
+
+    foreach ($item in $actions) {
+        if (-not ($item.Value.inputs.function.id -like "*``[*``]*")) {
+            if ($item.Value.inputs.function.id -match "/sites/(.*)/functions/(.*)") {
+                $counter += 1
+                $parmName = "functionApp$($counter.ToString().PadLeft(3, "0"))"
+
+                $functionName = $Matches[1]
+                $item.Value.inputs.function.id = "[format('/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Web/sites/{2}/functions/$($Matches[2])', subscription().subscriptionId, resourceGroup().name, parameters('$parmName'))]"
+
+                $armObj = Add-ArmParameter -InputObject $armObj -Name $parmName `
+                    -Type "string" `
+                    -Value "$functionName" `
+                    -Description "The name / id of the FunctionApp that is referenced by the Logic App."
+            }
+        }
+    }
+
+    Out-TaskFileArm -InputObject $armObj
+}
+
+#Original file: Set-Arm.FunctionApp.IdFormatted.Simple.WithMethod.AsParameter.task.ps1
+$parm = @{
+    Description = @"
+"@
+    Alias       = "Arm.Set-Arm.FunctionApp.IdFormatted.Simple.WithMethod.AsParameter"
+}
+
+Task -Name "Set-Arm.FunctionApp.IdFormatted.Simple.WithMethod.AsParameter" @parm -Action {
+    Set-TaskWorkDirectory
+
+    $armObj = Get-TaskWorkObject
+
+    $counter = 0
+    $actions = $armObj.resources[0].properties.definition.actions.PsObject.Properties | ForEach-Object { Get-ActionsByType -InputObject $_ -Type "Function" }
+
+
+    foreach ($item in $actions) {
+        if (-not ($item.Value.inputs.function.id -like "*``[*``]*")) {
+            if ($item.Value.inputs.function.id -match "/sites/(.*)/functions/(.*)") {
+                $counter += 1
+                $parmName = "functionApp$($counter.ToString().PadLeft(3, "0"))"
+                $parmMethod = "functionApp$($counter.ToString().PadLeft(3, "0"))Method"
+
+                $functionName = $Matches[1]
+                $functionMethod = $Matches[2]
+
+                $item.Value.inputs.function.id = "[format('/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Web/sites/{2}/functions/{3}}', subscription().subscriptionId, resourceGroup().name, parameters('$parmName'), parameters('$parmMethod'))]"
+
+                $armObj = Add-ArmParameter -InputObject $armObj -Name $parmName `
+                    -Type "string" `
+                    -Value "$functionName" `
+                    -Description "The name / id of the FunctionApp that is referenced by the Logic App."
+
+                $armObj = Add-ArmParameter -InputObject $armObj -Name $parmMethod `
+                    -Type "string" `
+                    -Value "$functionMethod" `
+                    -Description "The name the method exposed by the FunctionApp that is referenced by the Logic App."
+                    
+            }
+        }
+    }
+
+    Out-TaskFileArm -InputObject $armObj
+}
+
 #Original file: Set-Arm.IntegrationAccount.IdFormatted.Advanced.AsParameter.task.ps1
 $parm = @{
     Description = @"
@@ -481,7 +659,7 @@ Creates an Arm parameter: integrationAccount
 -Set the default value to the original name, extracted from integrationAccount.Id
 Creates an Arm parameter: integrationAccountResourceGroup
 -Set the default value to the original resource group, extracted from integrationAccount.Id
-Sets the value of the integrationAccount.Id: [format('/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Logic/integrationAccounts/{2}',subscription().subscriptionId,parameters('integrationAccountResourceGroup'),parameters('integrationAccount'))]
+Sets the value of the integrationAccount.Id: [format('/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Logic/integrationAccounts/{2}', subscription().subscriptionId, parameters('integrationAccountResourceGroup'), parameters('integrationAccount'))]
 "@
     Alias       = "Arm.Set-Arm.IntegrationAccount.IdFormatted.Advanced.AsParameter"
 }
@@ -495,7 +673,7 @@ Task -Name "Set-Arm.IntegrationAccount.IdFormatted.Advanced.AsParameter" @parm -
         if ($armObj.resources[0].properties.integrationAccount.id -match "resourceGroups/(.*)/providers") {
             
             $integrationAccountName = $armObj.resources[0].properties.integrationAccount.id.Split("/") | Select-Object -Last 1
-            $armObj.resources[0].properties.integrationAccount.id = "[format('/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Logic/integrationAccounts/{2}',subscription().subscriptionId,parameters('integrationAccountResourceGroup'),parameters('integrationAccount'))]"
+            $armObj.resources[0].properties.integrationAccount.id = "[format('/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Logic/integrationAccounts/{2}', subscription().subscriptionId, parameters('integrationAccountResourceGroup'), parameters('integrationAccount'))]"
 
             $armObj.resources[0].properties.integrationAccount.PsObject.Properties.Remove("name")
             $armObj.resources[0].properties.integrationAccount.PsObject.Properties.Remove("type")
@@ -523,7 +701,7 @@ Creates an Arm variable: integrationAccount
 -Set the value to the original name, extracted from integrationAccount.Id
 Creates an Arm variable: integrationAccountResourceGroup
 -Set the value to the original resource group, extracted from integrationAccount.Id
-Sets the value of the integrationAccount.Id: [format('/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Logic/integrationAccounts/{2}',subscription().subscriptionId,variables('integrationAccountResourceGroup'),variables('integrationAccount'))]
+Sets the value of the integrationAccount.Id: [format('/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Logic/integrationAccounts/{2}', subscription().subscriptionId,variables('integrationAccountResourceGroup'),variables('integrationAccount'))]
 "@
     Alias       = "Arm.Set-Arm.IntegrationAccount.IdFormatted.Advanced.AsVariable"
 }
@@ -538,7 +716,7 @@ Task -Name "Set-Arm.IntegrationAccount.IdFormatted.Advanced.AsVariable" @parm -A
 
             $integrationAccountName = $armObj.resources[0].properties.integrationAccount.id.Split("/") | Select-Object -Last 1
 
-            $armObj.resources[0].properties.integrationAccount.id = "[format('/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Logic/integrationAccounts/{2}',subscription().subscriptionId,variables('integrationAccountResourceGroup'),variables('integrationAccount'))]"
+            $armObj.resources[0].properties.integrationAccount.id = "[format('/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Logic/integrationAccounts/{2}', subscription().subscriptionId,variables('integrationAccountResourceGroup'),variables('integrationAccount'))]"
 
             $armObj.resources[0].properties.integrationAccount.PsObject.Properties.Remove("name")
             $armObj.resources[0].properties.integrationAccount.PsObject.Properties.Remove("type")
@@ -556,7 +734,7 @@ $parm = @{
     Description = @"
 Creates an Arm parameter: integrationAccount
 -Set the default value to the original name, extracted from integrationAccount.Id
-Sets the value of the integrationAccount.Id: [format('/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Logic/integrationAccounts/{2}',subscription().subscriptionId,resourceGroup().name,parameters('integrationAccount'))]
+Sets the value of the integrationAccount.Id: [format('/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Logic/integrationAccounts/{2}', subscription().subscriptionId, resourceGroup().name, parameters('integrationAccount'))]
 "@
     Alias       = "Arm.Set-Arm.IntegrationAccount.IdFormatted.Simple.AsParameter"
 }
@@ -568,7 +746,7 @@ Task -Name "Set-Arm.IntegrationAccount.IdFormatted.Simple.AsParameter" @parm -Ac
 
     if ($armObj.resources[0].properties.integrationAccount.id) {
         $integrationAccountName = $armObj.resources[0].properties.integrationAccount.id.Split("/") | Select-Object -Last 1
-        $armObj.resources[0].properties.integrationAccount.id = "[format('/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Logic/integrationAccounts/{2}',subscription().subscriptionId,resourceGroup().name,parameters('integrationAccount'))]"
+        $armObj.resources[0].properties.integrationAccount.id = "[format('/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Logic/integrationAccounts/{2}', subscription().subscriptionId, resourceGroup().name, parameters('integrationAccount'))]"
 
         $armObj.resources[0].properties.integrationAccount.PsObject.Properties.Remove("name")
         $armObj.resources[0].properties.integrationAccount.PsObject.Properties.Remove("type")
@@ -587,7 +765,7 @@ $parm = @{
     Description = @"
 Creates an Arm variable: integrationAccount
 -Set the value to the original name, extracted from integrationAccount.Id
-Sets the value of the integrationAccount.Id: [format('/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Logic/integrationAccounts/{2}',subscription().subscriptionId,resourceGroup().name,variables('integrationAccount'))]
+Sets the value of the integrationAccount.Id: [format('/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Logic/integrationAccounts/{2}', subscription().subscriptionId, resourceGroup().name,variables('integrationAccount'))]
 "@
     Alias       = "Arm.Set-Arm.IntegrationAccount.IdFormatted.Simple.AsVariable"
 }
@@ -599,7 +777,7 @@ Task -Name "Set-Arm.IntegrationAccount.IdFormatted.Simple.AsVariable" @parm -Act
 
     if ($armObj.resources[0].properties.integrationAccount.id) {
         $integrationAccountName = $armObj.resources[0].properties.integrationAccount.id.Split("/") | Select-Object -Last 1
-        $armObj.resources[0].properties.integrationAccount.id = "[format('/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Logic/integrationAccounts/{2}',subscription().subscriptionId,resourceGroup().name,variables('integrationAccount'))]"
+        $armObj.resources[0].properties.integrationAccount.id = "[format('/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Logic/integrationAccounts/{2}', subscription().subscriptionId, resourceGroup().name,variables('integrationAccount'))]"
 
         $armObj.resources[0].properties.integrationAccount.PsObject.Properties.Remove("name")
         $armObj.resources[0].properties.integrationAccount.PsObject.Properties.Remove("type")

@@ -89,7 +89,7 @@
         
 #>
 function Invoke-PsLaExtractor {
-    [CmdletBinding(DefaultParameterSetName = "NameOnly")]
+    [CmdletBinding(DefaultParameterSetName = "PreppedFile")]
     param (
         [Alias('File')]
         [Parameter(Mandatory = $true, ParameterSetName = "NameOnly")]
@@ -131,6 +131,7 @@ function Invoke-PsLaExtractor {
     Set-PSFConfig -FullName PsLogicAppExtractor.Execution.TaskInputNext -Value ""
     Set-PSFConfig -FullName PsLogicAppExtractor.Execution.TaskOutputFile -Value ""
     Set-PSFConfig -FullName PsLogicAppExtractor.Execution.TaskPath -Value ""
+    Set-PSFConfig -FullName PsLogicAppExtractor.Execution.Name -Value ""
 
     #Make sure the work path is created and available
     New-Item -Path $WorkPath -ItemType Directory -Force -ErrorAction Ignore > $null
@@ -143,15 +144,22 @@ function Invoke-PsLaExtractor {
         $parms.taskList = $Task
     }
     
+    Set-PSFConfig -FullName PsLogicAppExtractor.Execution.WorkPath -Value $WorkPath
+
     $props = @{}
     if ($SubscriptionId) { $props.SubscriptionId = $SubscriptionId }
     if ($ResourceGroup) { $props.ResourceGroup = $ResourceGroup }
     if ($Name) {
         $props.Name = $Name
+        Set-PSFConfig -FullName PsLogicAppExtractor.Execution.Name -Value $Name
     }
 
-    Set-PSFConfig -FullName PsLogicAppExtractor.Execution.WorkPath -Value $WorkPath
-
+    if ($PsCmdlet.ParameterSetName -eq "PreppedFile") {
+        if ((Get-Content -Path $Runbook -raw) -match '\$Name\W*=\W*"(.*)"') {
+            Set-PSFConfig -FullName PsLogicAppExtractor.Execution.Name -Value $Matches[1]
+        }
+    }
+    
     $res = Invoke-psake @parms -properties $props -ErrorVariable errorsFound
     
     if ($errorsFound) {
