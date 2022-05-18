@@ -51,7 +51,7 @@ function Out-TaskFile {
     )
     
     if ($InputObject) {
-        $Content = $InputObject | ConvertTo-Json -Depth 20
+        $Content = $InputObject | ConvertTo-Json -Depth 100
     }
 
     $encoding = New-Object System.Text.UTF8Encoding($true)
