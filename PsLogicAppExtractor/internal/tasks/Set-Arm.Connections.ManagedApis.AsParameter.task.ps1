@@ -1,6 +1,6 @@
 ﻿$parm = @{
     Description = @"
-Depricated. Use Set-Arm.Connections.ManagedApis.Id.AsParameter.task insted.
+Depricated. Use Set-Arm.Connections.ManagedApis.Id.AsParameter.task instead.
 
 Loops all `$connections children
 -Creates an Arm parameter, with prefix & suffix

@@ -8,7 +8,7 @@ schema: 2.0.0
 # Update-PsLaArmTemplate
 
 ## SYNOPSIS
-Short description
+Update ARM template from another ARM template.
 
 ## SYNTAX
 
@@ -18,19 +18,53 @@ Update-PsLaArmTemplate [-Source] <String> [-Destination] <String> [-SkipParamete
 ```
 
 ## DESCRIPTION
-Long description
+Update an ARM template, with the content of another ARM template.
+
+You can update the entire ARM template, or just a part of it.
+
+Supports the following options:
+* Full
+* SkipResources
+* SkipParameters
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-An example
+Update-PsLaArmTemplate -Source C:\Temp\Source.json -Destination C:\Temp\Destination.json
 ```
+
+This will update the ARM template in C:\Temp\Destination.json from the ARM template in C:\Temp\Source.json.
+It will overwrite the entire ARM template, but will not remove the source ARM template.
+
+### EXAMPLE 2
+```
+Update-PsLaArmTemplate -Source C:\Temp\Source.json -Destination C:\Temp\Destination.json -SkipParameters
+```
+
+This will update the ARM template in C:\Temp\Destination.json from the ARM template in C:\Temp\Source.json.
+It will overwrite the entire ARM template, but leave the parameters alone.
+
+### EXAMPLE 3
+```
+Update-PsLaArmTemplate -Source C:\Temp\Source.json -Destination C:\Temp\Destination.json -SkipResources
+```
+
+This will update the ARM template in C:\Temp\Destination.json from the ARM template in C:\Temp\Source.json.
+It will overwrite the entire ARM template, but leave the resources alone.
+
+### EXAMPLE 4
+```
+Update-PsLaArmTemplate -Source C:\Temp\Source.json -Destination C:\Temp\Destination.json -RemoveSource
+```
+
+This will update the ARM template in C:\Temp\Destination.json from the ARM template in C:\Temp\Source.json.
+It will overwrite the entire ARM template, and remove the source ARM template.
 
 ## PARAMETERS
 
 ### -Source
-Parameter description
+The path to the source ARM template to be used as the changes you want to apply.
 
 ```yaml
 Type: String
@@ -45,7 +79,7 @@ Accept wildcard characters: False
 ```
 
 ### -Destination
-Parameter description
+The path to the destination ARM template to be updated.
 
 ```yaml
 Type: String
@@ -60,7 +94,7 @@ Accept wildcard characters: False
 ```
 
 ### -SkipParameters
-Parameter description
+If true, then the parameters will not be updated.
 
 ```yaml
 Type: SwitchParameter
@@ -75,7 +109,7 @@ Accept wildcard characters: False
 ```
 
 ### -SkipResources
-Parameter description
+If true, then the resources will not be updated.
 
 ```yaml
 Type: SwitchParameter
@@ -90,7 +124,7 @@ Accept wildcard characters: False
 ```
 
 ### -RemoveSource
-Parameter description
+If true, then the source ARM template will be removed after it has been used.
 
 ```yaml
 Type: SwitchParameter
@@ -112,6 +146,6 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## OUTPUTS
 
 ## NOTES
-General notes
+Author: Mötz Jensen (@Splaxi)
 
 ## RELATED LINKS

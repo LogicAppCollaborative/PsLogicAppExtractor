@@ -1,0 +1,88 @@
+﻿---
+external help file: PsLogicAppExtractor-help.xml
+Module Name: PsLogicAppExtractor
+online version:
+schema: 2.0.0
+---
+
+# Update-PsLaArmParameterFile
+
+## SYNOPSIS
+Update parameter file from another file.
+
+## SYNTAX
+
+```
+Update-PsLaArmParameterFile [-Source] <String> [-Destination] <String> [<CommonParameters>]
+```
+
+## DESCRIPTION
+Update parameter file values from another file.
+
+The source file can be an ARM template file or a parameter file.
+
+## EXAMPLES
+
+### EXAMPLE 1
+```
+Update-PsLaArmParameterFile -Source C:\Temp\Source.json -Destination C:\Temp\Destination.json
+```
+
+This will update the parameter file C:\Temp\Destination.json with the values from the parameter file C:\Temp\Source.json.
+It will only update the parameter values that are present in the destination file.
+
+This example illustrates how to update a parameter file from an ARM template file.
+
+### EXAMPLE 2
+```
+Update-PsLaArmParameterFile -Source C:\Temp\Source.parameters.json -Destination C:\Temp\Destination.json
+```
+
+This will update the parameter file C:\Temp\Destination.json with the values from the parameter file C:\Temp\Source.parameters.json.
+It will only update the parameter values that are present in the destination file.
+
+This example illustrates how to update a parameter file from a parameter file.
+
+## PARAMETERS
+
+### -Source
+The path to the source file to be used as the changes you want to apply.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: True (ByValue)
+Accept wildcard characters: False
+```
+
+### -Destination
+The path to the destination parameter file to be updated.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 2
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### CommonParameters
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
+
+## INPUTS
+
+## OUTPUTS
+
+## NOTES
+Author: Mötz Jensen (@Splaxi)
+
+## RELATED LINKS
