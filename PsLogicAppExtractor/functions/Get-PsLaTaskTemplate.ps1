@@ -35,9 +35,11 @@
 function Get-PsLaTaskTemplate {
     [CmdletBinding()]
     param (
+        [parameter(Mandatory = $true)]
         [ValidateSet('Arm', 'Converter', 'Raw')]
         [string] $Category,
 
+        [PsfValidateScript('PSFramework.Validate.FSPath.Folder', ErrorString = 'PSFramework.Validate.FSPath.Folder')]
         [string] $OutputPath
     )
 

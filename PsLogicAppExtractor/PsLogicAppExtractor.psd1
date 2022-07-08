@@ -37,7 +37,7 @@
 	# TypesToProcess = @('xml\PsLogicAppExtractor.Types.ps1xml')
 	
 	# Format files (.ps1xml) to be loaded when importing this module
-	FormatsToProcess = @('xml\PsLogicAppExtractor.Format.ps1xml')
+	FormatsToProcess  = @('xml\PsLogicAppExtractor.Format.ps1xml')
 	
 	# Functions to export from this module
 	FunctionsToExport = @(
@@ -74,6 +74,8 @@
 		, 'Remove-LogicAppParm'
 		, 'Set-TaskWorkDirectory'
 		# , 'Set-TaskWorkDirectoryPester'
+
+		, 'Update-PsLaArmTemplate'
 	)
 	
 	# Cmdlets to export from this module

@@ -63,7 +63,7 @@
     }
 
     It 'Should be "[format(...)]" in the resources[0].properties.parameters.$connections.value.servicebus.id property' {
-        $armObj.resources[0].properties.parameters.'$connections'.value.servicebus.id | Should -BeExactly "[format('/subscriptions/{0}/providers/Microsoft.Web/locations/{1}/managedApis/servicebus',subscription().subscriptionId,parameters('logicAppLocation'))]"
+        $armObj.resources[0].properties.parameters.'$connections'.value.servicebus.id | Should -BeExactly "[format('/subscriptions/{0}/providers/Microsoft.Web/locations/{1}/managedApis/servicebus', subscription().subscriptionId, parameters('logicAppLocation'))]"
     }
 
     It "Should have a parameters.logicAppLocation property" {

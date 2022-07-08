@@ -111,6 +111,7 @@ function New-PsLaRunbookByTask {
 
         [string] $Name,
 
+        [PsfValidateScript('PSFramework.Validate.FSPath.Folder', ErrorString = 'PSFramework.Validate.FSPath.Folder')]
         [string] $OutputPath,
 
         [switch] $IncludePrefixSuffix

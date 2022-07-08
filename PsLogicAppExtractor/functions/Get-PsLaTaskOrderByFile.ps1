@@ -59,28 +59,31 @@ function Get-PsLaTaskOrderByFile {
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseOutputTypeCorrectly', '')]
     [CmdletBinding()]
     param (
+        [parameter(Mandatory = $true, ValueFromPipeline = $true)]
+        [PsfValidateScript('PSFramework.Validate.FSPath.File', ErrorString = 'PSFramework.Validate.FSPath.File')]
         [Alias('Runbook')]
-        [Parameter(Mandatory = $true)]
         [string] $File,
 
         [switch] $Detailed
     )
     
-    # We are playing around with the internal / global psake object
-    $psake.context = New-Object System.Collections.Stack
+    process {
+        # We are playing around with the internal / global psake object
+        $psake.context = New-Object System.Collections.Stack
 
-    $default = Get-PSakeScriptTasks -Runbook $File | Where-Object Name -eq "Default" | Select-Object -First 1
+        $default = Get-PSakeScriptTasks -Runbook $File | Where-Object Name -eq "Default" | Select-Object -First 1
 
-    $tasks = @(Get-PSakeScriptTasks -Runbook $File | Where-Object Name -ne "Default" | Select-Object -Property @{Label = "Category"; Expression = { $_.Alias.Split(".")[0] } }, Name, Description)
+        $tasks = @(Get-PSakeScriptTasks -Runbook $File | Where-Object Name -ne "Default" | Select-Object -Property @{Label = "Category"; Expression = { $_.Alias.Split(".")[0] } }, Name, Description)
 
-    $res = @(for ($i = 0; $i -lt $default.DependsOn.Count; $i++) {
-            $tasks | Where-Object Name -eq $($default.DependsOn[$i]) | Select-Object -Property @{Label = "ExecutionOrder"; Expression = { $i + 1 } }, *
-        })
+        $res = @(for ($i = 0; $i -lt $default.DependsOn.Count; $i++) {
+                $tasks | Where-Object Name -eq $($default.DependsOn[$i]) | Select-Object -Property @{Label = "ExecutionOrder"; Expression = { $i + 1 } }, *
+            })
 
-    if ($Detailed) {
-        $res | Format-List
-    }
-    else {
-        $res
+        if ($Detailed) {
+            $res | Format-List
+        }
+        else {
+            $res
+        }
     }
 }

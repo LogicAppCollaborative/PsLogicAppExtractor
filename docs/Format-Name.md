@@ -23,6 +23,8 @@ If the passed prefix and suffix is not $null, then they are used
 
 Otherwise the cmdlet will default back to the configuration for each type, that is persisted in the configuration store
 
+Notes: It is considered as an internal function, and should not be used directly.
+
 ## EXAMPLES
 
 ### EXAMPLE 1
@@ -117,5 +119,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## NOTES
 Author: Mötz Jensen (@Splaxi)
+
+This is considered as an internal function, and should not be used directly.
 
 ## RELATED LINKS

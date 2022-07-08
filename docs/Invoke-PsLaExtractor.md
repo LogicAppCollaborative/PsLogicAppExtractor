@@ -12,10 +12,10 @@ Execute the extractor process of the LogicApp
 
 ## SYNTAX
 
-### NameOnly (Default)
+### PreppedFile (Default)
 ```
-Invoke-PsLaExtractor -Runbook <String> -Name <String> [-Task <String[]>] [-WorkPath <String>]
- [-OutputPath <String>] [-KeepFiles] [<CommonParameters>]
+Invoke-PsLaExtractor -Runbook <String> [-Task <String[]>] [-WorkPath <String>] [-OutputPath <String>]
+ [-KeepFiles] [<CommonParameters>]
 ```
 
 ### Subscription
@@ -30,10 +30,10 @@ Invoke-PsLaExtractor -Runbook <String> -ResourceGroup <String> -Name <String> [-
  [-WorkPath <String>] [-OutputPath <String>] [-KeepFiles] [<CommonParameters>]
 ```
 
-### PreppedFile
+### NameOnly
 ```
-Invoke-PsLaExtractor -Runbook <String> [-Task <String[]>] [-WorkPath <String>] [-OutputPath <String>]
- [-KeepFiles] [<CommonParameters>]
+Invoke-PsLaExtractor -Runbook <String> -Name <String> [-Task <String[]>] [-WorkPath <String>]
+ [-OutputPath <String>] [-KeepFiles] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -140,7 +140,7 @@ Name of the logic app, that you want to work against
 
 ```yaml
 Type: String
-Parameter Sets: NameOnly, Subscription, ResourceGroup
+Parameter Sets: Subscription, ResourceGroup, NameOnly
 Aliases:
 
 Required: True
