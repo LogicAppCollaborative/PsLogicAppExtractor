@@ -6,6 +6,8 @@
     .DESCRIPTION
         Gets the object from the "previous" task, based on the persisted path and loads it into memory using ConvertFrom-Json
         
+        Notes: It is considered as an internal function, and should not be used directly.
+        
     .PARAMETER Path
         Path to the file that you want the task to work against
         
@@ -18,6 +20,7 @@
         
         Author: Mötz Jensen (@Splaxi)
         
+        This is considered as an internal function, and should not be used directly.
 #>
 function Get-TaskWorkObject {
     [CmdletBinding()]
@@ -26,5 +29,5 @@ function Get-TaskWorkObject {
 
     )
 
-    Get-Content -Path $Path -Raw | ConvertFrom-Json
+    Get-Content -Path $Path -Raw | ConvertFrom-Json -Depth 100
 }

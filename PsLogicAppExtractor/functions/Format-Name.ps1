@@ -10,6 +10,8 @@
         
         Otherwise the cmdlet will default back to the configuration for each type, that is persisted in the configuration store
         
+        Notes: It is considered as an internal function, and should not be used directly.
+        
     .PARAMETER Type
         The type of name that you want to work against
         
@@ -45,6 +47,7 @@
         
         Author: Mötz Jensen (@Splaxi)
         
+        This is considered as an internal function, and should not be used directly.
 #>
 function Format-Name {
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseOutputTypeCorrectly', '')]

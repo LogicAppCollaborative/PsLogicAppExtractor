@@ -6,6 +6,8 @@
     .DESCRIPTION
         Get actions and all nested actions, filtered by type
         
+        Notes: It is considered as an internal function, and should not be used directly.
+        
     .PARAMETER InputObject
         The object that you want to work against
         
@@ -23,6 +25,7 @@
         
         Author: Mötz Jensen (@Splaxi)
         
+        This is considered as an internal function, and should not be used directly.
 #>
 function Get-ActionsByType {
     param (

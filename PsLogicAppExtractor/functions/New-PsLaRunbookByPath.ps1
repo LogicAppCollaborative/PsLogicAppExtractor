@@ -110,6 +110,7 @@ function New-PsLaRunbookByPath {
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]
     [CmdletBinding()]
     param (
+        [PsfValidateScript('PSFramework.Validate.FSPath.Folder', ErrorString = 'PSFramework.Validate.FSPath.Folder')]
         [string] $Path = $(Get-PSFConfigValue -FullName PsLogicAppExtractor.ModulePath.Tasks),
 
         [string] $SubscriptionId,
@@ -118,6 +119,7 @@ function New-PsLaRunbookByPath {
 
         [string] $Name,
 
+        [PsfValidateScript('PSFramework.Validate.FSPath.Folder', ErrorString = 'PSFramework.Validate.FSPath.Folder')]
         [string] $OutputPath,
 
         [switch] $IncludePrefixSuffix

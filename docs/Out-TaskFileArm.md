@@ -19,6 +19,8 @@ Out-TaskFileArm [-InputObject] <Object> [<CommonParameters>]
 ## DESCRIPTION
 Persists the tasks output into a file, as an ARM template
 
+Notes: It is considered as an internal function, and should not be used directly.
+
 ## EXAMPLES
 
 ### EXAMPLE 1
@@ -57,5 +59,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## NOTES
 Author: Mötz Jensen (@Splaxi)
+
+This is considered as an internal function, and should not be used directly.
 
 ## RELATED LINKS

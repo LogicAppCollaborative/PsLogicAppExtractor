@@ -13,8 +13,8 @@ Get parameters from ARM template
 ## SYNTAX
 
 ```
-Get-PsLaArmParameter [[-Path] <String>] [[-Exclude] <String[]>] [[-Include] <String[]>] [-AsFile]
- [-BlankValues] [-CopyMetadata] [<CommonParameters>]
+Get-PsLaArmParameter [-Path] <String> [[-Exclude] <String[]>] [[-Include] <String[]>] [-AsFile] [-BlankValues]
+ [-CopyMetadata] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -88,10 +88,10 @@ Type: String
 Parameter Sets: (All)
 Aliases:
 
-Required: False
+Required: True
 Position: 1
 Default value: None
-Accept pipeline input: False
+Accept pipeline input: True (ByValue)
 Accept wildcard characters: False
 ```
 

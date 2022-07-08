@@ -6,6 +6,8 @@
     .DESCRIPTION
         Removes an ARM template variable by the name provided
         
+        Notes: It is considered as an internal function, and should not be used directly.
+        
     .PARAMETER InputObject
         The ARM object that you want to work against
         
@@ -25,6 +27,7 @@
         
         Author: Mötz Jensen (@Splaxi)
         
+        This is considered as an internal function, and should not be used directly.
 #>
 function Remove-ArmVariable {
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]

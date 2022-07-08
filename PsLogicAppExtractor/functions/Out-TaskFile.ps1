@@ -8,6 +8,8 @@
         
         Sets the $Script:FilePath = $Path, to ensure the next tasks can pick up the file and continue its work
         
+        Notes: It is considered as an internal function, and should not be used directly.
+        
     .PARAMETER Path
         Path to where the tasks wants the ouput to be persisted
         
@@ -37,6 +39,7 @@
         
         Author: Mötz Jensen (@Splaxi)
         
+        This is considered as an internal function, and should not be used directly.
 #>
 function Out-TaskFile {
     [CmdletBinding(DefaultParameterSetName = "InputObject")]

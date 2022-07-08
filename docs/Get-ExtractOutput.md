@@ -19,6 +19,8 @@ Get-ExtractOutput [-Path] <String> [<CommonParameters>]
 ## DESCRIPTION
 Get the full path of the "latest" file from the workpath of the runbook / extraction process
 
+Notes: It is considered as an internal function, and should not be used directly.
+
 ## EXAMPLES
 
 ### EXAMPLE 1
@@ -54,5 +56,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## NOTES
 Author: Mötz Jensen (@Splaxi)
+
+This is considered as an internal function, and should not be used directly.
 
 ## RELATED LINKS

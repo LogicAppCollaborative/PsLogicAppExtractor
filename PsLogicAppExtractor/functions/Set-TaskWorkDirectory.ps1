@@ -8,6 +8,8 @@
         
         Outputs the path that has been constructed
         
+        Notes: It is considered as an internal function, and should not be used directly.
+        
     .PARAMETER Path
         Path to the current working directory
         
@@ -30,6 +32,7 @@
         
         Author: Mötz Jensen (@Splaxi)
         
+        This is considered as an internal function, and should not be used directly.
 #>
 function Set-TaskWorkDirectory {
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]
@@ -37,15 +40,16 @@ function Set-TaskWorkDirectory {
     param (
         [string] $Path = $(Get-PSFConfigValue -FullName PsLogicAppExtractor.Execution.WorkPath),
         
-        [string] $FileName = "$Name.json"
+        [string] $FileName = "$(Get-PSFConfigValue -FullName PsLogicAppExtractor.Execution.Name).json"
     )
+    
     Set-PSFConfig -FullName PsLogicAppExtractor.Execution.TaskCounter -Value $($(Get-PSFConfigValue -FullName PsLogicAppExtractor.Execution.TaskCounter) + 1)
     $taskCounter = $(Get-PSFConfigValue -FullName PsLogicAppExtractor.Execution.TaskCounter)
-    
+        
     $taskName = $($psake.context.Peek().CurrentTaskName)
     $newPath = "$Path\$taskCounter`_$TaskName"
     New-Item -Path $newPath -ItemType Directory -Force -ErrorAction Ignore > $null
-
+    
     Set-PSFConfig -FullName PsLogicAppExtractor.Execution.TaskPath -Value $newPath
-    Set-PSFConfig -FullName PsLogicAppExtractor.Execution.TaskOutputFile -Value "$newPath\$fileName"
+    Set-PSFConfig -FullName PsLogicAppExtractor.Execution.TaskOutputFile -Value "$newPath\$FileName"
 }

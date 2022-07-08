@@ -19,6 +19,8 @@ Get-ArmParameterValue [-InputObject] <Object> [-Name] <String> [<CommonParameter
 ## DESCRIPTION
 Gets the current default value from the specified ARM template parameter
 
+Notes: It is considered as an internal function, and should not be used directly.
+
 ## EXAMPLES
 
 ### EXAMPLE 1
@@ -71,5 +73,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## NOTES
 Author: Mötz Jensen (@Splaxi)
+
+This is considered as an internal function, and should not be used directly.
 
 ## RELATED LINKS

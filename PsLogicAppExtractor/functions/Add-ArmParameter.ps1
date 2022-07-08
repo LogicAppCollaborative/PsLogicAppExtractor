@@ -6,6 +6,8 @@
     .DESCRIPTION
         Adds or overwrites an ARM template parameter by the name provided, and allows you to specify the default value, type and the metadata decription
         
+        Notes: It is considered as an internal function, and should not be used directly.
+        
     .PARAMETER InputObject
         The ARM object that you want to work against
         
@@ -46,6 +48,7 @@
         
         Author: Mötz Jensen (@Splaxi)
         
+        This is considered as an internal function, and should not be used directly.
 #>
 function Add-ArmParameter {
     [CmdletBinding()]

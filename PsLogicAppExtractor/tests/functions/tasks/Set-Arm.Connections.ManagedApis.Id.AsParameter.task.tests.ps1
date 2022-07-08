@@ -1,10 +1,7 @@
-﻿Describe 'Set-Arm.IntegrationAccount.IdFormatted.Simple.AsVariable' {
+﻿Describe 'Set-Arm.Connections.ManagedApis.Id.AsParameter' {
 
     BeforeAll {
-        # Import-Module C:\GIT\GITHUB\PsLogicAppExtractor.Workspace\PsLogicAppExtractor\PsLogicAppExtractor -Force
-
         ."$PSScriptRoot\..\..\..\internal\classes\PsLogicAppExtractor.class.ps1"
-        # #."$PSScriptRoot\..\..\Set-TaskWorkDirectoryPester.ps1"
 
         $parms = @{}
         $parms.buildFile = "$PSScriptRoot\all.psakefile.ps1"
@@ -17,10 +14,10 @@
         New-Item -Path $WorkPath -ItemType Directory -Force -ErrorAction Ignore > $null
 
         Set-PSFConfig -FullName PsLogicAppExtractor.Execution.WorkPath -Value $WorkPath
-        Set-PSFConfig -FullName PsLogicAppExtractor.Execution.TaskInputNext -Value "$PSScriptRoot\_Raw.LogicApp.json"
+        Set-PSFConfig -FullName PsLogicAppExtractor.Execution.TaskInputNext -Value "$PSScriptRoot\_Raw.LogicApp.Action.Queue.json"
         Set-PSFConfig -FullName PsLogicAppExtractor.Pester.FileName -Value "$logicAppName.json"
         
-        Invoke-psake @parms -taskList "Set-Raw.ApiVersion", "ConvertTo-Arm", "Set-Arm.IntegrationAccount.IdFormatted.Simple.AsVariable"
+        Invoke-psake @parms -taskList "Set-Raw.ApiVersion", "ConvertTo-Arm", "Set-Arm.Connections.ManagedApis.Id.AsParameter"
 
         $resPath = Get-ExtractOutput -Path $WorkPath
         $armObj = [ArmTemplate]$(Get-Content -Path $resPath -Raw | ConvertFrom-Json)
@@ -54,24 +51,28 @@
         $armObj.resources.Count | Should -BeExactly 1
     }
 
-    It 'Should have a resources[0].properties.integrationAccount property' {
-        $armObj.resources[0].properties.integrationAccount | Should -Not -Be $null
+    It 'Should have a resources[0].properties.parameters.$connections.value property' {
+        $armObj.resources[0].properties.parameters.'$connections'.value | Should -Not -Be $null
     }
 
-    It 'Should have a resources[0].properties.integrationAccount.id property' {
-        $armObj.resources[0].properties.integrationAccount.id | Should -Not -Be $null
+    It 'Should have a resources[0].properties.parameters.$connections.value.servicebus property' {
+        $armObj.resources[0].properties.parameters.'$connections'.value.servicebus | Should -Not -Be $null
     }
 
-    It 'Should be "[format(...)]" in the resources[0].properties.integrationAccount.id property' {
-        $armObj.resources[0].properties.integrationAccount.id | Should -BeExactly "[format('/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Logic/integrationAccounts/{2}', subscription().subscriptionId, resourceGroup().name,variables('integrationAccount'))]"
+    It 'Should be "[resourceId(...)]" in the resources[0].properties.parameters.$connections.value.servicebus.connectionId property' {
+        $armObj.resources[0].properties.parameters.'$connections'.value.servicebus.connectionId | Should -BeExactly "[resourceId('Microsoft.Web/connections', parameters('connection_servicebus_id'))]"
     }
 
-    It "Should have a variables.integrationAccount property" {
-        $armObj.variables.integrationAccount | Should -Not -Be $null
+    It 'Should be "[parameters(...)]" in the resources[0].properties.parameters.$connections.value.servicebus.connectionName property' {
+        $armObj.resources[0].properties.parameters.'$connections'.value.servicebus.connectionName | Should -BeExactly "[parameters('connection_servicebus_id')]"
     }
 
-    It "Should be 'Test-IntegrationAccount' in the variables.integrationAccount property" {
-        $armObj.variables.integrationAccount | Should -BeExactly "Test-IntegrationAccount"
+    It "Should have a parameters.connection_servicebus_id property" {
+        $armObj.parameters.connection_servicebus_id | Should -Not -Be $null
+    }
+
+    It "Should be 'servicebus' in the parameters.connection_servicebus_id.defaultValue property" {
+        $armObj.parameters.connection_servicebus_id.defaultValue | Should -BeExactly "servicebus"
     }
     
     # AfterAll {

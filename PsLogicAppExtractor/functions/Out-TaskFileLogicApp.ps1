@@ -6,6 +6,8 @@
     .DESCRIPTION
         Persists the tasks output into a file, as a LogicApp json structure
         
+        Notes: It is considered as an internal function, and should not be used directly.
+        
     .PARAMETER InputObject
         The object that should be written to the desired path
         
@@ -21,6 +23,7 @@
         
         Author: Mötz Jensen (@Splaxi)
         
+        This is considered as an internal function, and should not be used directly.
 #>
 function Out-TaskFileLogicApp {
     [CmdletBinding()]

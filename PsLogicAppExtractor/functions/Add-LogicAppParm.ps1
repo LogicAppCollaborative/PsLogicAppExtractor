@@ -6,6 +6,8 @@
     .DESCRIPTION
         Adds or overwrites a LogicApp parm (parameter) by the name provided, and allows you to specify the default value and the type
         
+        Notes: It is considered as an internal function, and should not be used directly.
+        
     .PARAMETER InputObject
         The ARM object that you want to work against
         
@@ -35,6 +37,7 @@
         
         Author: Mötz Jensen (@Splaxi)
         
+        This is considered as an internal function, and should not be used directly.
 #>
 function Add-LogicAppParm {
     [CmdletBinding()]
