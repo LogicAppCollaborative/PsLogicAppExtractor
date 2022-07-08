@@ -1,31 +1,59 @@
 ﻿
 <#
     .SYNOPSIS
-        Short description
+        Update ARM template from another ARM template.
         
     .DESCRIPTION
-        Long description
+        Update an ARM template, with the content of another ARM template.
+
+        You can update the entire ARM template, or just a part of it.
+
+        Supports the following options:
+        * Full
+        * SkipResources
+        * SkipParameters
         
     .PARAMETER Source
-        Parameter description
+        The path for the source ARM template to be used as the changes you want to apply.
         
     .PARAMETER Destination
-        Parameter description
+        The path for the destination ARM template to be updated.
         
     .PARAMETER SkipParameters
-        Parameter description
+        If true, then the parameters will not be updated.
         
     .PARAMETER SkipResources
-        Parameter description
+        If true, then the resources will not be updated.
         
     .PARAMETER RemoveSource
-        Parameter description
+        If true, then the source ARM template will be removed after it has been used.
         
     .EXAMPLE
-        An example
+        PS C:\> Update-PsLaArmTemplate -Source C:\Temp\Source.json -Destination C:\Temp\Destination.json
+
+        This will update the ARM template in C:\Temp\Destination.json from the ARM template in C:\Temp\Source.json.
+        It will overwrite the entire ARM template, but will not remove the source ARM template.
         
+    .EXAMPLE
+        PS C:\> Update-PsLaArmTemplate -Source C:\Temp\Source.json -Destination C:\Temp\Destination.json -SkipParameters
+
+        This will update the ARM template in C:\Temp\Destination.json from the ARM template in C:\Temp\Source.json.
+        It will overwrite the entire ARM template, but leave the parameters alone.
+
+    .EXAMPLE
+        PS C:\> Update-PsLaArmTemplate -Source C:\Temp\Source.json -Destination C:\Temp\Destination.json -SkipResources
+
+        This will update the ARM template in C:\Temp\Destination.json from the ARM template in C:\Temp\Source.json.
+        It will overwrite the entire ARM template, but leave the resources alone.
+
+    .EXAMPLE
+        PS C:\> Update-PsLaArmTemplate -Source C:\Temp\Source.json -Destination C:\Temp\Destination.json -RemoveSource
+
+        This will update the ARM template in C:\Temp\Destination.json from the ARM template in C:\Temp\Source.json.
+        It will overwrite the entire ARM template, and remove the source ARM template.
+
     .NOTES
-        General notes
+        Author: Mötz Jensen (@Splaxi)
 #>
 function Update-PsLaArmTemplate {
     [CmdletBinding()]
@@ -72,7 +100,7 @@ function Update-PsLaArmTemplate {
 
     Out-TaskFile -Path $Destination -InputObject $([ArmTemplate]$armObjDestination)
 
-    if($RemoveSource) {
+    if ($RemoveSource) {
         Remove-Item -Path $Source -Force -Recurse -ErrorAction SilentlyContinue
     }
 }
