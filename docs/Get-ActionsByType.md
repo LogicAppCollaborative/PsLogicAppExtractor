@@ -19,6 +19,8 @@ Get-ActionsByType [[-InputObject] <PSObject>] [[-Type] <String>]
 ## DESCRIPTION
 Get actions and all nested actions, filtered by type
 
+Notes: It is considered as an internal function, and should not be used directly.
+
 ## EXAMPLES
 
 ### EXAMPLE 1
@@ -68,5 +70,7 @@ Accept wildcard characters: False
 
 ## NOTES
 Author: Mötz Jensen (@Splaxi)
+
+This is considered as an internal function, and should not be used directly.
 
 ## RELATED LINKS

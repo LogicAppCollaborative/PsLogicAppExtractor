@@ -63,7 +63,7 @@
     }
 
     It 'Should be "[format(...)]" in the resources[0].properties.integrationAccount.id property' {
-        $armObj.resources[0].properties.integrationAccount.id | Should -BeExactly "[format('/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Logic/integrationAccounts/{2}',subscription().subscriptionId,parameters('integrationAccountResourceGroup'),parameters('integrationAccount'))]"
+        $armObj.resources[0].properties.integrationAccount.id | Should -BeExactly "[format('/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Logic/integrationAccounts/{2}', subscription().subscriptionId, parameters('integrationAccountResourceGroup'), parameters('integrationAccount'))]"
     }
 
     It "Should have a parameters.integrationAccount property" {

@@ -72,8 +72,9 @@ function Get-PsLaTaskByFile {
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseOutputTypeCorrectly', '')]
     [CmdletBinding()]
     param (
+        [parameter(Mandatory = $true, ValueFromPipeline = $true)]
+        [PsfValidateScript('PSFramework.Validate.FSPath.File', ErrorString = 'PSFramework.Validate.FSPath.File')]
         [Alias('Runbook')]
-        [Parameter(Mandatory = $true)]
         [string] $File,
 
         [ValidateSet('Arm', 'Converter', 'Exporter', 'LogicApp')]
@@ -82,17 +83,19 @@ function Get-PsLaTaskByFile {
         [switch] $Detailed
     )
     
-    # We are playing around with the internal / global psake object
-    $psake.context = New-Object System.Collections.Stack
+    process {
+        # We are playing around with the internal / global psake object
+        $psake.context = New-Object System.Collections.Stack
 
-    $res = @(Get-PSakeScriptTasks -Runbook $File | Where-Object Name -ne "Default" | Select-Object -Property @{Label = "Category"; Expression = { $_.Alias.Split(".")[0] } }, Name, Description)
+        $res = @(Get-PSakeScriptTasks -Runbook $File | Where-Object Name -ne "Default" | Select-Object -Property @{Label = "Category"; Expression = { $_.Alias.Split(".")[0] } }, Name, Description)
 
-    $temp = $res | Where-Object Category -like "*$Category*" | Sort-Object Category, Name
+        $temp = $res | Where-Object Category -like "*$Category*" | Sort-Object Category, Name
         
-    if ($Detailed) {
-        $temp | Format-List
-    }
-    else {
-        $temp
+        if ($Detailed) {
+            $temp | Format-List
+        }
+        else {
+            $temp
+        }
     }
 }

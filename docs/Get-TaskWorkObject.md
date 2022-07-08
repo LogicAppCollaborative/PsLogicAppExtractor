@@ -19,6 +19,8 @@ Get-TaskWorkObject [[-Path] <String>] [<CommonParameters>]
 ## DESCRIPTION
 Gets the object from the "previous" task, based on the persisted path and loads it into memory using ConvertFrom-Json
 
+Notes: It is considered as an internal function, and should not be used directly.
+
 ## EXAMPLES
 
 ### EXAMPLE 1
@@ -54,5 +56,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## NOTES
 Author: Mötz Jensen (@Splaxi)
+
+This is considered as an internal function, and should not be used directly.
 
 ## RELATED LINKS

@@ -6,6 +6,8 @@
     .DESCRIPTION
         Removes an LogicApp parm (parameter) by the name provided
         
+        Notes: It is considered as an internal function, and should not be used directly.
+        
     .PARAMETER InputObject
         The LogicApp object that you want to work against
         
@@ -25,6 +27,7 @@
         
         Author: Mötz Jensen (@Splaxi)
         
+        This is considered as an internal function, and should not be used directly.
 #>
 function Remove-LogicAppParm {
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]

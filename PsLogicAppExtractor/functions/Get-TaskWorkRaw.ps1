@@ -6,6 +6,8 @@
     .DESCRIPTION
         Gets the object from the "previous" task, based on the persisted path and loads it into memory using Get-Content
         
+        Notes: It is considered as an internal function, and should not be used directly.
+        
     .PARAMETER Path
         Path to the file that you want the task to work against
         
@@ -18,6 +20,7 @@
         
         Author: Mötz Jensen (@Splaxi)
         
+        This is considered as an internal function, and should not be used directly.
 #>
 function Get-TaskWorkRaw {
     [CmdletBinding()]
