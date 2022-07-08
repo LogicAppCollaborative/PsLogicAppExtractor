@@ -43,7 +43,8 @@
 function Get-PsLaTaskByPath {
     [CmdletBinding()]
     param (
-        [Parameter(Mandatory = $true)]
+        [parameter(Mandatory = $true, ValueFromPipeline = $true)]
+        [PsfValidateScript('PSFramework.Validate.FSPath.Folder', ErrorString = 'PSFramework.Validate.FSPath.Folder')]
         [string] $Path
     )
     

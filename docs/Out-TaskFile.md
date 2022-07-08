@@ -27,6 +27,8 @@ Persists the tasks output into a file, either the raw content or the object
 
 Sets the $Script:FilePath = $Path, to ensure the next tasks can pick up the file and continue its work
 
+Notes: It is considered as an internal function, and should not be used directly.
+
 ## EXAMPLES
 
 ### EXAMPLE 1
@@ -105,5 +107,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## NOTES
 Author: Mötz Jensen (@Splaxi)
+
+This is considered as an internal function, and should not be used directly.
 
 ## RELATED LINKS

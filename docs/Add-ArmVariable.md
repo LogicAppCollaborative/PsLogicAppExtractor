@@ -19,6 +19,8 @@ Add-ArmVariable [-InputObject] <Object> [-Name] <String> [-Value] <Object> [<Com
 ## DESCRIPTION
 Adds or overwrites an ARM template variable by the name provided, and allows you to specify the value
 
+Notes: It is considered as an internal function, and should not be used directly.
+
 ## EXAMPLES
 
 ### EXAMPLE 1
@@ -89,5 +91,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## NOTES
 Author: Mötz Jensen (@Splaxi)
+
+This is considered as an internal function, and should not be used directly.
 
 ## RELATED LINKS

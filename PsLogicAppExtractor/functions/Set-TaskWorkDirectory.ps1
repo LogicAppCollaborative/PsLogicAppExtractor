@@ -8,6 +8,8 @@
         
         Outputs the path that has been constructed
         
+        Notes: It is considered as an internal function, and should not be used directly.
+        
     .PARAMETER Path
         Path to the current working directory
         
@@ -30,6 +32,7 @@
         
         Author: Mötz Jensen (@Splaxi)
         
+        This is considered as an internal function, and should not be used directly.
 #>
 function Set-TaskWorkDirectory {
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]

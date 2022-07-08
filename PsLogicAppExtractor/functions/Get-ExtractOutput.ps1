@@ -6,6 +6,8 @@
     .DESCRIPTION
         Get the full path of the "latest" file from the workpath of the runbook / extraction process
         
+        Notes: It is considered as an internal function, and should not be used directly.
+        
     .PARAMETER Path
         Path to the workpath where the runbook has been persisting files
         
@@ -18,6 +20,7 @@
         
         Author: Mötz Jensen (@Splaxi)
         
+        This is considered as an internal function, and should not be used directly.
 #>
 function Get-ExtractOutput {
     [CmdletBinding()]

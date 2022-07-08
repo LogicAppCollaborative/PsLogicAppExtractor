@@ -6,6 +6,8 @@
     .DESCRIPTION
         Gets the current default value from the specified ARM template parameter
         
+        Notes: It is considered as an internal function, and should not be used directly.
+        
     .PARAMETER InputObject
         The ARM object that you want to work against
         
@@ -23,6 +25,7 @@
         
         Author: Mötz Jensen (@Splaxi)
         
+        This is considered as an internal function, and should not be used directly.
 #>
 function Get-ArmParameterValue {
     [CmdletBinding()]

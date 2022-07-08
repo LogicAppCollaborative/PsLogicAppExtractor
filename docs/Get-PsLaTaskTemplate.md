@@ -13,7 +13,7 @@ Short description
 ## SYNTAX
 
 ```
-Get-PsLaTaskTemplate [[-Category] <String>] [[-OutputPath] <String>] [<CommonParameters>]
+Get-PsLaTaskTemplate [-Category] <String> [[-OutputPath] <String>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -46,7 +46,7 @@ Type: String
 Parameter Sets: (All)
 Aliases:
 
-Required: False
+Required: True
 Position: 1
 Default value: None
 Accept pipeline input: False

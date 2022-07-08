@@ -6,6 +6,8 @@
     .DESCRIPTION
         Adds or overwrites an ARM template variable by the name provided, and allows you to specify the value
         
+        Notes: It is considered as an internal function, and should not be used directly.
+        
     .PARAMETER InputObject
         The ARM object that you want to work against
         
@@ -29,6 +31,7 @@
         
         Author: Mötz Jensen (@Splaxi)
         
+        This is considered as an internal function, and should not be used directly.
 #>
 function Add-ArmVariable {
     [CmdletBinding()]

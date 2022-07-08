@@ -72,8 +72,9 @@ function Get-PsLaTaskByFile {
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseOutputTypeCorrectly', '')]
     [CmdletBinding()]
     param (
+        [parameter(Mandatory = $true, ValueFromPipeline = $true)]
+        [PsfValidateScript('PSFramework.Validate.FSPath.File', ErrorString = 'PSFramework.Validate.FSPath.File')]
         [Alias('Runbook')]
-        [Parameter(Mandatory = $true)]
         [string] $File,
 
         [ValidateSet('Arm', 'Converter', 'Exporter', 'LogicApp')]

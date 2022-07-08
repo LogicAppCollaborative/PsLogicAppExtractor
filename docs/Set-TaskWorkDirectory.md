@@ -21,6 +21,8 @@ Sets the current tasks working directory, based on the current PsLaWorkPath and 
 
 Outputs the path that has been constructed
 
+Notes: It is considered as an internal function, and should not be used directly.
+
 ## EXAMPLES
 
 ### EXAMPLE 1
@@ -64,7 +66,7 @@ Aliases:
 
 Required: False
 Position: 2
-Default value: "$Name.json"
+Default value: "$(Get-PSFConfigValue -FullName PsLogicAppExtractor.Execution.Name).json"
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
@@ -78,5 +80,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## NOTES
 Author: Mötz Jensen (@Splaxi)
+
+This is considered as an internal function, and should not be used directly.
 
 ## RELATED LINKS

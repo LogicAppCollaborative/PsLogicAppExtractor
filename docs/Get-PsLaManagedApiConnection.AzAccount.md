@@ -62,67 +62,67 @@ It will display detailed information about the ApiConnection object
 Output example:
 
 id                : /subscriptions/b466443d-6eac-4513-a7f0-3579502929f00/resourceGroups/TestRg/providers/Microsoft.W
-eb/connections/azureblob
+                    eb/connections/azureblob
 name              : azureblob
 DisplayName       : TestFtpDownload
 AuthenticatedUser :
 ParameterValues   : @{accountName=storageaccount1}
 OverallStatus     : Connected
 StatusDetails     : {
-"status": "Connected"
-}
+                    "status": "Connected"
+                    }
 
 id                : /subscriptions/b466443d-6eac-4513-a7f0-3579502929f00/resourceGroups/TestRg/providers/Microsoft.W
-eb/connections/azureeventgrid
+                    eb/connections/azureeventgrid
 name              : azureeventgrid
 DisplayName       : TestEventGrid
 AuthenticatedUser : @{name=sarah@contoso.com}
 ParameterValues   : @{token:TenantId=f312ba7d-b63a-4306-9e97-a623c3f42024; token:grantType=code}
 OverallStatus     : Error
 StatusDetails     : {
-"status": "Error",
-"target": "token",
-"error": {
-"code": "Unauthorized",
-"message": "Failed to refresh access token for service: aadcertificate.
+                        "status": "Error",
+                        "target": "token",
+                        "error": {
+                            "code": "Unauthorized",
+                            "message": "Failed to refresh access token for service: aadcertificate.
 Correlation
-Id=g-3bdeeea8-ae1f-4ac3-82dc-7fee7f16a1e2, UTC TimeStamp=4/8/2021 11:40:36 PM, Error: Failed to
-acquire token from AAD: {\"error\":\"invalid_grant\",\"error_description\":\"AADSTS700082: The refresh
-token has expired due to inactivity.The token was issued on 2020-09-01T12:13:41.5336734Z and was
-inactive for 90.00:00:00.\\\\r\\\\nTrace ID: b6f03183-79e9-4f81-a640-efcf65c30400\\\\r\\\\nCorrelation ID:
-52b391c3-9c1d-42c7-99f3-a219b7675aee\\\\r\\\\nTimestamp: 2021-04-08
-23:40:36Z\",\"error_codes\":\[700082\],\"timestamp\":\"2021-04-08 23:40:36Z\",\"trace_id\":\"b6f03183-79e
-9-4f81-a640-efcf65c30400\",\"correlation_id\":\"52b391c3-9c1d-42c7-99f3-a219b7675aee\",\"error_uri\":\"
-https://login.windows.net/error?code=700082\"}"
-}
-}
+                        Id=g-3bdeeea8-ae1f-4ac3-82dc-7fee7f16a1e2, UTC TimeStamp=4/8/2021 11:40:36 PM, Error: Failed to
+                        acquire token from AAD: {\"error\":\"invalid_grant\",\"error_description\":\"AADSTS700082: The refresh
+                        token has expired due to inactivity.The token was issued on 2020-09-01T12:13:41.5336734Z and was
+                        inactive for 90.00:00:00.\\\\r\\\\nTrace ID: b6f03183-79e9-4f81-a640-efcf65c30400\\\\r\\\\nCorrelation ID:
+                        52b391c3-9c1d-42c7-99f3-a219b7675aee\\\\r\\\\nTimestamp: 2021-04-08
+                        23:40:36Z\",\"error_codes\":\[700082\],\"timestamp\":\"2021-04-08 23:40:36Z\",\"trace_id\":\"b6f03183-79e
+                        9-4f81-a640-efcf65c30400\",\"correlation_id\":\"52b391c3-9c1d-42c7-99f3-a219b7675aee\",\"error_uri\":\"
+                        https://login.windows.net/error?code=700082\"}"
+                        }
+                    }
 
 id                : /subscriptions/b466443d-6eac-4513-a7f0-3579502929f00/resourceGroups/TestRg/providers/Microsoft.W
-eb/connections/office365
+                    eb/connections/office365
 name              : office365
 DisplayName       : MyPersonalConnection
 AuthenticatedUser :
 ParameterValues   :
 OverallStatus     : Error
 StatusDetails     : {
-"status": "Error",
-"target": "token",
-"error": {
-"code": "Unauthenticated",
-"message": "This connection is not authenticated."
-}
-}
+                        "status": "Error",
+                        "target": "token",
+                        "error": {
+                            "code": "Unauthenticated",
+                            "message": "This connection is not authenticated."
+                        }
+                    }
 
 id                : /subscriptions/b466443d-6eac-4513-a7f0-3579502929f00/resourceGroups/TestRg/providers/Microsoft.W
-ft.Web/connections/office365-1
+                    ft.Web/connections/office365-1
 name              : office365-1
 DisplayName       : MyPersonalConnection2
 AuthenticatedUser : @{name=sarah@contoso.com}
 ParameterValues   :
 OverallStatus     : Connected
 StatusDetails     : {
-"status": "Connected"
-}
+                        "status": "Connected"
+                    }
 
 ### EXAMPLE 3
 ```
@@ -135,45 +135,45 @@ Filters the list to show only the ones with error
 Output example:
 
 id                : /subscriptions/b466443d-6eac-4513-a7f0-3579502929f00/resourceGroups/TestRg/providers/Microsoft.W
-eb/connections/azureeventgrid
+                    eb/connections/azureeventgrid
 name              : azureeventgrid
 DisplayName       : TestEventGrid
 AuthenticatedUser : @{name=sarah@contoso.com}
 ParameterValues   : @{token:TenantId=f312ba7d-b63a-4306-9e97-a623c3f42024; token:grantType=code}
 OverallStatus     : Error
 StatusDetails     : {
-"status": "Error",
-"target": "token",
-"error": {
-"code": "Unauthorized",
-"message": "Failed to refresh access token for service: aadcertificate.
+                        "status": "Error",
+                        "target": "token",
+                        "error": {
+                            "code": "Unauthorized",
+                            "message": "Failed to refresh access token for service: aadcertificate.
 Correlation
-Id=g-3bdeeea8-ae1f-4ac3-82dc-7fee7f16a1e2, UTC TimeStamp=4/8/2021 11:40:36 PM, Error: Failed to
-acquire token from AAD: {\"error\":\"invalid_grant\",\"error_description\":\"AADSTS700082: The refresh
-token has expired due to inactivity.The token was issued on 2020-09-01T12:13:41.5336734Z and was
-inactive for 90.00:00:00.\\\\r\\\\nTrace ID: b6f03183-79e9-4f81-a640-efcf65c30400\\\\r\\\\nCorrelation ID:
-52b391c3-9c1d-42c7-99f3-a219b7675aee\\\\r\\\\nTimestamp: 2021-04-08
-23:40:36Z\",\"error_codes\":\[700082\],\"timestamp\":\"2021-04-08 23:40:36Z\",\"trace_id\":\"b6f03183-79e
-9-4f81-a640-efcf65c30400\",\"correlation_id\":\"52b391c3-9c1d-42c7-99f3-a219b7675aee\",\"error_uri\":\"
-https://login.windows.net/error?code=700082\"}"
-}
-}
+                        Id=g-3bdeeea8-ae1f-4ac3-82dc-7fee7f16a1e2, UTC TimeStamp=4/8/2021 11:40:36 PM, Error: Failed to
+                        acquire token from AAD: {\"error\":\"invalid_grant\",\"error_description\":\"AADSTS700082: The refresh
+                        token has expired due to inactivity.The token was issued on 2020-09-01T12:13:41.5336734Z and was
+                        inactive for 90.00:00:00.\\\\r\\\\nTrace ID: b6f03183-79e9-4f81-a640-efcf65c30400\\\\r\\\\nCorrelation ID:
+                        52b391c3-9c1d-42c7-99f3-a219b7675aee\\\\r\\\\nTimestamp: 2021-04-08
+                        23:40:36Z\",\"error_codes\":\[700082\],\"timestamp\":\"2021-04-08 23:40:36Z\",\"trace_id\":\"b6f03183-79e
+                        9-4f81-a640-efcf65c30400\",\"correlation_id\":\"52b391c3-9c1d-42c7-99f3-a219b7675aee\",\"error_uri\":\"
+                        https://login.windows.net/error?code=700082\"}"
+                        }
+                    }
 
 id                : /subscriptions/b466443d-6eac-4513-a7f0-3579502929f00/resourceGroups/TestRg/providers/Microsoft.W
-eb/connections/office365
+                    eb/connections/office365
 name              : office365
 DisplayName       : MyPersonalConnection
 AuthenticatedUser :
 ParameterValues   :
 OverallStatus     : Error
 StatusDetails     : {
-"status": "Error",
-"target": "token",
-"error": {
-"code": "Unauthenticated",
-"message": "This connection is not authenticated."
-}
-}
+                        "status": "Error",
+                        "target": "token",
+                        "error": {
+                            "code": "Unauthenticated",
+                            "message": "This connection is not authenticated."
+                        }
+                    }
 
 ### EXAMPLE 4
 ```
@@ -188,20 +188,20 @@ This is useful in combination with the Invoke-PsLaConsent.AzAccount cmdlet
 Output example:
 
 id                : /subscriptions/b466443d-6eac-4513-a7f0-3579502929f00/resourceGroups/TestRg/providers/Microsoft.W
-eb/connections/office365
+                    eb/connections/office365
 name              : office365
 DisplayName       : MyPersonalConnection
 AuthenticatedUser :
 ParameterValues   :
 OverallStatus     : Error
 StatusDetails     : {
-"status": "Error",
-"target": "token",
-"error": {
-"code": "Unauthenticated",
-"message": "This connection is not authenticated."
-}
-}
+                        "status": "Error",
+                        "target": "token",
+                        "error": {
+                            "code": "Unauthenticated",
+                            "message": "This connection is not authenticated."
+                        }
+                    }
 
 ### EXAMPLE 5
 ```
@@ -214,29 +214,29 @@ Filters the list to show only the ones with error of the type Unauthenticated
 Output example:
 
 id                : /subscriptions/b466443d-6eac-4513-a7f0-3579502929f00/resourceGroups/TestRg/providers/Microsoft.W
-eb/connections/azureeventgrid
+                    eb/connections/azureeventgrid
 name              : azureeventgrid
 DisplayName       : TestEventGrid
 AuthenticatedUser : @{name=sarah@contoso.com}
 ParameterValues   : @{token:TenantId=f312ba7d-b63a-4306-9e97-a623c3f42024; token:grantType=code}
 OverallStatus     : Error
 StatusDetails     : {
-"status": "Error",
-"target": "token",
-"error": {
-"code": "Unauthorized",
-"message": "Failed to refresh access token for service: aadcertificate.
+                        "status": "Error",
+                        "target": "token",
+                        "error": {
+                            "code": "Unauthorized",
+                            "message": "Failed to refresh access token for service: aadcertificate.
 Correlation
-Id=g-3bdeeea8-ae1f-4ac3-82dc-7fee7f16a1e2, UTC TimeStamp=4/8/2021 11:40:36 PM, Error: Failed to
-acquire token from AAD: {\"error\":\"invalid_grant\",\"error_description\":\"AADSTS700082: The refresh
-token has expired due to inactivity.The token was issued on 2020-09-01T12:13:41.5336734Z and was
-inactive for 90.00:00:00.\\\\r\\\\nTrace ID: b6f03183-79e9-4f81-a640-efcf65c30400\\\\r\\\\nCorrelation ID:
-52b391c3-9c1d-42c7-99f3-a219b7675aee\\\\r\\\\nTimestamp: 2021-04-08
-23:40:36Z\",\"error_codes\":\[700082\],\"timestamp\":\"2021-04-08 23:40:36Z\",\"trace_id\":\"b6f03183-79e
-9-4f81-a640-efcf65c30400\",\"correlation_id\":\"52b391c3-9c1d-42c7-99f3-a219b7675aee\",\"error_uri\":\"
-https://login.windows.net/error?code=700082\"}"
-}
-}
+                        Id=g-3bdeeea8-ae1f-4ac3-82dc-7fee7f16a1e2, UTC TimeStamp=4/8/2021 11:40:36 PM, Error: Failed to
+                        acquire token from AAD: {\"error\":\"invalid_grant\",\"error_description\":\"AADSTS700082: The refresh
+                        token has expired due to inactivity.The token was issued on 2020-09-01T12:13:41.5336734Z and was
+                        inactive for 90.00:00:00.\\\\r\\\\nTrace ID: b6f03183-79e9-4f81-a640-efcf65c30400\\\\r\\\\nCorrelation ID:
+                        52b391c3-9c1d-42c7-99f3-a219b7675aee\\\\r\\\\nTimestamp: 2021-04-08
+                        23:40:36Z\",\"error_codes\":\[700082\],\"timestamp\":\"2021-04-08 23:40:36Z\",\"trace_id\":\"b6f03183-79e
+                        9-4f81-a640-efcf65c30400\",\"correlation_id\":\"52b391c3-9c1d-42c7-99f3-a219b7675aee\",\"error_uri\":\"
+                        https://login.windows.net/error?code=700082\"}"
+                        }
+                    }
 
 ### EXAMPLE 6
 ```

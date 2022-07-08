@@ -96,6 +96,7 @@ function Invoke-PsLaExtractor {
         [Parameter(Mandatory = $true, ParameterSetName = "PreppedFile")]
         [Parameter(Mandatory = $true, ParameterSetName = "ResourceGroup")]
         [Parameter(Mandatory = $true, ParameterSetName = "Subscription")]
+        [PsfValidateScript('PSFramework.Validate.FSPath.File', ErrorString = 'PSFramework.Validate.FSPath.File')]
         [string] $Runbook,
 
         [Parameter(Mandatory = $true, ParameterSetName = "Subscription")]
@@ -112,8 +113,10 @@ function Invoke-PsLaExtractor {
 
         [string[]] $Task,
 
+        [PsfValidateScript('PSFramework.Validate.FSPath.Folder', ErrorString = 'PSFramework.Validate.FSPath.Folder')]
         [string] $WorkPath = "$([System.IO.Path]::GetTempPath())PsLogicAppExtractor\$([System.Guid]::NewGuid().Guid)",
 
+        [PsfValidateScript('PSFramework.Validate.FSPath.Folder', ErrorString = 'PSFramework.Validate.FSPath.Folder')]
         [string] $OutputPath,
 
         [switch] $KeepFiles
