@@ -35,6 +35,7 @@
         Author: Mötz Jensen (@Splaxi)
 #>
 function Update-PsLaArmParameterFile {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]
     [CmdletBinding()]
     param (
         [parameter(Mandatory = $true, ValueFromPipeline = $true)]
