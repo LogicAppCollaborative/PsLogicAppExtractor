@@ -1,4 +1,4 @@
-﻿Describe 'Testing Set-Arm.Location.AsResourceGroup.AsParameter' {
+﻿Describe 'Set-Arm.Connections.ManagedApis.Name.AsParameter' {
 
     BeforeAll {
         ."$PSScriptRoot\..\..\..\internal\classes\PsLogicAppExtractor.class.ps1"
@@ -14,13 +14,12 @@
         New-Item -Path $WorkPath -ItemType Directory -Force -ErrorAction Ignore > $null
 
         Set-PSFConfig -FullName PsLogicAppExtractor.Execution.WorkPath -Value $WorkPath
-        Set-PSFConfig -FullName PsLogicAppExtractor.Execution.TaskInputNext -Value "$PSScriptRoot\_Raw.LogicApp.json"
+        Set-PSFConfig -FullName PsLogicAppExtractor.Execution.TaskInputNext -Value "$PSScriptRoot\_Raw.LogicApp.Action.Queue.json"
         Set-PSFConfig -FullName PsLogicAppExtractor.Pester.FileName -Value "$logicAppName.json"
         
-        Invoke-psake @parms -taskList "Set-Raw.ApiVersion", "ConvertTo-Arm", "Set-Arm.Location.AsResourceGroup.AsParameter"
+        Invoke-psake @parms -taskList "Set-Raw.ApiVersion", "ConvertTo-Arm", "Set-Arm.Connections.ManagedApis.Name.AsParameter"
 
         $resPath = Get-ExtractOutput -Path $WorkPath
-        $raw = Get-Content -Path $resPath -Raw
         $armObj = [ArmTemplate]$(Get-Content -Path $resPath -Raw | ConvertFrom-Json)
     }
 
@@ -52,18 +51,30 @@
         $armObj.resources.Count | Should -BeExactly 1
     }
 
-    It "Should have a parameters.logicAppLocation property" {
-        $armObj.parameters.logicAppLocation | Should -Not -Be $null
+    It 'Should have a resources[0].properties.parameters.$connections.value property' {
+        $armObj.resources[0].properties.parameters.'$connections'.value | Should -Not -Be $null
     }
 
-    It 'Should be "[resourceGroup().location]" in the parameters.logicAppLocation.defaultValue property' {
-        $armObj.parameters.logicAppLocation.defaultValue | Should -BeExactly "[resourceGroup().location]"
+    It 'Should have a resources[0].properties.parameters.$connections.value.servicebus property' {
+        $armObj.resources[0].properties.parameters.'$connections'.value.servicebus | Should -Not -Be $null
     }
 
-    It 'Should be "[parameters(''logicAppLocation'')]" in the resources[0].location property' {
-        $armObj.resources[0].location | Should -BeExactly "[parameters('logicAppLocation')]"
+    It 'Should be "[resourceId(...)]" in the resources[0].properties.parameters.$connections.value.servicebus.connectionId property' {
+        $armObj.resources[0].properties.parameters.'$connections'.value.servicebus.connectionId | Should -BeExactly "[resourceId('Microsoft.Web/connections', parameters('connection_servicebus_id'))]"
     }
 
+    It 'Should be "[parameters(...)]" in the resources[0].properties.parameters.$connections.value.servicebus.connectionName property' {
+        $armObj.resources[0].properties.parameters.'$connections'.value.servicebus.connectionName | Should -BeExactly "[parameters('connection_servicebus_id')]"
+    }
+
+    It "Should have a parameters.connection_servicebus_id property" {
+        $armObj.parameters.connection_servicebus_id | Should -Not -Be $null
+    }
+
+    It "Should be 'servicebus' in the parameters.connection_servicebus_id.defaultValue property" {
+        $armObj.parameters.connection_servicebus_id.defaultValue | Should -BeExactly "SB-Inbound-Queue"
+    }
+    
     # AfterAll {
     #     Write-Host "$resPath"
     # }
