@@ -76,6 +76,7 @@
 		# , 'Set-TaskWorkDirectoryPester'
 
 		, 'Update-PsLaArmTemplate'
+		, 'Update-PsLaArmParameterFile'
 	)
 	
 	# Cmdlets to export from this module

@@ -5,19 +5,19 @@
         
     .DESCRIPTION
         Update an ARM template, with the content of another ARM template.
-
+        
         You can update the entire ARM template, or just a part of it.
-
+        
         Supports the following options:
         * Full
         * SkipResources
         * SkipParameters
         
     .PARAMETER Source
-        The path for the source ARM template to be used as the changes you want to apply.
+        The path to the source ARM template to be used as the changes you want to apply.
         
     .PARAMETER Destination
-        The path for the destination ARM template to be updated.
+        The path to the destination ARM template to be updated.
         
     .PARAMETER SkipParameters
         If true, then the parameters will not be updated.
@@ -30,28 +30,28 @@
         
     .EXAMPLE
         PS C:\> Update-PsLaArmTemplate -Source C:\Temp\Source.json -Destination C:\Temp\Destination.json
-
+        
         This will update the ARM template in C:\Temp\Destination.json from the ARM template in C:\Temp\Source.json.
         It will overwrite the entire ARM template, but will not remove the source ARM template.
         
     .EXAMPLE
         PS C:\> Update-PsLaArmTemplate -Source C:\Temp\Source.json -Destination C:\Temp\Destination.json -SkipParameters
-
+        
         This will update the ARM template in C:\Temp\Destination.json from the ARM template in C:\Temp\Source.json.
         It will overwrite the entire ARM template, but leave the parameters alone.
-
+        
     .EXAMPLE
         PS C:\> Update-PsLaArmTemplate -Source C:\Temp\Source.json -Destination C:\Temp\Destination.json -SkipResources
-
+        
         This will update the ARM template in C:\Temp\Destination.json from the ARM template in C:\Temp\Source.json.
         It will overwrite the entire ARM template, but leave the resources alone.
-
+        
     .EXAMPLE
         PS C:\> Update-PsLaArmTemplate -Source C:\Temp\Source.json -Destination C:\Temp\Destination.json -RemoveSource
-
+        
         This will update the ARM template in C:\Temp\Destination.json from the ARM template in C:\Temp\Source.json.
         It will overwrite the entire ARM template, and remove the source ARM template.
-
+        
     .NOTES
         Author: Mötz Jensen (@Splaxi)
 #>
