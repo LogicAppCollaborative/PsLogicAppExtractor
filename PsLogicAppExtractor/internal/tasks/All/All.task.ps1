@@ -298,10 +298,10 @@ Loops all `$connections children
 -Sets the connectionId to: [resourceId('Microsoft.Web/connections', parameters('XYZ'))]
 -Sets the connectionName to: [parameters('XYZ')]
 "@
-    Alias       = "Arm.Set-Arm.Connections.ManagedApis.Id.AsParameter.task"
+    Alias       = "Arm.Set-Arm.Connections.ManagedApis.Id.AsParameter"
 }
 
-Task -Name "Set-Arm.Connections.ManagedApis.Id.AsParameter.task" @parm -Action {
+Task -Name "Set-Arm.Connections.ManagedApis.Id.AsParameter" @parm -Action {
     Set-TaskWorkDirectory
 
     $armObj = Get-TaskWorkObject
