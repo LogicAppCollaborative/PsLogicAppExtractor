@@ -56,6 +56,7 @@
         Author: Mötz Jensen (@Splaxi)
 #>
 function Update-PsLaArmTemplate {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]
     [CmdletBinding()]
     param (
         [parameter(Mandatory = $true, ValueFromPipeline = $true)]
@@ -73,34 +74,36 @@ function Update-PsLaArmTemplate {
         [switch] $RemoveSource
     )
 
-    #The task counter needs to be reset prior running
-    Set-PSFConfig -FullName PsLogicAppExtractor.Execution.TaskCounter -Value 0
+    process {
+        #The task counter needs to be reset prior running
+        Set-PSFConfig -FullName PsLogicAppExtractor.Execution.TaskCounter -Value 0
 
-    Set-PSFConfig -FullName PsLogicAppExtractor.Execution.TaskInputNext -Value ""
-    Set-PSFConfig -FullName PsLogicAppExtractor.Execution.TaskOutputFile -Value ""
-    Set-PSFConfig -FullName PsLogicAppExtractor.Execution.TaskPath -Value ""
-    Set-PSFConfig -FullName PsLogicAppExtractor.Execution.Name -Value ""
+        Set-PSFConfig -FullName PsLogicAppExtractor.Execution.TaskInputNext -Value ""
+        Set-PSFConfig -FullName PsLogicAppExtractor.Execution.TaskOutputFile -Value ""
+        Set-PSFConfig -FullName PsLogicAppExtractor.Execution.TaskPath -Value ""
+        Set-PSFConfig -FullName PsLogicAppExtractor.Execution.Name -Value ""
         
-    $armObjSource = Get-TaskWorkObject -Path $Source
-    $armObjDestination = Get-TaskWorkObject -Path $Destination
+        $armObjSource = Get-TaskWorkObject -Path $Source
+        $armObjDestination = Get-TaskWorkObject -Path $Destination
 
-    if (-not $SkipParameters) {
-        # "Before ####"
-        # $armObjDestination.parameters | ConvertTo-Json -Depth 10
-        # "Before ####"
-        $armObjDestination.parameters = $armObjSource.parameters | ConvertTo-Json -Depth 10 | ConvertFrom-Json -Depth 10
-        # "After ####"
-        # $armObjDestination.parameters | ConvertTo-Json -Depth 10
-        # "After ####"
-    }
+        if (-not $SkipParameters) {
+            # "Before ####"
+            # $armObjDestination.parameters | ConvertTo-Json -Depth 10
+            # "Before ####"
+            $armObjDestination.parameters = $armObjSource.parameters | ConvertTo-Json -Depth 10 | ConvertFrom-Json -Depth 10
+            # "After ####"
+            # $armObjDestination.parameters | ConvertTo-Json -Depth 10
+            # "After ####"
+        }
 
-    if (-not $SkipResources) {
-        $armObjDestination.resources = @($armObjSource.resources | ConvertTo-Json -Depth 100 | ConvertFrom-Json -Depth 100)
-    }
+        if (-not $SkipResources) {
+            $armObjDestination.resources = @($armObjSource.resources | ConvertTo-Json -Depth 100 | ConvertFrom-Json -Depth 100)
+        }
 
-    Out-TaskFile -Path $Destination -InputObject $([ArmTemplate]$armObjDestination)
+        Out-TaskFile -Path $Destination -InputObject $([ArmTemplate]$armObjDestination)
 
-    if ($RemoveSource) {
-        Remove-Item -Path $Source -Force -Recurse -ErrorAction SilentlyContinue
+        if ($RemoveSource) {
+            Remove-Item -Path $Source -Force -Recurse -ErrorAction SilentlyContinue
+        }
     }
 }

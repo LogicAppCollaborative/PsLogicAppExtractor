@@ -95,61 +95,63 @@ function Get-PsLaArmParameter {
         [switch] $CopyMetadata
     )
 
-    $armObj = [ArmTemplate]$(Get-TaskWorkObject -Path $Path)
+    process {
+        $armObj = [ArmTemplate]$(Get-TaskWorkObject -Path $Path)
 
-    $res = [ordered]@{}
-    $res.'$schema' = "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#"
-    $res.contentVersion = "1.0.0.0"
-    $res.parameters = [ordered]@{}
+        $res = [ordered]@{}
+        $res.'$schema' = "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#"
+        $res.contentVersion = "1.0.0.0"
+        $res.parameters = [ordered]@{}
       
-    foreach ($item in $armObj.parameters.PsObject.Properties) {
-        if ($item.Name -in $Exclude) { continue }
+        foreach ($item in $armObj.parameters.PsObject.Properties) {
+            if ($item.Name -in $Exclude) { continue }
         
-        if ($Include.Count -gt 0) {
-            if (-not ($item.Name -in $Include)) { continue }
-        }
+            if ($Include.Count -gt 0) {
+                if (-not ($item.Name -in $Include)) { continue }
+            }
         
-        $valueObj = [ordered]@{}
+            $valueObj = [ordered]@{}
 
-        if ($BlankValues) {
-            switch ($item.Value.Type) {
-                "int" {
-                    $valueObj.value = 0
-                }
-                "bool" {
-                    $valueObj.value = $false
-                }
-                "object" {
-                    $valueObj.value = $null
-                }
-                "array" {
-                    $valueObj.value = @()
-                }
-                Default {
-                    $valueObj.value = ""
+            if ($BlankValues) {
+                switch ($item.Value.Type) {
+                    "int" {
+                        $valueObj.value = 0
+                    }
+                    "bool" {
+                        $valueObj.value = $false
+                    }
+                    "object" {
+                        $valueObj.value = $null
+                    }
+                    "array" {
+                        $valueObj.value = @()
+                    }
+                    Default {
+                        $valueObj.value = ""
+                    }
                 }
             }
+            else {
+                $valueObj.value = $item.Value.DefaultValue
+            }
+
+            if ($CopyMetadata -and $item.Value.metadata) {
+                $valueObj.metadata = $item.Value.metadata
+            }
+
+            $res.parameters."$($item.Name)" = $valueObj
+        }
+
+        if ($AsFile) {
+            $pathLocal = $Path.Replace(".json", ".parameters.json")
+
+            $encoding = New-Object System.Text.UTF8Encoding($true)
+            [System.IO.File]::WriteAllLines($pathLocal, $($([PSCustomObject] $res) | ConvertTo-Json -Depth 10), $encoding)
+
+            Get-Item -Path $pathLocal | Select-Object -ExpandProperty FullName
         }
         else {
-            $valueObj.value = $item.Value.DefaultValue
+            $([PSCustomObject] $res) | ConvertTo-Json -Depth 10
         }
-
-        if ($CopyMetadata -and $item.Value.metadata) {
-            $valueObj.metadata = $item.Value.metadata
-        }
-
-        $res.parameters."$($item.Name)" = $valueObj
-    }
-
-    if ($AsFile) {
-        $pathLocal = $Path.Replace(".json", ".parameters.json")
-
-        $encoding = New-Object System.Text.UTF8Encoding($true)
-        [System.IO.File]::WriteAllLines($pathLocal, $($([PSCustomObject] $res) | ConvertTo-Json -Depth 10), $encoding)
-
-        Get-Item -Path $pathLocal | Select-Object -ExpandProperty FullName
-    }
-    else {
-        $([PSCustomObject] $res) | ConvertTo-Json -Depth 10
     }
 }

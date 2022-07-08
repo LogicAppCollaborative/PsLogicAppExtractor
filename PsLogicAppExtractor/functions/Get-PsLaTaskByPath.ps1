@@ -48,20 +48,11 @@ function Get-PsLaTaskByPath {
         [string] $Path
     )
     
-    $files = Get-ChildItem -Path "$Path\*.ps1"
+    process {
+        $files = Get-ChildItem -Path "$Path\*.ps1"
 
-    $res = New-Object System.Collections.Generic.List[System.Object]
+        $res = New-Object System.Collections.Generic.List[System.Object]
 
-    # We are playing around with the internal / global psake object
-    $psake.context = New-Object System.Collections.Stack
-    $psake.context.push(
-        @{
-            "tasks"   = @{}
-            "aliases" = @{}
-        }
-    )
-
-    foreach ($item in $files) {
         # We are playing around with the internal / global psake object
         $psake.context = New-Object System.Collections.Stack
         $psake.context.push(
@@ -70,24 +61,35 @@ function Get-PsLaTaskByPath {
                 "aliases" = @{}
             }
         )
-        
-        . $item.FullName
 
-        foreach ($task in $psake.context.tasks) {
-            foreach ($value in $task.Values) {
-                $res.Add([PsCustomObject][ordered]@{
-                        Category    = $value.Alias.Split(".")[0]
-                        Name        = $value.Name
-                        Description = $value.Description
-                        Path        = $item.FullName
-                        File        = $item.Name
-                    })
+        foreach ($item in $files) {
+            # We are playing around with the internal / global psake object
+            $psake.context = New-Object System.Collections.Stack
+            $psake.context.push(
+                @{
+                    "tasks"   = @{}
+                    "aliases" = @{}
+                }
+            )
+        
+            . $item.FullName
+
+            foreach ($task in $psake.context.tasks) {
+                foreach ($value in $task.Values) {
+                    $res.Add([PsCustomObject][ordered]@{
+                            Category    = $value.Alias.Split(".")[0]
+                            Name        = $value.Name
+                            Description = $value.Description
+                            Path        = $item.FullName
+                            File        = $item.Name
+                        })
+                }
             }
         }
+
+        # We are playing around with the internal / global psake object
+        $psake.context = New-Object System.Collections.Stack
+
+        $res.ToArray() | Where-Object Name -ne "Default" | Sort-Object Category, Name
     }
-
-    # We are playing around with the internal / global psake object
-    $psake.context = New-Object System.Collections.Stack
-
-    $res.ToArray() | Where-Object Name -ne "Default" | Sort-Object Category, Name
 }
