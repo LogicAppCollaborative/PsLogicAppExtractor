@@ -17,6 +17,11 @@
     .PARAMETER KeepUnusedParameters
         If you want to keep the parameters in the destination file that are not in the source file, set this switch.
         
+    .PARAMETER KeepValues
+        If you want to keep the values of the parameters in the destination file, set this switch.
+
+        Useful when you want to align parameters across "environments", but don't want to change the values of the parameters.
+
     .EXAMPLE
         PS C:\> Update-PsLaArmParameterFile -Source C:\Temp\Source.json -Destination C:\Temp\Destination.json
         
@@ -32,7 +37,25 @@
         It will only update the parameter values that are present in the destination file.
         
         This example illustrates how to update a parameter file from a parameter file.
+
+    .EXAMPLE
+        PS C:\> Update-PsLaArmParameterFile -Source C:\Temp\Source.parameters.json -Destination C:\Temp\Destination.json -KeepUnusedParameters
         
+        This will update the parameter file C:\Temp\Destination.json with the values from the parameter file C:\Temp\Source.parameters.json.
+        It will only update the parameter values that are present in the destination file.
+        It will keep the parameters in the destination file that are not in the source file.
+        
+        This example illustrates how to update a parameter file from a parameter file.
+        
+    .EXAMPLE
+        PS C:\> Update-PsLaArmParameterFile -Source C:\Temp\Source.parameters.json -Destination C:\Temp\Destination.json KeepValues
+        
+        This will update the parameter file C:\Temp\Destination.json with the values from the parameter file C:\Temp\Source.parameters.json.
+        It will only update the parameter values that are present in the destination file.
+        It will keep the values of the parameters in the destination file.
+        
+        This example illustrates how to update a parameter file from a parameter file.
+
     .NOTES
         
         Author: Mötz Jensen (@Splaxi)
@@ -49,7 +72,9 @@ function Update-PsLaArmParameterFile {
         [PsfValidateScript('PSFramework.Validate.FSPath.File', ErrorString = 'PSFramework.Validate.FSPath.File')]
         [string] $Destination,
 
-        [switch] $KeepUnusedParameters
+        [switch] $KeepUnusedParameters,
+
+        [switch] $KeepValues
     )
 
     process {
@@ -69,6 +94,10 @@ function Update-PsLaArmParameterFile {
             
             if (-not ($armObjSource.parameters."$($item.Name)") -and (-not $KeepUnusedParameters)) {
                 $armObjDestination.parameters.PsObject.Properties.Remove($item.Name)
+                continue
+            }
+
+            if ($KeepValues) {
                 continue
             }
 
