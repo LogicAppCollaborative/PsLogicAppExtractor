@@ -163,7 +163,7 @@ Task -Name "Export-Raw.Connections.ManagedApis.DisplayName.AzCli" @parm -Action 
 #Original file: Set-Arm.Connections.ManagedApis.AsParameter.task.ps1
 $parm = @{
     Description = @"
-Depricated. Use Set-Arm.Connections.ManagedApis.Id.AsParameter.task insted.
+Depricated. Use Set-Arm.Connections.ManagedApis.Id.AsParameter.task instead.
 
 Loops all `$connections children
 -Creates an Arm parameter, with prefix & suffix

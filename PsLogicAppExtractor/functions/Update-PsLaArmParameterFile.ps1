@@ -19,12 +19,12 @@
         
     .PARAMETER KeepValues
         If you want to keep the values of the parameters in the destination file, set this switch.
-
+        
         Useful when you want to align parameters across "environments", but don't want to change the values of the parameters.
-
+        
     .PARAMETER ExcludeSourceParameters
         If you want to exclude parameters from the source file from the update, set this switch.
-
+        
     .EXAMPLE
         PS C:\> Update-PsLaArmParameterFile -Source C:\Temp\Source.json -Destination C:\Temp\Destination.json
         
@@ -40,7 +40,7 @@
         It will only update the parameter values that are present in the destination file.
         
         This example illustrates how to update a parameter file from a parameter file.
-
+        
     .EXAMPLE
         PS C:\> Update-PsLaArmParameterFile -Source C:\Temp\Source.parameters.json -Destination C:\Temp\Destination.json -KeepUnusedParameters
         
@@ -58,7 +58,7 @@
         It will keep the values of the parameters in the destination file.
         
         This example illustrates how to update a parameter file from a parameter file.
-
+        
     .NOTES
         
         Author: Mötz Jensen (@Splaxi)
