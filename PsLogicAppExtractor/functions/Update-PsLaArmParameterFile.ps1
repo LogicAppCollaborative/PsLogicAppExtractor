@@ -14,13 +14,16 @@
     .PARAMETER Destination
         The path to the destination parameter file to be updated.
         
-    .PARAMETER KeepUnusedParameters
+    .PARAMETER KeepDestinationParameters
         If you want to keep the parameters in the destination file that are not in the source file, set this switch.
         
     .PARAMETER KeepValues
         If you want to keep the values of the parameters in the destination file, set this switch.
 
         Useful when you want to align parameters across "environments", but don't want to change the values of the parameters.
+
+    .PARAMETER ExcludeSourceParameters
+        If you want to exclude parameters from the source file from the update, set this switch.
 
     .EXAMPLE
         PS C:\> Update-PsLaArmParameterFile -Source C:\Temp\Source.json -Destination C:\Temp\Destination.json
@@ -72,9 +75,12 @@ function Update-PsLaArmParameterFile {
         [PsfValidateScript('PSFramework.Validate.FSPath.File', ErrorString = 'PSFramework.Validate.FSPath.File')]
         [string] $Destination,
 
-        [switch] $KeepUnusedParameters,
+        [Alias('KeepUnusedParameters')]
+        [switch] $KeepDestinationParameters,
 
-        [switch] $KeepValues
+        [switch] $KeepValues,
+
+        [string[]] $ExcludeSourceParameters
     )
 
     process {
@@ -92,7 +98,7 @@ function Update-PsLaArmParameterFile {
         foreach ($item in $armObjDestination.parameters.PsObject.Properties) {
             $valueObj = [ordered]@{}
             
-            if (-not ($armObjSource.parameters."$($item.Name)") -and (-not $KeepUnusedParameters)) {
+            if (-not ($armObjSource.parameters."$($item.Name)") -and (-not $KeepDestinationParameters)) {
                 $armObjDestination.parameters.PsObject.Properties.Remove($item.Name)
                 continue
             }
@@ -109,6 +115,25 @@ function Update-PsLaArmParameterFile {
             }
 
             $armObjDestination.parameters."$($item.Name)" = $valueObj
+        }
+
+        foreach ($item in $armObjSource.parameters.PsObject.Properties) {
+            $valueObj = [ordered]@{}
+
+            if($item.Name -in $ExcludeSourceParameters) {
+                continue
+            }
+
+            if (-not ($armObjDestination.parameters."$($item.Name)")) {
+                if ($armObjSource.parameters."$($item.Name)".DefaultValue) {
+                    $valueObj.value = $armObjSource.parameters."$($item.Name)".DefaultValue
+                }
+                else {
+                    $valueObj.value = $armObjSource.parameters."$($item.Name)".Value
+                }
+
+                $armObjDestination.parameters | Add-Member -MemberType NoteProperty -Name "$($item.Name)" -Value $valueObj
+            }
         }
 
         Out-TaskFile -Path $Destination -InputObject $armObjDestination
