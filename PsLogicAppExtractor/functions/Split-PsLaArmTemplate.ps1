@@ -44,6 +44,7 @@
 #>
 function Split-PsLaArmTemplate {
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseOutputTypeCorrectly', '')]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '')]
     [CmdletBinding()]
     param (
         [parameter(Mandatory = $true)]
