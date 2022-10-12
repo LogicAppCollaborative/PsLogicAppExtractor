@@ -1,54 +1,55 @@
-﻿<#
-.SYNOPSIS
-Get Managed Api Connection objects by their usage
-
-.DESCRIPTION
-Get Managed Api Connection objects, and filter by their usage
-
-You can list Api Connections that are NOT referenced by any Logic App
-You can list Logic Apps and the Api Connections they reference, but doesn't exists
-You can list Api Connections that are referenced by Logic Apps
-
+﻿
+<#
+    .SYNOPSIS
+        Get Managed Api Connection objects by their usage
+        
+    .DESCRIPTION
+        Get Managed Api Connection objects, and filter by their usage
+        
+        You can list Api Connections that are NOT referenced by any Logic App
+        You can list Logic Apps and the Api Connections they reference, but doesn't exists
+        You can list Api Connections that are referenced by Logic Apps
+        
     .PARAMETER SubscriptionId
         Id of the subscription that you want to work against, your current az cli session either needs to be "connected" to the subscription or at least have permissions to work against the subscription
         
     .PARAMETER ResourceGroup
         Name of the resource group that you want to work against, your current az cli session needs to have permissions to work against the resource group
-
-.PARAMETER IncludeUsed
-Instruct the cmdlet to include Api Connections that are referenced by Logic Apps
-
-.PARAMETER IncludeLogicAppResourceNotFound
-Instructions the cmdlet to include Api Connections that are referenced by Logic Apps, but where the Api Connection doesn't exists
-
-.EXAMPLE
-PS C:\> Get-PsLaManagedApiConnectionByUsage.AzAccount -SubscriptionId "b466443d-6eac-4513-a7f0-3579502929f00" -ResourceGroup "TestRg"
-
-This will list all Api Connections in the resource group "TestRg" in the subscription "b466443d-6eac-4513-a7f0-3579502929f00".
-It will only list Api Connections that are NOT referenced by any Logic App
-
-.EXAMPLE
-PS C:\> Get-PsLaManagedApiConnectionByUsage.AzAccount -SubscriptionId "b466443d-6eac-4513-a7f0-3579502929f00" -ResourceGroup "TestRg" -IncludeUsed
-
-This will list all Api Connections in the resource group "TestRg" in the subscription "b466443d-6eac-4513-a7f0-3579502929f00".
-It will list Api Connections that are NOT referenced by any Logic App.
-It will list Api Connections that are referenced by Logic Apps.
-
-.EXAMPLE
-PS C:\> Get-PsLaManagedApiConnectionByUsage.AzAccount -SubscriptionId "b466443d-6eac-4513-a7f0-3579502929f00" -ResourceGroup "TestRg" -IncludeLogicAppResourceNotFound
-
-This will list all Api Connections in the resource group "TestRg" in the subscription "b466443d-6eac-4513-a7f0-3579502929f00".
-It will list Api Connections that are NOT referenced by any Logic App.
-It will list Api Connections that are referenced by Logic Apps, but where the Api Connection doesn't exists.
-
-.NOTES
-Author: Mötz Jensen (@Splaxi)
-
-The implementation was inspired by the following blog post:
-https://techcommunity.microsoft.com/t5/integrations-on-azure-blog/use-powershell-script-to-manage-your-api-connection-of-logic-app/ba-p/2668253
-https://www.integration-playbook.io/docs/find-orphaned-api-connectors
-https://github.com/sandroasp/Azure-Learning-Path/blob/main/Logic-Apps/Find-Azure-Orphaned-API-Connectors-powershell/Find-Orphaned-API-Connectors.ps1
-
+        
+    .PARAMETER IncludeUsed
+        Instruct the cmdlet to include Api Connections that are referenced by Logic Apps
+        
+    .PARAMETER IncludeLogicAppResourceNotFound
+        Instructions the cmdlet to include Api Connections that are referenced by Logic Apps, but where the Api Connection doesn't exists
+        
+    .EXAMPLE
+        PS C:\> Get-PsLaManagedApiConnectionByUsage.AzAccount -SubscriptionId "b466443d-6eac-4513-a7f0-3579502929f00" -ResourceGroup "TestRg"
+        
+        This will list all Api Connections in the resource group "TestRg" in the subscription "b466443d-6eac-4513-a7f0-3579502929f00".
+        It will only list Api Connections that are NOT referenced by any Logic App
+        
+    .EXAMPLE
+        PS C:\> Get-PsLaManagedApiConnectionByUsage.AzAccount -SubscriptionId "b466443d-6eac-4513-a7f0-3579502929f00" -ResourceGroup "TestRg" -IncludeUsed
+        
+        This will list all Api Connections in the resource group "TestRg" in the subscription "b466443d-6eac-4513-a7f0-3579502929f00".
+        It will list Api Connections that are NOT referenced by any Logic App.
+        It will list Api Connections that are referenced by Logic Apps.
+        
+    .EXAMPLE
+        PS C:\> Get-PsLaManagedApiConnectionByUsage.AzAccount -SubscriptionId "b466443d-6eac-4513-a7f0-3579502929f00" -ResourceGroup "TestRg" -IncludeLogicAppResourceNotFound
+        
+        This will list all Api Connections in the resource group "TestRg" in the subscription "b466443d-6eac-4513-a7f0-3579502929f00".
+        It will list Api Connections that are NOT referenced by any Logic App.
+        It will list Api Connections that are referenced by Logic Apps, but where the Api Connection doesn't exists.
+        
+    .NOTES
+        Author: Mötz Jensen (@Splaxi)
+        
+        The implementation was inspired by the following blog post:
+        https://techcommunity.microsoft.com/t5/integrations-on-azure-blog/use-powershell-script-to-manage-your-api-connection-of-logic-app/ba-p/2668253
+        https://www.integration-playbook.io/docs/find-orphaned-api-connectors
+        https://github.com/sandroasp/Azure-Learning-Path/blob/main/Logic-Apps/Find-Azure-Orphaned-API-Connectors-powershell/Find-Orphaned-API-Connectors.ps1
+        
 #>
 function Get-PsLaManagedApiConnectionByUsage.AzAccount {
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseOutputTypeCorrectly', '')]

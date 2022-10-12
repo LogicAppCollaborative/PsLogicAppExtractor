@@ -1,45 +1,46 @@
-﻿<#
-.SYNOPSIS
-Split an ARM template into multiple files, based on the resource type
-
-.DESCRIPTION
-You might have a large ARM template, consisting of multiple resource types. This script will create single ARM templates for the specified resource type, and will copy the parameters from the original template
-
-.PARAMETER Path
-Path to the ARM template that you want to work against
-
-.PARAMETER OutputPath
-Path to were the ARM template file will be persisted
+﻿
+<#
+    .SYNOPSIS
+        Split an ARM template into multiple files, based on the resource type
         
-The path has to be a directory
+    .DESCRIPTION
+        You might have a large ARM template, consisting of multiple resource types. This script will create single ARM templates for the specified resource type, and will copy the parameters from the original template
         
-The file will be named as the original ARM template file
-
-.PARAMETER TypeFilter
-Instruct the cmdlet to only process the specified resource type
-
-The default value is 'Microsoft.Web/connections'
-
-.EXAMPLE
-PS C:\> Split-ArmTemplate -Path 'C:\temp\template.json' -OutputPath 'C:\temp\output'
-
-This will create a new ARM template file for each resource of the type 'Microsoft.Web/connections' in the original ARM template file.
-The new ARM template files will be persisted in the 'C:\temp\output' directory.
-
-.EXAMPLE
-PS C:\> Split-ArmTemplate -Path 'C:\temp\template.json'
-
-This will create a new ARM template file for each resource of the type 'Microsoft.Web/connections' in the original ARM template file.
-The new ARM template files will be persisted in the same directory as the original ARM template file.
-
-.EXAMPLE
-PS C:\> Split-ArmTemplate -Path 'C:\temp\template.json' -TypeFilter 'Microsoft.Web/sites'
-
-This will create a new ARM template file for each resource of the type 'Microsoft.Web/sites' in the original ARM template file.
-The new ARM template files will be persisted in the same directory as the original ARM template file.
-
-.NOTES
-Author: Mötz Jensen (@Splaxi)
+    .PARAMETER Path
+        Path to the ARM template that you want to work against
+        
+    .PARAMETER OutputPath
+        Path to were the ARM template file will be persisted
+        
+        The path has to be a directory
+        
+        The file will be named as the original ARM template file
+        
+    .PARAMETER TypeFilter
+        Instruct the cmdlet to only process the specified resource type
+        
+        The default value is 'Microsoft.Web/connections'
+        
+    .EXAMPLE
+        PS C:\> Split-ArmTemplate -Path 'C:\temp\template.json' -OutputPath 'C:\temp\output'
+        
+        This will create a new ARM template file for each resource of the type 'Microsoft.Web/connections' in the original ARM template file.
+        The new ARM template files will be persisted in the 'C:\temp\output' directory.
+        
+    .EXAMPLE
+        PS C:\> Split-ArmTemplate -Path 'C:\temp\template.json'
+        
+        This will create a new ARM template file for each resource of the type 'Microsoft.Web/connections' in the original ARM template file.
+        The new ARM template files will be persisted in the same directory as the original ARM template file.
+        
+    .EXAMPLE
+        PS C:\> Split-ArmTemplate -Path 'C:\temp\template.json' -TypeFilter 'Microsoft.Web/sites'
+        
+        This will create a new ARM template file for each resource of the type 'Microsoft.Web/sites' in the original ARM template file.
+        The new ARM template files will be persisted in the same directory as the original ARM template file.
+        
+    .NOTES
+        Author: Mötz Jensen (@Splaxi)
 #>
 function Split-PsLaArmTemplate {
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseOutputTypeCorrectly', '')]
