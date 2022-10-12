@@ -99,6 +99,7 @@ function Update-PsLaArmParameterFile {
             $valueObj = [ordered]@{}
             
             if (-not ($armObjSource.parameters."$($item.Name)") -and (-not $KeepDestinationParameters)) {
+                # Should we use the Remove-ArmParameter function here?
                 $armObjDestination.parameters.PsObject.Properties.Remove($item.Name)
                 continue
             }
@@ -131,7 +132,8 @@ function Update-PsLaArmParameterFile {
                 else {
                     $valueObj.value = $armObjSource.parameters."$($item.Name)".Value
                 }
-
+                
+                # Should we use the Add-ArmParameter function here?
                 $armObjDestination.parameters | Add-Member -MemberType NoteProperty -Name "$($item.Name)" -Value $valueObj
             }
         }

@@ -44,6 +44,8 @@
 		'Get-PsLaArmParameter'
 		, 'Get-PsLaManagedApiConnection.AzAccount'
 		, 'Get-PsLaManagedApiConnection.AzCli'
+		, 'Get-PsLaManagedApiConnectionByUsage.AzAccount'
+		, 'Get-PsLaManagedApiConnectionByUsage.AzCli'
 		, 'Get-PsLaTask'
 		, 'Get-PsLaTaskByFile'
 		, 'Get-PsLaTaskByPath'
@@ -73,6 +75,7 @@
 		, 'Remove-ArmVariable'
 		, 'Remove-LogicAppParm'
 		, 'Set-TaskWorkDirectory'
+		, 'Split-PsLaArmTemplate'
 		# , 'Set-TaskWorkDirectoryPester'
 
 		, 'Update-PsLaArmTemplate'

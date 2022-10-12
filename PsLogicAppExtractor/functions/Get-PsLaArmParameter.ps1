@@ -82,6 +82,7 @@ function Get-PsLaArmParameter {
     param (
         [parameter(Mandatory = $true, ValueFromPipeline = $true)]
         [PsfValidateScript('PSFramework.Validate.FSPath.File', ErrorString = 'PSFramework.Validate.FSPath.File')]
+        [Alias('File')]
         [string] $Path,
 
         [string[]] $Exclude,

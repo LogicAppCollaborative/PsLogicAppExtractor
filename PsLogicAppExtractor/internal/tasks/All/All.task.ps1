@@ -229,7 +229,524 @@ Task -Name "Set-Arm.Connections.ManagedApis.AsVariable" @parm -Action {
     Out-TaskFileArm -InputObject $armObj
 }
 
-#Original file: Set-Arm.Connections.ManagedApis.Generic.AsArmObject.task.ps1
+#Original file: Set-Arm.Connections.ManagedApis.AzureBlob.ListKey.Advanced.AsArmObject.AzAccount.task.ps1
+$parm = @{
+    Description = @"
+Loops all `$connections children
+-Validates that is of the type azureblob
+--Creates a new resource in the ARM template, for the ApiConnection object
+--With matching ARM Parameters, for the SubscriptionId, ResourceGroup, Namespace, Key
+--Makes sure the ARM Parameters logicAppLocation exists
+--The type is based on ListKey / ConnectionString approach
+--Name & Displayname is extracted from the Api Connection Object
+"@
+    Alias       = "Arm.Set-Arm.Connections.ManagedApis.AzureBlob.ListKey.Advanced.AsArmObject.AzAccount"
+}
+
+Task -Name "Set-Arm.Connections.ManagedApis.AzureBlob.ListKey.Advanced.AsArmObject.AzAccount" @parm -Action {
+    Set-TaskWorkDirectory
+
+    $found = $false
+    $conType = "azureblob"
+    
+    $armObj = Get-TaskWorkObject
+
+    $armObj.resources[0].properties.parameters.'$connections'.value.PsObject.Properties | ForEach-Object {
+
+        if ($_.Value.id -like "*managedApis/azureblob*") {
+            $found = $true
+
+            # Fetch the details from the connection object
+            $uri = "{0}?api-version=2018-07-01-preview" -f $($_.Value.connectionId)
+            $resObj = Invoke-AzRestMethod -Path $uri -Method Get | Select-Object -ExpandProperty content | ConvertFrom-Json
+
+            # Use the display name as the name of the resource
+            $conName = $resObj.Name
+            $displayName = $resObj.Properties.DisplayName
+            $resName = $resObj.Properties.ParameterValues.AccountName
+
+            # Fetch base template
+            $pathArms = "$(Get-PSFConfigValue -FullName PsLogicAppExtractor.ModulePath.Base)\internal\arms"
+            $apiObj = Get-Content -Path "$pathArms\API.AzureBlob.AccessKey.json" -Raw | ConvertFrom-Json
+
+            # Set the names of the parameters
+            $Prefix = Get-PSFConfigValue -FullName PsLogicAppExtractor.prefixsuffix.connection.prefix
+            $subPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_Subscription" -Value "$($_.Name)"
+            $rgPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_ResourceGroup" -Value "$($_.Name)"
+            $objPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_StorageAccount" -Value "$($_.Name)"
+            
+            $idPreSuf = Format-Name -Type "Connection" -Value "$($_.Name)"
+            $displayPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_DisplayName" -Value "$($_.Name)"
+            
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$subPreSuf" `
+                -Type "string" `
+                -Value "[subscription().subscriptionId]" `
+                -Description "The subscription where the storage account is located. ($($_.Name))"
+
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$rgPreSuf" `
+                -Type "string" `
+                -Value "[resourceGroup().name]" `
+                -Description "The resource group where the storage account is located. ($($_.Name))"
+
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$objPreSuf" `
+                -Type "string" `
+                -Value "$resName" `
+                -Description "The name of the storage account. ($($_.Name))"
+            
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$idPreSuf" `
+                -Type "string" `
+                -Value $conName `
+                -Description "The name / id of the ManagedApi connection object that is being utilized by the Logic App. Will be for the trigger and other actions that depend on connections."
+
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$displayPreSuf" `
+                -Type "string" `
+                -Value $displayName `
+                -Description "The display name of the ManagedApi connection object that is being utilized by the Logic App."
+
+            # Update the api object properties
+            $apiObj.Name = "[parameters('$idPreSuf')]"
+            $apiObj.properties.displayName = "[parameters('$displayPreSuf')]"
+            $apiObj.properties.parameterValues.accountName = "[parameters('$objPreSuf')]"
+            $apiObj.properties.parameterValues.accessKey = $apiObj.properties.parameterValues.accessKey.Replace("'##SUSCRIPTIONID##'", "parameters('$subPreSuf')").Replace("'##RESOURCEGROUPNAME##'", "parameters('$rgPreSuf')").Replace("'##ACCOUNTNAME##'", "parameters('$objPreSuf')")
+
+            # Append the new resource to the ARM template
+            $armObj.resources += $apiObj
+
+            if ($null -eq $armObj.resources[0].dependsOn) {
+                # Create the dependsOn array if it does not exist
+                $armObj.resources[0] | Add-Member -MemberType NoteProperty -Name "dependsOn" -Value @()
+            }
+
+            # Add the new resource to the dependsOn array, so that the deployment will work
+            $armObj.resources[0].dependsOn += "[resourceId('Microsoft.Web/connections', parameters('$idPreSuf'))]"
+
+            # Adjust the connection object to depend on the same name
+            $_.Value.connectionId = "[resourceId('Microsoft.Web/connections', parameters('$idPreSuf'))]"
+            $_.Value.connectionName = "[parameters('$idPreSuf')]"
+            $_.Value.id = "[format('/subscriptions/{0}/providers/Microsoft.Web/locations/{1}/managedApis/$conType', subscription().subscriptionId, parameters('logicAppLocation'))]"
+        }
+    }
+
+    if ($found) {
+        # We need the location parameter
+        if ($null -eq $armObj.parameters.logicAppLocation) {
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "logicAppLocation" `
+                -Type "string" `
+                -Value "[resourceGroup().location]" `
+                -Description "Location of the Logic App. Best practice recommendation is to make this depending on the Resource Group and its location."
+        }
+    }
+
+    Out-TaskFileArm -InputObject $armObj
+}
+
+#Original file: Set-Arm.Connections.ManagedApis.AzureBlob.ListKey.Advanced.AsArmObject.AzCli.task.ps1
+$parm = @{
+    Description = @"
+Loops all `$connections children
+-Validates that is of the type azureblob
+--Creates a new resource in the ARM template, for the ApiConnection object
+--With matching ARM Parameters, for the SubscriptionId, ResourceGroup, Namespace, Key
+--Makes sure the ARM Parameters logicAppLocation exists
+--The type is based on ListKey / ConnectionString approach
+--Name & Displayname is extracted from the Api Connection Object
+"@
+    Alias       = "Arm.Set-Arm.Connections.ManagedApis.AzureBlob.ListKey.Advanced.AsArmObject.AzCli"
+}
+
+Task -Name "Set-Arm.Connections.ManagedApis.AzureBlob.ListKey.Advanced.AsArmObject.AzCli" @parm -Action {
+    Set-TaskWorkDirectory
+
+    $found = $false
+    $conType = "azureblob"
+    
+    $armObj = Get-TaskWorkObject
+
+    $armObj.resources[0].properties.parameters.'$connections'.value.PsObject.Properties | ForEach-Object {
+
+        if ($_.Value.id -like "*managedApis/azureblob*") {
+            $found = $true
+
+            # Fetch the details from the connection object
+            $uri = "{0}?api-version=2018-07-01-preview" -f $($_.Value.connectionId)
+            $resObj = az rest --url $uri | ConvertFrom-Json
+
+            # Use the display name as the name of the resource
+            $conName = $resObj.Name
+            $displayName = $resObj.Properties.DisplayName
+            $resName = $resObj.Properties.ParameterValues.AccountName
+
+            # Fetch base template
+            $pathArms = "$(Get-PSFConfigValue -FullName PsLogicAppExtractor.ModulePath.Base)\internal\arms"
+            $apiObj = Get-Content -Path "$pathArms\API.AzureBlob.AccessKey.json" -Raw | ConvertFrom-Json
+
+            # Set the names of the parameters
+            $Prefix = Get-PSFConfigValue -FullName PsLogicAppExtractor.prefixsuffix.connection.prefix
+            $subPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_Subscription" -Value "$($_.Name)"
+            $rgPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_ResourceGroup" -Value "$($_.Name)"
+            $objPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_StorageAccount" -Value "$($_.Name)"
+            
+            $idPreSuf = Format-Name -Type "Connection" -Value "$($_.Name)"
+            $displayPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_DisplayName" -Value "$($_.Name)"
+            
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$subPreSuf" `
+                -Type "string" `
+                -Value "[subscription().subscriptionId]" `
+                -Description "The subscription where the storage account is located. ($($_.Name))"
+
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$rgPreSuf" `
+                -Type "string" `
+                -Value "[resourceGroup().name]" `
+                -Description "The resource group where the storage account is located. ($($_.Name))"
+
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$objPreSuf" `
+                -Type "string" `
+                -Value "$resName" `
+                -Description "The name of the storage account. ($($_.Name))"
+            
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$idPreSuf" `
+                -Type "string" `
+                -Value $conName `
+                -Description "The name / id of the ManagedApi connection object that is being utilized by the Logic App. Will be for the trigger and other actions that depend on connections."
+
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$displayPreSuf" `
+                -Type "string" `
+                -Value $displayName `
+                -Description "The display name of the ManagedApi connection object that is being utilized by the Logic App."
+
+            # Update the api object properties
+            $apiObj.Name = "[parameters('$idPreSuf')]"
+            $apiObj.properties.displayName = "[parameters('$displayPreSuf')]"
+            $apiObj.properties.parameterValues.accountName = "[parameters('$objPreSuf')]"
+            $apiObj.properties.parameterValues.accessKey = $apiObj.properties.parameterValues.accessKey.Replace("'##SUSCRIPTIONID##'", "parameters('$subPreSuf')").Replace("'##RESOURCEGROUPNAME##'", "parameters('$rgPreSuf')").Replace("'##ACCOUNTNAME##'", "parameters('$objPreSuf')")
+
+            # Append the new resource to the ARM template
+            $armObj.resources += $apiObj
+
+            if ($null -eq $armObj.resources[0].dependsOn) {
+                # Create the dependsOn array if it does not exist
+                $armObj.resources[0] | Add-Member -MemberType NoteProperty -Name "dependsOn" -Value @()
+            }
+
+            # Add the new resource to the dependsOn array, so that the deployment will work
+            $armObj.resources[0].dependsOn += "[resourceId('Microsoft.Web/connections', parameters('$idPreSuf'))]"
+
+            # Adjust the connection object to depend on the same name
+            $_.Value.connectionId = "[resourceId('Microsoft.Web/connections', parameters('$idPreSuf'))]"
+            $_.Value.connectionName = "[parameters('$idPreSuf')]"
+            $_.Value.id = "[format('/subscriptions/{0}/providers/Microsoft.Web/locations/{1}/managedApis/$conType', subscription().subscriptionId, parameters('logicAppLocation'))]"
+        }
+    }
+
+    if ($found) {
+        # We need the location parameter
+        if ($null -eq $armObj.parameters.logicAppLocation) {
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "logicAppLocation" `
+                -Type "string" `
+                -Value "[resourceGroup().location]" `
+                -Description "Location of the Logic App. Best practice recommendation is to make this depending on the Resource Group and its location."
+        }
+    }
+
+    Out-TaskFileArm -InputObject $armObj
+}
+
+#Original file: Set-Arm.Connections.ManagedApis.AzureBlob.ListKey.AsArmObject.AzAccount.task.ps1
+$parm = @{
+    Description = @"
+Loops all `$connections children
+-Validates that is of the type azureblob
+--Creates a new resource in the ARM template, for the ApiConnection object
+--With matching ARM Parameters, for the SubscriptionId, ResourceGroup, Namespace, Key
+--Makes sure the ARM Parameters logicAppLocation exists
+--The type is based on ListKey / ConnectionString approach
+--Name & Displayname is extracted from the ConnectionName property
+"@
+    Alias       = "Arm.Set-Arm.Connections.ManagedApis.AzureBlob.ListKey.AsArmObject.AzAccount.task"
+}
+
+Task -Name "Set-Arm.Connections.ManagedApis.AzureBlob.ListKey.AsArmObject.AzAccount.task" @parm -Action {
+    Set-TaskWorkDirectory
+
+    $found = $false
+    $conType = "azureblob"
+    
+    $armObj = Get-TaskWorkObject
+
+    $armObj.resources[0].properties.parameters.'$connections'.value.PsObject.Properties | ForEach-Object {
+
+        if ($_.Value.id -like "*managedApis/azureblob*") {
+            $found = $true
+
+            # Fetch the details from the connection object
+            $uri = "{0}?api-version=2018-07-01-preview" -f $($_.Value.connectionId)
+            $resObj = Invoke-AzRestMethod -Path $uri -Method Get | Select-Object -ExpandProperty content | ConvertFrom-Json
+
+            # Use the display name as the name of the resource
+            $conName = $resObj.Properties.DisplayName
+            $resName = $resObj.Properties.ParameterValues.AccountName
+
+            # Fetch base template
+            $pathArms = "$(Get-PSFConfigValue -FullName PsLogicAppExtractor.ModulePath.Base)\internal\arms"
+            $apiObj = Get-Content -Path "$pathArms\API.AzureBlob.AccessKey.json" -Raw | ConvertFrom-Json
+
+            # Set the names of the parameters
+            $Prefix = Get-PSFConfigValue -FullName PsLogicAppExtractor.prefixsuffix.connection.prefix
+            $subPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_Subscription" -Value "$($_.Name)"
+            $rgPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_ResourceGroup" -Value "$($_.Name)"
+            $objPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_StorageAccount" -Value "$($_.Name)"
+            $idPreSuf = Format-Name -Type "Connection" -Value "$($_.Name)"
+            
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$subPreSuf" `
+                -Type "string" `
+                -Value "[subscription().subscriptionId]" `
+                -Description "The subscription where the storage account is located. ($($_.Name))"
+
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$rgPreSuf" `
+                -Type "string" `
+                -Value "[resourceGroup().name]" `
+                -Description "The resource group where the storage account is located. ($($_.Name))"
+
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$objPreSuf" `
+                -Type "string" `
+                -Value "$resName" `
+                -Description "The name of the storage account. ($($_.Name))"
+            
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$idPreSuf" `
+                -Type "string" `
+                -Value $conName `
+                -Description "The name / id of the ManagedApi connection object that is being utilized by the Logic App. Will be for the trigger and other actions that depend on connections."
+
+            $apiObj.Name = "[parameters('$idPreSuf')]"
+            $apiObj.properties.displayName = "[parameters('$idPreSuf')]"
+            $apiObj.properties.parameterValues.accountName = "[parameters('$objPreSuf')]"
+            $apiObj.properties.parameterValues.accessKey = $apiObj.properties.parameterValues.accessKey.Replace("'##SUSCRIPTIONID##'", "parameters('$subPreSuf')").Replace("'##RESOURCEGROUPNAME##'", "parameters('$rgPreSuf')").Replace("'##ACCOUNTNAME##'", "parameters('$objPreSuf')")
+
+            # Append the new resource to the ARM template
+            $armObj.resources += $apiObj
+
+            if ($null -eq $armObj.resources[0].dependsOn) {
+                # Create the dependsOn array if it does not exist
+                $armObj.resources[0] | Add-Member -MemberType NoteProperty -Name "dependsOn" -Value @()
+            }
+
+            # Add the new resource to the dependsOn array, so that the deployment will work
+            $armObj.resources[0].dependsOn += "[resourceId('Microsoft.Web/connections', parameters('$idPreSuf'))]"
+
+            # Adjust the connection object to depend on the same name
+            $_.Value.connectionId = "[resourceId('Microsoft.Web/connections', parameters('$idPreSuf'))]"
+            $_.Value.connectionName = "[parameters('$idPreSuf')]"
+            $_.Value.id = "[format('/subscriptions/{0}/providers/Microsoft.Web/locations/{1}/managedApis/$conType', subscription().subscriptionId, parameters('logicAppLocation'))]"
+        }
+    }
+
+    if ($found) {
+        # We need the location parameter
+        if ($null -eq $armObj.parameters.logicAppLocation) {
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "logicAppLocation" `
+                -Type "string" `
+                -Value "[resourceGroup().location]" `
+                -Description "Location of the Logic App. Best practice recommendation is to make this depending on the Resource Group and its location."
+        }
+    }
+
+    Out-TaskFileArm -InputObject $armObj
+}
+
+#Original file: Set-Arm.Connections.ManagedApis.AzureBlob.ListKey.AsArmObject.AzCli.task.ps1
+$parm = @{
+    Description = @"
+Loops all `$connections children
+-Validates that is of the type azureblob
+--Creates a new resource in the ARM template, for the ApiConnection object
+--With matching ARM Parameters, for the SubscriptionId, ResourceGroup, Namespace, Key
+--Makes sure the ARM Parameters logicAppLocation exists
+--The type is based on ListKey / ConnectionString approach
+--Name & Displayname is extracted from the ConnectionName property
+"@
+    Alias       = "Arm.Set-Arm.Connections.ManagedApis.AzureBlob.ListKey.AsArmObject.AzCli"
+}
+
+Task -Name "Set-Arm.Connections.ManagedApis.AzureBlob.ListKey.AsArmObject.AzCli" @parm -Action {
+    Set-TaskWorkDirectory
+
+    $found = $false
+    $conType = "azureblob"
+    
+    $armObj = Get-TaskWorkObject
+
+    $armObj.resources[0].properties.parameters.'$connections'.value.PsObject.Properties | ForEach-Object {
+
+        if ($_.Value.id -like "*managedApis/azureblob*") {
+            $found = $true
+
+            # Fetch the details from the connection object
+            $uri = "{0}?api-version=2018-07-01-preview" -f $($_.Value.connectionId)
+            $resObj = az rest --url $uri | ConvertFrom-Json
+
+            # Use the display name as the name of the resource
+            $conName = $resObj.Properties.DisplayName
+            $resName = $resObj.Properties.ParameterValues.AccountName
+
+            # Fetch base template
+            $pathArms = "$(Get-PSFConfigValue -FullName PsLogicAppExtractor.ModulePath.Base)\internal\arms"
+            $apiObj = Get-Content -Path "$pathArms\API.AzureBlob.AccessKey.json" -Raw | ConvertFrom-Json
+
+            # Set the names of the parameters
+            $Prefix = Get-PSFConfigValue -FullName PsLogicAppExtractor.prefixsuffix.connection.prefix
+            $subPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_Subscription" -Value "$($_.Name)"
+            $rgPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_ResourceGroup" -Value "$($_.Name)"
+            $objPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_StorageAccount" -Value "$($_.Name)"
+            $idPreSuf = Format-Name -Type "Connection" -Value "$($_.Name)"
+            
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$subPreSuf" `
+                -Type "string" `
+                -Value "[subscription().subscriptionId]" `
+                -Description "The subscription where the storage account is located. ($($_.Name))"
+
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$rgPreSuf" `
+                -Type "string" `
+                -Value "[resourceGroup().name]" `
+                -Description "The resource group where the storage account is located. ($($_.Name))"
+
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$objPreSuf" `
+                -Type "string" `
+                -Value "$resName" `
+                -Description "The name of the storage account. ($($_.Name))"
+            
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$idPreSuf" `
+                -Type "string" `
+                -Value $conName `
+                -Description "The name / id of the ManagedApi connection object that is being utilized by the Logic App. Will be for the trigger and other actions that depend on connections."
+
+            # Update the api object properties
+            $apiObj.Name = "[parameters('$idPreSuf')]"
+            $apiObj.properties.displayName = "[parameters('$idPreSuf')]"
+            $apiObj.properties.parameterValues.accountName = "[parameters('$objPreSuf')]"
+            $apiObj.properties.parameterValues.accessKey = $apiObj.properties.parameterValues.accessKey.Replace("'##SUSCRIPTIONID##'", "parameters('$subPreSuf')").Replace("'##RESOURCEGROUPNAME##'", "parameters('$rgPreSuf')").Replace("'##ACCOUNTNAME##'", "parameters('$objPreSuf')")
+
+            # Append the new resource to the ARM template
+            $armObj.resources += $apiObj
+
+            if ($null -eq $armObj.resources[0].dependsOn) {
+                # Create the dependsOn array if it does not exist
+                $armObj.resources[0] | Add-Member -MemberType NoteProperty -Name "dependsOn" -Value @()
+            }
+
+            # Add the new resource to the dependsOn array, so that the deployment will work
+            $armObj.resources[0].dependsOn += "[resourceId('Microsoft.Web/connections', parameters('$idPreSuf'))]"
+
+            # Adjust the connection object to depend on the same name
+            $_.Value.connectionId = "[resourceId('Microsoft.Web/connections', parameters('$idPreSuf'))]"
+            $_.Value.connectionName = "[parameters('$idPreSuf')]"
+            $_.Value.id = "[format('/subscriptions/{0}/providers/Microsoft.Web/locations/{1}/managedApis/$conType', subscription().subscriptionId, parameters('logicAppLocation'))]"
+        }
+    }
+
+    if ($found) {
+        # We need the location parameter
+        if ($null -eq $armObj.parameters.logicAppLocation) {
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "logicAppLocation" `
+                -Type "string" `
+                -Value "[resourceGroup().location]" `
+                -Description "Location of the Logic App. Best practice recommendation is to make this depending on the Resource Group and its location."
+        }
+    }
+
+    Out-TaskFileArm -InputObject $armObj
+}
+
+#Original file: Set-Arm.Connections.ManagedApis.Generic.Advanced.AsArmObject.AzCli.task.ps1
+$parm = @{
+    Description = @"
+Loops all `$connections children
+-Validates that is of the type ManagedApi
+--Creates a new resource in the ARM template, for the ApiConnection object
+--Makes sure the ARM Parameters logicAppLocation exists
+--Name & Displayname is extracted from the Api Connection Object
+--Extends the dependsOn property on the LogicApp resource, to depend on the ApiConnection object
+"@
+    Alias       = "Arm.Set-Arm.Connections.ManagedApis.Generic.Advanced.AsArmObject.AzCli"
+}
+
+Task -Name "Set-Arm.Connections.ManagedApis.Generic.Advanced.AsArmObject.AzCli" @parm -Action {
+    Set-TaskWorkDirectory
+
+    $found = $false
+
+    $armObj = Get-TaskWorkObject
+
+    foreach ($connectionObj in $armObj.resources[0].properties.parameters.'$connections'.value.PsObject.Properties) {
+        if ($connectionObj.Value.id -match "/managedApis/(.*)") {
+            
+            # We have specialized templates for these types
+            if ($Matches[1] -in @("azureblob", "servicebus")) { continue }
+
+            $found = $true
+            $conType = $Matches[1]
+
+            # Fetch the details from the connection object
+            $uri = "{0}?api-version=2018-07-01-preview" -f $($connectionObj.Value.connectionId)
+            $resObj = az rest --url $uri | ConvertFrom-Json
+            
+            # Use the display name as the name of the resource
+            $conName = $resObj.Name
+            $displayName = $resObj.Properties.DisplayName
+            
+            # Fetch base template
+            $pathArms = "$(Get-PSFConfigValue -FullName PsLogicAppExtractor.ModulePath.Base)\internal\arms"
+            $apiObj = Get-Content -Path "$pathArms\API.Managed.json" -Raw | ConvertFrom-Json
+
+            $Prefix = Get-PSFConfigValue -FullName PsLogicAppExtractor.prefixsuffix.connection.prefix
+            $idPreSuf = Format-Name -Type "Connection" -Value "$($connectionObj.Name)"
+            $displayPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_DisplayName" -Value "$($connectionObj.Name)"
+
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$idPreSuf" `
+                -Type "string" `
+                -Value $conName `
+                -Description "The name / id of the ManagedApi connection object that is being utilized by the Logic App. Will be for the trigger and other actions that depend on connections."
+
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$displayPreSuf" `
+                -Type "string" `
+                -Value $displayName `
+                -Description "The display name of the ManagedApi connection object that is being utilized by the Logic App."
+
+            # Update the api object properties
+            $apiObj.Name = "[parameters('$idPreSuf')]"
+            $apiObj.properties.displayName = "[parameters('$displayPreSuf')]"
+            $apiObj.properties.api.id = $apiObj.properties.api.id.Replace("##TYPE##", $conType)
+            
+            # Append the new resource to the ARM template
+            $armObj.resources += $apiObj
+
+            if ($null -eq $armObj.resources[0].dependsOn) {
+                # Create the dependsOn array if it does not exist
+                $armObj.resources[0] | Add-Member -MemberType NoteProperty -Name "dependsOn" -Value @()
+            }
+            
+            # Add the new resource to the dependsOn array, so that the deployment will work
+            $armObj.resources[0].dependsOn += "[resourceId('Microsoft.Web/connections', parameters('$idPreSuf'))]"
+
+            # Adjust the connection object to depend on the same name
+            $connectionObj.Value.connectionId = "[resourceId('Microsoft.Web/connections', parameters('$idPreSuf'))]"
+            $connectionObj.Value.connectionName = "[parameters('$idPreSuf')]"
+            $connectionObj.Value.id = "[format('/subscriptions/{0}/providers/Microsoft.Web/locations/{1}/managedApis/$conType', subscription().subscriptionId, parameters('logicAppLocation'))]"
+        }
+    }
+
+    if ($found) {
+        if ($null -eq $armObj.parameters.logicAppLocation) {
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "logicAppLocation" `
+                -Type "string" `
+                -Value "[resourceGroup().location]" `
+                -Description "Location of the Logic App. Best practice recommendation is to make this depending on the Resource Group and its location."
+        }
+    }
+
+    Out-TaskFileArm -InputObject $armObj
+}
+
+#Original file: Set-Arm.Connections.ManagedApis.Generic.AsArmObject.AzAccount.task.ps1
 $parm = @{
     Description = @"
 Loops all `$connections children
@@ -239,41 +756,147 @@ Loops all `$connections children
 --Name & Displayname is extracted from the ConnectionName property
 --Extends the dependsOn property on the LogicApp resource, to depend on the ApiConnection object
 "@
-    Alias       = "Arm.Set-Arm.Connections.ManagedApis.Generic.AsArmObject"
+    Alias       = "Arm.Set-Arm.Connections.ManagedApis.Generic.AsArmObject.AzAccount"
 }
 
-Task -Name "Set-Arm.Connections.ManagedApis.Generic.AsArmObject" @parm -Action {
+Task -Name "Set-Arm.Connections.ManagedApis.Generic.AsArmObject.AzAccount" @parm -Action {
     Set-TaskWorkDirectory
 
     $found = $false
 
     $armObj = Get-TaskWorkObject
 
-    $armObj.resources[0].properties.parameters.'$connections'.value.PsObject.Properties | ForEach-Object {
+    foreach ($connectionObj in $armObj.resources[0].properties.parameters.'$connections'.value.PsObject.Properties) {
+        if ($connectionObj.Value.id -match "/managedApis/(.*)") {
+            
+            # We have specialized templates for these types
+            if ($Matches[1] -in @("azureblob", "servicebus")) { continue }
 
-        if ($_.Value.id -match "/managedApis/(.*)") {
             $found = $true
+            $conType = $Matches[1]
+
+            # Fetch the details from the connection object
+            $uri = "{0}?api-version=2018-07-01-preview" -f $($_.Value.connectionId)
+            $resObj = Invoke-AzRestMethod -Path $uri -Method Get | Select-Object -ExpandProperty content | ConvertFrom-Json
             
+            # Use the display name as the name of the resource
+            $conName = $resObj.Properties.DisplayName
+            
+            # Fetch base template
             $pathArms = "$(Get-PSFConfigValue -FullName PsLogicAppExtractor.ModulePath.Base)\internal\arms"
+            $apiObj = Get-Content -Path "$pathArms\API.Managed.json" -Raw | ConvertFrom-Json
 
-            $conObj = Get-Content -Path "$pathArms\API.Managed.json" -Raw | ConvertFrom-Json
+            # Set the names of the parameters
+            $idPreSuf = Format-Name -Type "Connection" -Value "$($connectionObj.Name)"
 
-            $conObj.Name = $_.Value.connectionName
-            $conObj.properties.displayName = $_.Value.connectionName
-            $conObj.properties.api.id = $conObj.properties.api.id.Replace("##TYPE##", $Matches[1])
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$idPreSuf" `
+                -Type "string" `
+                -Value $conName `
+                -Description "The name / id of the ManagedApi connection object that is being utilized by the Logic App. Will be for the trigger and other actions that depend on connections."
+
+            # Update the api object properties
+            $apiObj.Name = "[parameters('$idPreSuf')]"
+            $apiObj.properties.displayName = "[parameters('$idPreSuf')]"
+            $apiObj.properties.api.id = $apiObj.properties.api.id.Replace("##TYPE##", $conType)
             
-            $armObj.resources += $conObj
+            # Append the new resource to the ARM template
+            $armObj.resources += $apiObj
 
             if ($null -eq $armObj.resources[0].dependsOn) {
+                # Create the dependsOn array if it does not exist
                 $armObj.resources[0] | Add-Member -MemberType NoteProperty -Name "dependsOn" -Value @()
             }
+            
+            # Add the new resource to the dependsOn array, so that the deployment will work
+            $armObj.resources[0].dependsOn += "[resourceId('Microsoft.Web/connections', parameters('$idPreSuf'))]"
 
-            if ($($_.Value.connectionName) -match "\[(.*)\]") {
-                $armObj.resources[0].dependsOn += "[resourceId('Microsoft.Web/connections', $($Matches[1]))]"
+            # Adjust the connection object to depend on the same name
+            $connectionObj.Value.connectionId = "[resourceId('Microsoft.Web/connections', parameters('$idPreSuf'))]"
+            $connectionObj.Value.connectionName = "[parameters('$idPreSuf')]"
+            $connectionObj.Value.id = "[format('/subscriptions/{0}/providers/Microsoft.Web/locations/{1}/managedApis/$conType', subscription().subscriptionId, parameters('logicAppLocation'))]"
+        }
+    }
+
+    if ($found) {
+        if ($null -eq $armObj.parameters.logicAppLocation) {
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "logicAppLocation" `
+                -Type "string" `
+                -Value "[resourceGroup().location]" `
+                -Description "Location of the Logic App. Best practice recommendation is to make this depending on the Resource Group and its location."
+        }
+    }
+
+    Out-TaskFileArm -InputObject $armObj
+}
+
+#Original file: Set-Arm.Connections.ManagedApis.Generic.AsArmObject.AzCli.task.ps1
+$parm = @{
+    Description = @"
+Loops all `$connections children
+-Validates that is of the type ManagedApi
+--Creates a new resource in the ARM template, for the ApiConnection object
+--Makes sure the ARM Parameters logicAppLocation exists
+--Name & Displayname is extracted from the ConnectionName property
+--Extends the dependsOn property on the LogicApp resource, to depend on the ApiConnection object
+"@
+    Alias       = "Arm.Set-Arm.Connections.ManagedApis.Generic.AsArmObject.AzCli"
+}
+
+Task -Name "Set-Arm.Connections.ManagedApis.Generic.AsArmObject.AzCli" @parm -Action {
+    Set-TaskWorkDirectory
+
+    $found = $false
+
+    $armObj = Get-TaskWorkObject
+
+    foreach ($connectionObj in $armObj.resources[0].properties.parameters.'$connections'.value.PsObject.Properties) {
+        if ($connectionObj.Value.id -match "/managedApis/(.*)") {
+            
+            # We have specialized templates for these types
+            if ($Matches[1] -in @("azureblob", "servicebus")) { continue }
+
+            $found = $true
+            $conType = $Matches[1]
+
+            # Fetch the details from the connection object
+            $uri = "{0}?api-version=2018-07-01-preview" -f $($connectionObj.Value.connectionId)
+            $resObj = az rest --url $uri | ConvertFrom-Json
+            
+            # Use the display name as the name of the resource
+            $conName = $resObj.Properties.DisplayName
+            
+            # Fetch base template
+            $pathArms = "$(Get-PSFConfigValue -FullName PsLogicAppExtractor.ModulePath.Base)\internal\arms"
+            $apiObj = Get-Content -Path "$pathArms\API.Managed.json" -Raw | ConvertFrom-Json
+
+            # Set the names of the parameters
+            $idPreSuf = Format-Name -Type "Connection" -Value "$($connectionObj.Name)"
+
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$idPreSuf" `
+                -Type "string" `
+                -Value $conName `
+                -Description "The name / id of the ManagedApi connection object that is being utilized by the Logic App. Will be for the trigger and other actions that depend on connections."
+
+            # Update the api object properties
+            $apiObj.Name = "[parameters('$idPreSuf')]"
+            $apiObj.properties.displayName = "[parameters('$idPreSuf')]"
+            $apiObj.properties.api.id = $apiObj.properties.api.id.Replace("##TYPE##", $conType)
+            
+            # Append the new resource to the ARM template
+            $armObj.resources += $apiObj
+
+            if ($null -eq $armObj.resources[0].dependsOn) {
+                # Create the dependsOn array if it does not exist
+                $armObj.resources[0] | Add-Member -MemberType NoteProperty -Name "dependsOn" -Value @()
             }
-            else {
-                $armObj.resources[0].dependsOn += "[resourceId('Microsoft.Web/connections', '$($_.Value.connectionName)')]"
-            }
+            
+            # Add the new resource to the dependsOn array, so that the deployment will work
+            $armObj.resources[0].dependsOn += "[resourceId('Microsoft.Web/connections', parameters('$idPreSuf'))]"
+
+            # Adjust the connection object to depend on the same name
+            $connectionObj.Value.connectionId = "[resourceId('Microsoft.Web/connections', parameters('$idPreSuf'))]"
+            $connectionObj.Value.connectionName = "[parameters('$idPreSuf')]"
+            $connectionObj.Value.id = "[format('/subscriptions/{0}/providers/Microsoft.Web/locations/{1}/managedApis/$conType', subscription().subscriptionId, parameters('logicAppLocation'))]"
         }
     }
 
@@ -396,72 +1019,108 @@ Task -Name "Set-Arm.Connections.ManagedApis.Name.AsParameter" @parm -Action {
     Out-TaskFileArm -InputObject $armObj
 }
 
-#Original file: Set-Arm.Connections.ManagedApis.Servicebus.ListKey.AsArmObject.task.ps1
+#Original file: Set-Arm.Connections.ManagedApis.Servicebus.ListKey.Advanced.AsArmObject.AzAccount.task.ps1
 $parm = @{
     Description = @"
 Loops all `$connections children
--Validates that is of the type servicebus
+-Validates that is of the type servicebus, and that is using the classic connection string approach
 --Creates a new resource in the ARM template, for the ApiConnection object
 --With matching ARM Parameters, for the ResourceGroup, Namespace, AccessKey
 --Makes sure the ARM Parameters logicAppLocation exists
 --The type is based on ListKey / ConnectionString approach
---Name & Displayname is extracted from the ConnectionName property
+--Name & Displayname is extracted from the Api Connection Object
 "@
-    Alias       = "Arm.Set-Arm.Connections.ManagedApis.Servicebus.ListKey.AsArmObject"
+    Alias       = "Arm.Set-Arm.Connections.ManagedApis.Servicebus.ListKey.Advanced.AsArmObject.AzAccount"
 }
 
-Task -Name "Set-Arm.Connections.ManagedApis.Servicebus.ListKey.AsArmObject" @parm -Action {
+Task -Name "Set-Arm.Connections.ManagedApis.Servicebus.ListKey.Advanced.AsArmObject.AzAccount" @parm -Action {
     Set-TaskWorkDirectory
 
     $found = $false
+    $conType = "servicebus"
 
     $armObj = Get-TaskWorkObject
 
-    $armObj.resources[0].properties.parameters.'$connections'.value.PsObject.Properties | ForEach-Object {
-
-        if ($_.Value.id -like "*managedApis/servicebus*") {
+    foreach ($connectionObj in $armObj.resources[0].properties.parameters.'$connections'.value.PsObject.Properties) {
+        if ($connectionObj.Value.id -like "*managedApis/servicebus*") {
+        
+            # This should only handle the classic Servicebus connections based on ListKey
+            if ($connectionObj.Value.connectionProperties.authentication.type -eq "ManagedServiceIdentity") { continue }
+        
             $found = $true
+        
+            # Fetch the details from the connection object
+            $uri = "{0}?api-version=2018-07-01-preview" -f $($_.Value.connectionId)
+            $resObj = Invoke-AzRestMethod -Path $uri -Method Get | Select-Object -ExpandProperty content | ConvertFrom-Json
+            
+            # Use the display name as the name of the resource
+            $conName = $resObj.Name
+            $displayName = $resObj.Properties.DisplayName
 
+            # Fetch base template
             $pathArms = "$(Get-PSFConfigValue -FullName PsLogicAppExtractor.ModulePath.Base)\internal\arms"
+            $apiObj = Get-Content -Path "$pathArms\API.SB.ConnectionString.json" -Raw | ConvertFrom-Json
 
-            $sbObj = Get-Content -Path "$pathArms\API.SB.ConnectionString.json" -Raw | ConvertFrom-Json
+            # Set the names of the parameters
+            $Prefix = Get-PSFConfigValue -FullName PsLogicAppExtractor.prefixsuffix.connection.prefix
+            $subPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_Subscription" -Value "$($connectionObj.Name)"
+            $rgPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_ResourceGroup" -Value "$($connectionObj.Name)"
+            $objPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_Namespace" -Value "$($connectionObj.Name)"
+            $keyPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_Key" -Value "$($connectionObj.Name)"
 
-            $sbObj.Name = $_.Value.connectionName
-            $sbObj.properties.displayName = $_.Value.connectionName
-
-            $rgPreSuf = Format-Name -Type "Connection" -Prefix $Parm_Prefix -Suffix "_ResourceGroup" -Value "$($_.Name)"
-            $nsPreSuf = Format-Name -Type "Connection" -Prefix $Parm_Prefix -Suffix "_Namespace" -Value "$($_.Name)"
-            $keyPreSuf = Format-Name -Type "Connection" -Prefix $Parm_Prefix -Suffix "_Key" -Value "$($_.Name)"
+            $idPreSuf = Format-Name -Type "Connection" -Value "$($connectionObj.Name)"
+            $displayPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_DisplayName" -Value "$($connectionObj.Name)"
+            
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$subPreSuf" `
+                -Type "string" `
+                -Value "[subscription().subscriptionId]" `
+                -Description "The subscription where the servicebus namespace is located. ($($connectionObj.Name))"
 
             $armObj = Add-ArmParameter -InputObject $armObj -Name "$rgPreSuf" `
                 -Type "string" `
-                -Value "" `
-                -Description "The resource group where the servicebus namespace is located. ($($_.Name))"
+                -Value "[resourceGroup().name]" `
+                -Description "The resource group where the servicebus namespace is located. ($($connectionObj.Name))"
 
-            $armObj = Add-ArmParameter -InputObject $armObj -Name "$nsPreSuf" `
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$objPreSuf" `
                 -Type "string" `
                 -Value "" `
-                -Description "The name of the servicebus namespace. ($($_.Name))"
+                -Description "The name of the servicebus namespace. ($($connectionObj.Name))"
+            
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$idPreSuf" `
+                -Type "string" `
+                -Value $conName `
+                -Description "The name / id of the ManagedApi connection object that is being utilized by the Logic App. Will be for the trigger and other actions that depend on connections."
 
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$displayPreSuf" `
+                -Type "string" `
+                -Value $displayName `
+                -Description "The display name of the ManagedApi connection object that is being utilized by the Logic App."
+                
             $armObj = Add-ArmParameter -InputObject $armObj -Name "$keyPreSuf" `
                 -Type "string" `
-                -Value "" `
-                -Description "The name of the namespace access policy key that will be used during the deployment to fetch the connection string based on that key. ($($_.Name))"
-
-            $sbObj.properties.parameterValues.connectionString = $sbObj.properties.parameterValues.connectionString.Replace("'##RESOURCEGROUPNAME##'", "parameters('$rgPreSuf')").Replace("'##NAMESPACE##'", "parameters('$nsPreSuf')").Replace("'##KEYNAME##'", "parameters('$keyPreSuf')")
-
-            $armObj.resources += $sbObj
+                -Value "RootManageSharedAccessKey" `
+                -Description "The name of the namespace access policy key that will be used during the deployment to fetch the connection string based on that key. ($($connectionObj.Name))"
+            
+            # Update the api object properties
+            $apiObj.Name = "[parameters('$idPreSuf')]"
+            $apiObj.properties.displayName = "[parameters('$displayPreSuf')]"
+            $apiObj.properties.parameterValues.connectionString = $apiObj.properties.parameterValues.connectionString.Replace("'##SUSCRIPTIONID##'", "parameters('$subPreSuf')").Replace("'##RESOURCEGROUPNAME##'", "parameters('$rgPreSuf')").Replace("'##NAMESPACE##'", "parameters('$objPreSuf')").Replace("'##KEYNAME##'", "parameters('$keyPreSuf')")
+            
+            # Append the new resource to the ARM template
+            $armObj.resources += $apiObj
 
             if ($null -eq $armObj.resources[0].dependsOn) {
+                # Create the dependsOn array if it does not exist
                 $armObj.resources[0] | Add-Member -MemberType NoteProperty -Name "dependsOn" -Value @()
             }
 
-            if ($($_.Value.connectionName) -match "\[(.*)\]") {
-                $armObj.resources[0].dependsOn += "[resourceId('Microsoft.Web/connections', $($Matches[1]))]"
-            }
-            else {
-                $armObj.resources[0].dependsOn += "[resourceId('Microsoft.Web/connections', '$($_.Value.connectionName)')]"
-            }
+            # Add the new resource to the dependsOn array, so that the deployment will work
+            $armObj.resources[0].dependsOn += "[resourceId('Microsoft.Web/connections', parameters('$idPreSuf'))]"
+
+            # Adjust the connection object to depend on the same name
+            $connectionObj.Value.connectionId = "[resourceId('Microsoft.Web/connections', parameters('$idPreSuf'))]"
+            $connectionObj.Value.connectionName = "[parameters('$idPreSuf')]"
+            $connectionObj.Value.id = "[format('/subscriptions/{0}/providers/Microsoft.Web/locations/{1}/managedApis/$conType', subscription().subscriptionId, parameters('logicAppLocation'))]"
         }
     }
 
@@ -477,64 +1136,740 @@ Task -Name "Set-Arm.Connections.ManagedApis.Servicebus.ListKey.AsArmObject" @par
     Out-TaskFileArm -InputObject $armObj
 }
 
-#Original file: Set-Arm.Connections.ManagedApis.Servicebus.ManagedIdentity.AsArmObject.task.ps1
+#Original file: Set-Arm.Connections.ManagedApis.Servicebus.ListKey.Advanced.AsArmObject.AzCli.task.ps1
 $parm = @{
     Description = @"
 Loops all `$connections children
--Validates that is of the type servicebus
+-Validates that is of the type servicebus, and that is using the classic connection string approach
+--Creates a new resource in the ARM template, for the ApiConnection object
+--With matching ARM Parameters, for the ResourceGroup, Namespace, AccessKey
+--Makes sure the ARM Parameters logicAppLocation exists
+--The type is based on ListKey / ConnectionString approach
+--Name & Displayname is extracted from the Api Connection Object
+"@
+    Alias       = "Arm.Set-Arm.Connections.ManagedApis.Servicebus.ListKey.Advanced.AsArmObject.AzCli"
+}
+
+Task -Name "Set-Arm.Connections.ManagedApis.Servicebus.ListKey.Advanced.AsArmObject.AzCli" @parm -Action {
+    Set-TaskWorkDirectory
+
+    $found = $false
+    $conType = "servicebus"
+
+    $armObj = Get-TaskWorkObject
+
+    foreach ($connectionObj in $armObj.resources[0].properties.parameters.'$connections'.value.PsObject.Properties) {
+        if ($connectionObj.Value.id -like "*managedApis/servicebus*") {
+        
+            # This should only handle the classic Servicebus connections based on ListKey
+            if ($connectionObj.Value.connectionProperties.authentication.type -eq "ManagedServiceIdentity") { continue }
+        
+            $found = $true
+        
+            # Fetch the details from the connection object
+            $uri = "{0}?api-version=2018-07-01-preview" -f $($connectionObj.Value.connectionId)
+            $resObj = az rest --url $uri | ConvertFrom-Json
+            
+            # Use the display name as the name of the resource
+            $conName = $resObj.Name
+            $displayName = $resObj.Properties.DisplayName
+
+            # Fetch base template
+            $pathArms = "$(Get-PSFConfigValue -FullName PsLogicAppExtractor.ModulePath.Base)\internal\arms"
+            $apiObj = Get-Content -Path "$pathArms\API.SB.ConnectionString.json" -Raw | ConvertFrom-Json
+
+            # Set the names of the parameters
+            $Prefix = Get-PSFConfigValue -FullName PsLogicAppExtractor.prefixsuffix.connection.prefix
+            $subPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_Subscription" -Value "$($connectionObj.Name)"
+            $rgPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_ResourceGroup" -Value "$($connectionObj.Name)"
+            $objPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_Namespace" -Value "$($connectionObj.Name)"
+            $keyPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_Key" -Value "$($connectionObj.Name)"
+
+            $idPreSuf = Format-Name -Type "Connection" -Value "$($connectionObj.Name)"
+            $displayPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_DisplayName" -Value "$($connectionObj.Name)"
+            
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$subPreSuf" `
+                -Type "string" `
+                -Value "[subscription().subscriptionId]" `
+                -Description "The subscription where the servicebus namespace is located. ($($connectionObj.Name))"
+
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$rgPreSuf" `
+                -Type "string" `
+                -Value "[resourceGroup().name]" `
+                -Description "The resource group where the servicebus namespace is located. ($($connectionObj.Name))"
+
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$objPreSuf" `
+                -Type "string" `
+                -Value "" `
+                -Description "The name of the servicebus namespace. ($($connectionObj.Name))"
+            
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$idPreSuf" `
+                -Type "string" `
+                -Value $conName `
+                -Description "The name / id of the ManagedApi connection object that is being utilized by the Logic App. Will be for the trigger and other actions that depend on connections."
+
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$displayPreSuf" `
+                -Type "string" `
+                -Value $displayName `
+                -Description "The display name of the ManagedApi connection object that is being utilized by the Logic App."
+                
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$keyPreSuf" `
+                -Type "string" `
+                -Value "RootManageSharedAccessKey" `
+                -Description "The name of the namespace access policy key that will be used during the deployment to fetch the connection string based on that key. ($($connectionObj.Name))"
+            
+            # Update the api object properties
+            $apiObj.Name = "[parameters('$idPreSuf')]"
+            $apiObj.properties.displayName = "[parameters('$displayPreSuf')]"
+            $apiObj.properties.parameterValues.connectionString = $apiObj.properties.parameterValues.connectionString.Replace("'##SUSCRIPTIONID##'", "parameters('$subPreSuf')").Replace("'##RESOURCEGROUPNAME##'", "parameters('$rgPreSuf')").Replace("'##NAMESPACE##'", "parameters('$objPreSuf')").Replace("'##KEYNAME##'", "parameters('$keyPreSuf')")
+            
+            # Append the new resource to the ARM template
+            $armObj.resources += $apiObj
+
+            if ($null -eq $armObj.resources[0].dependsOn) {
+                # Create the dependsOn array if it does not exist
+                $armObj.resources[0] | Add-Member -MemberType NoteProperty -Name "dependsOn" -Value @()
+            }
+
+            # Add the new resource to the dependsOn array, so that the deployment will work
+            $armObj.resources[0].dependsOn += "[resourceId('Microsoft.Web/connections', parameters('$idPreSuf'))]"
+
+            # Adjust the connection object to depend on the same name
+            $connectionObj.Value.connectionId = "[resourceId('Microsoft.Web/connections', parameters('$idPreSuf'))]"
+            $connectionObj.Value.connectionName = "[parameters('$idPreSuf')]"
+            $connectionObj.Value.id = "[format('/subscriptions/{0}/providers/Microsoft.Web/locations/{1}/managedApis/$conType', subscription().subscriptionId, parameters('logicAppLocation'))]"
+        }
+    }
+
+    if ($found) {
+        if ($null -eq $armObj.parameters.logicAppLocation) {
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "logicAppLocation" `
+                -Type "string" `
+                -Value "[resourceGroup().location]" `
+                -Description "Location of the Logic App. Best practice recommendation is to make this depending on the Resource Group and its location."
+        }
+    }
+
+    Out-TaskFileArm -InputObject $armObj
+}
+
+#Original file: Set-Arm.Connections.ManagedApis.Servicebus.ListKey.AsArmObject.AzAccount.task.ps1
+$parm = @{
+    Description = @"
+Loops all `$connections children
+-Validates that is of the type servicebus, and that is using the classic connection string approach
+--Creates a new resource in the ARM template, for the ApiConnection object
+--With matching ARM Parameters, for the ResourceGroup, Namespace, AccessKey
+--Makes sure the ARM Parameters logicAppLocation exists
+--The type is based on ListKey / ConnectionString approach
+--Displayname is extracted from the Api Connection Object
+--The displayname will be configured to be the same as the name of the connection
+"@
+    Alias       = "Arm.Set-Arm.Connections.ManagedApis.Servicebus.ListKey.AsArmObject.AzAccount"
+}
+
+Task -Name "Set-Arm.Connections.ManagedApis.Servicebus.ListKey.AsArmObject.AzAccount" @parm -Action {
+    Set-TaskWorkDirectory
+
+    $found = $false
+    $conType = "servicebus"
+
+    $armObj = Get-TaskWorkObject
+
+    foreach ($connectionObj in $armObj.resources[0].properties.parameters.'$connections'.value.PsObject.Properties) {
+        if ($connectionObj.Value.id -like "*managedApis/servicebus*") {
+        
+            # This should only handle the classic Servicebus connections based on ListKey
+            if ($connectionObj.Value.connectionProperties.authentication.type -eq "ManagedServiceIdentity") { continue }
+        
+            $found = $true
+        
+            # Fetch the details from the connection object
+            $uri = "{0}?api-version=2018-07-01-preview" -f $($_.Value.connectionId)
+            $resObj = Invoke-AzRestMethod -Path $uri -Method Get | Select-Object -ExpandProperty content | ConvertFrom-Json
+
+            # Use the display name as the name of the resource
+            $conName = $resObj.Properties.DisplayName
+
+            # Fetch base template
+            $pathArms = "$(Get-PSFConfigValue -FullName PsLogicAppExtractor.ModulePath.Base)\internal\arms"
+            $apiObj = Get-Content -Path "$pathArms\API.SB.ConnectionString.json" -Raw | ConvertFrom-Json
+
+            # Set the names of the parameters
+            $Prefix = Get-PSFConfigValue -FullName PsLogicAppExtractor.prefixsuffix.connection.prefix
+            $subPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_Subscription" -Value "$($connectionObj.Name)"
+            $rgPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_ResourceGroup" -Value "$($connectionObj.Name)"
+            $objPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_Namespace" -Value "$($connectionObj.Name)"
+            $keyPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_Key" -Value "$($connectionObj.Name)"
+
+            $idPreSuf = Format-Name -Type "Connection" -Value "$($connectionObj.Name)"
+            
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$subPreSuf" `
+                -Type "string" `
+                -Value "[subscription().subscriptionId]" `
+                -Description "The subscription where the servicebus namespace is located. ($($connectionObj.Name))"
+
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$rgPreSuf" `
+                -Type "string" `
+                -Value "[resourceGroup().name]" `
+                -Description "The resource group where the servicebus namespace is located. ($($connectionObj.Name))"
+
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$objPreSuf" `
+                -Type "string" `
+                -Value "" `
+                -Description "The name of the servicebus namespace. ($($connectionObj.Name))"
+            
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$idPreSuf" `
+                -Type "string" `
+                -Value $conName `
+                -Description "The name / id of the ManagedApi connection object that is being utilized by the Logic App. Will be for the trigger and other actions that depend on connections."
+
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$keyPreSuf" `
+                -Type "string" `
+                -Value "RootManageSharedAccessKey" `
+                -Description "The name of the namespace access policy key that will be used during the deployment to fetch the connection string based on that key. ($($connectionObj.Name))"
+            
+            # Update the api object properties
+            $apiObj.Name = "[parameters('$idPreSuf')]"
+            $apiObj.properties.displayName = "[parameters('$idPreSuf')]"
+            $apiObj.properties.parameterValues.connectionString = $apiObj.properties.parameterValues.connectionString.Replace("'##SUSCRIPTIONID##'", "parameters('$subPreSuf')").Replace("'##RESOURCEGROUPNAME##'", "parameters('$rgPreSuf')").Replace("'##NAMESPACE##'", "parameters('$objPreSuf')").Replace("'##KEYNAME##'", "parameters('$keyPreSuf')")
+            
+            # Append the new resource to the ARM template
+            $armObj.resources += $apiObj
+
+            if ($null -eq $armObj.resources[0].dependsOn) {
+                # Create the dependsOn array if it does not exist
+                $armObj.resources[0] | Add-Member -MemberType NoteProperty -Name "dependsOn" -Value @()
+            }
+
+            # Add the new resource to the dependsOn array, so that the deployment will work
+            $armObj.resources[0].dependsOn += "[resourceId('Microsoft.Web/connections', parameters('$idPreSuf'))]"
+
+            # Adjust the connection object to depend on the same name
+            $connectionObj.Value.connectionId = "[resourceId('Microsoft.Web/connections', parameters('$idPreSuf'))]"
+            $connectionObj.Value.connectionName = "[parameters('$idPreSuf')]"
+            $connectionObj.Value.id = "[format('/subscriptions/{0}/providers/Microsoft.Web/locations/{1}/managedApis/$conType', subscription().subscriptionId, parameters('logicAppLocation'))]"
+        }
+    }
+
+    if ($found) {
+        if ($null -eq $armObj.parameters.logicAppLocation) {
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "logicAppLocation" `
+                -Type "string" `
+                -Value "[resourceGroup().location]" `
+                -Description "Location of the Logic App. Best practice recommendation is to make this depending on the Resource Group and its location."
+        }
+    }
+
+    Out-TaskFileArm -InputObject $armObj
+}
+
+#Original file: Set-Arm.Connections.ManagedApis.Servicebus.ListKey.AsArmObject.AzCli.task.ps1
+$parm = @{
+    Description = @"
+Loops all `$connections children
+-Validates that is of the type servicebus, and that is using the classic connection string approach
+--Creates a new resource in the ARM template, for the ApiConnection object
+--With matching ARM Parameters, for the ResourceGroup, Namespace, AccessKey
+--Makes sure the ARM Parameters logicAppLocation exists
+--The type is based on ListKey / ConnectionString approach
+--Displayname is extracted from the Api Connection Object
+--The displayname will be configured to be the same as the name of the connection
+"@
+    Alias       = "Arm.Set-Arm.Connections.ManagedApis.Servicebus.ListKey.AsArmObject.AzCli"
+}
+
+Task -Name "Set-Arm.Connections.ManagedApis.Servicebus.ListKey.AsArmObject.AzCli" @parm -Action {
+    Set-TaskWorkDirectory
+
+    $found = $false
+    $conType = "servicebus"
+
+    $armObj = Get-TaskWorkObject
+
+    foreach ($connectionObj in $armObj.resources[0].properties.parameters.'$connections'.value.PsObject.Properties) {
+        if ($connectionObj.Value.id -like "*managedApis/servicebus*") {
+        
+            # This should only handle the classic Servicebus connections based on ListKey
+            if ($connectionObj.Value.connectionProperties.authentication.type -eq "ManagedServiceIdentity") { continue }
+        
+            $found = $true
+        
+            # Fetch the details from the connection object
+            $uri = "{0}?api-version=2018-07-01-preview" -f $($connectionObj.Value.connectionId)
+            $resObj = az rest --url $uri | ConvertFrom-Json
+            
+            # Use the display name as the name of the resource
+            $conName = $resObj.Properties.DisplayName
+
+            # Fetch base template
+            $pathArms = "$(Get-PSFConfigValue -FullName PsLogicAppExtractor.ModulePath.Base)\internal\arms"
+            $apiObj = Get-Content -Path "$pathArms\API.SB.ConnectionString.json" -Raw | ConvertFrom-Json
+
+            # Set the names of the parameters
+            $Prefix = Get-PSFConfigValue -FullName PsLogicAppExtractor.prefixsuffix.connection.prefix
+            $subPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_Subscription" -Value "$($connectionObj.Name)"
+            $rgPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_ResourceGroup" -Value "$($connectionObj.Name)"
+            $objPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_Namespace" -Value "$($connectionObj.Name)"
+            $keyPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_Key" -Value "$($connectionObj.Name)"
+
+            $idPreSuf = Format-Name -Type "Connection" -Value "$($connectionObj.Name)"
+            
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$subPreSuf" `
+                -Type "string" `
+                -Value "[subscription().subscriptionId]" `
+                -Description "The subscription where the servicebus namespace is located. ($($connectionObj.Name))"
+
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$rgPreSuf" `
+                -Type "string" `
+                -Value "[resourceGroup().name]" `
+                -Description "The resource group where the servicebus namespace is located. ($($connectionObj.Name))"
+
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$objPreSuf" `
+                -Type "string" `
+                -Value "" `
+                -Description "The name of the servicebus namespace. ($($connectionObj.Name))"
+            
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$idPreSuf" `
+                -Type "string" `
+                -Value $conName `
+                -Description "The name / id of the ManagedApi connection object that is being utilized by the Logic App. Will be for the trigger and other actions that depend on connections."
+
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$keyPreSuf" `
+                -Type "string" `
+                -Value "RootManageSharedAccessKey" `
+                -Description "The name of the namespace access policy key that will be used during the deployment to fetch the connection string based on that key. ($($connectionObj.Name))"
+            
+            # Update the api object properties
+            $apiObj.Name = "[parameters('$idPreSuf')]"
+            $apiObj.properties.displayName = "[parameters('$idPreSuf')]"
+            $apiObj.properties.parameterValues.connectionString = $apiObj.properties.parameterValues.connectionString.Replace("'##SUSCRIPTIONID##'", "parameters('$subPreSuf')").Replace("'##RESOURCEGROUPNAME##'", "parameters('$rgPreSuf')").Replace("'##NAMESPACE##'", "parameters('$objPreSuf')").Replace("'##KEYNAME##'", "parameters('$keyPreSuf')")
+            
+            # Append the new resource to the ARM template
+            $armObj.resources += $apiObj
+
+            if ($null -eq $armObj.resources[0].dependsOn) {
+                # Create the dependsOn array if it does not exist
+                $armObj.resources[0] | Add-Member -MemberType NoteProperty -Name "dependsOn" -Value @()
+            }
+
+            # Add the new resource to the dependsOn array, so that the deployment will work
+            $armObj.resources[0].dependsOn += "[resourceId('Microsoft.Web/connections', parameters('$idPreSuf'))]"
+
+            # Adjust the connection object to depend on the same name
+            $connectionObj.Value.connectionId = "[resourceId('Microsoft.Web/connections', parameters('$idPreSuf'))]"
+            $connectionObj.Value.connectionName = "[parameters('$idPreSuf')]"
+            $connectionObj.Value.id = "[format('/subscriptions/{0}/providers/Microsoft.Web/locations/{1}/managedApis/$conType', subscription().subscriptionId, parameters('logicAppLocation'))]"
+        }
+    }
+
+    if ($found) {
+        if ($null -eq $armObj.parameters.logicAppLocation) {
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "logicAppLocation" `
+                -Type "string" `
+                -Value "[resourceGroup().location]" `
+                -Description "Location of the Logic App. Best practice recommendation is to make this depending on the Resource Group and its location."
+        }
+    }
+
+    Out-TaskFileArm -InputObject $armObj
+}
+
+#Original file: Set-Arm.Connections.ManagedApis.Servicebus.ManagedIdentity.Advanced.AsArmObject.AzAccount.task.ps1
+$parm = @{
+    Description = @"
+Loops all `$connections children
+-Validates that is of the type servicebus and is using the Managed Identity authentication scheme
+--Creates a new resource in the ARM template, for the ApiConnection object
+--With matching ARM Parameters, for the Namespace
+--Makes sure the ARM Parameters logicAppLocation exists
+--The type is based on the Managed Identity authentication
+--Name & Displayname is extracted from the Api Connection Object
+"@
+    Alias       = "Arm.Set-Arm.Connections.ManagedApis.Servicebus.ManagedIdentity.Advanced.AsArmObject.AzAccount"
+}
+
+Task -Name "Set-Arm.Connections.ManagedApis.Servicebus.ManagedIdentity.Advanced.AsArmObject.AzAccount" @parm -Action {
+    Set-TaskWorkDirectory
+    
+    $found = $false
+    $conType = "servicebus"
+
+    $armObj = Get-TaskWorkObject
+
+    foreach ($connectionObj in $armObj.resources[0].properties.parameters.'$connections'.value.PsObject.Properties) {
+        if ($connectionObj.Value.id -like "*managedApis/servicebus*") {
+
+            # This should only handle Managed Identity Servicebus connections
+            if ($connectionObj.Value.connectionProperties.authentication.type -ne "ManagedServiceIdentity") { continue }
+
+            $found = $true
+
+            # Fetch the details from the connection object
+            $uri = "{0}?api-version=2018-07-01-preview" -f $($_.Value.connectionId)
+            $resObj = Invoke-AzRestMethod -Path $uri -Method Get | Select-Object -ExpandProperty content | ConvertFrom-Json
+            
+            # Use the display name as the name of the resource
+            $conName = $resObj.Name
+            $displayName = $resObj.Properties.DisplayName
+            $resName = $displayName #fallback default value
+
+            if ($resObj.Properties.parameterValueSet.values.namespaceEndpoint.value -match "sb://(.*).servicebus.windows.net") {
+                $resName = $Matches[1]
+            }
+
+            # Fetch base template
+            $pathArms = "$(Get-PSFConfigValue -FullName PsLogicAppExtractor.ModulePath.Base)\internal\arms"
+            $apiObj = Get-Content -Path "$pathArms\API.SB.Managed.json" -Raw | ConvertFrom-Json
+
+            # Set the names of the parameters
+            $Prefix = Get-PSFConfigValue -FullName PsLogicAppExtractor.prefixsuffix.connection.prefix
+            $idPreSuf = Format-Name -Type "Connection" -Value "$($connectionObj.Name)"
+            $displayPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_DisplayName" -Value "$($connectionObj.Name)"
+            $nsPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_Namespace" -Value "$($connectionObj.Name)"
+
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$nsPreSuf" `
+                -Type "string" `
+                -Value "$resName" `
+                -Description "The name of the servicebus namespace. ($($connectionObj.Name))"
+
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$idPreSuf" `
+                -Type "string" `
+                -Value $conName `
+                -Description "The name / id of the ManagedApi connection object that is being utilized by the Logic App. Will be for the trigger and other actions that depend on connections."
+
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$displayPreSuf" `
+                -Type "string" `
+                -Value $displayName `
+                -Description "The display name of the ManagedApi connection object that is being utilized by the Logic App."
+
+            # Update the api object properties
+            $apiObj.Name = "[parameters('$idPreSuf')]"
+            $apiObj.properties.displayName = "[parameters('$displayPreSuf')]"
+            $apiObj.properties.parameterValueSet.values.namespaceEndpoint.value = $apiObj.properties.parameterValueSet.values.namespaceEndpoint.value.Replace("'##NAMESPACE##'", "parameters('$nsPreSuf')")
+
+            # Append the new resource to the ARM template
+            $armObj.resources += $apiObj
+
+            if ($null -eq $armObj.resources[0].dependsOn) {
+                # Create the dependsOn array if it does not exist
+                $armObj.resources[0] | Add-Member -MemberType NoteProperty -Name "dependsOn" -Value @()
+            }
+            
+            # Add the new resource to the dependsOn array, so that the deployment will work
+            $armObj.resources[0].dependsOn += "[resourceId('Microsoft.Web/connections', parameters('$idPreSuf'))]"
+
+            # Adjust the connection object to depend on the same name
+            $connectionObj.Value.connectionId = "[resourceId('Microsoft.Web/connections', parameters('$idPreSuf'))]"
+            $connectionObj.Value.connectionName = "[parameters('$idPreSuf')]"
+            $connectionObj.Value.id = "[format('/subscriptions/{0}/providers/Microsoft.Web/locations/{1}/managedApis/$conType', subscription().subscriptionId, parameters('logicAppLocation'))]"
+        }
+
+    }
+
+    if ($found) {
+        # We need the location parameter
+        if ($null -eq $armObj.parameters.logicAppLocation) {
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "logicAppLocation" `
+                -Type "string" `
+                -Value "[resourceGroup().location]" `
+                -Description "Location of the Logic App. Best practice recommendation is to make this depending on the Resource Group and its location."
+        }
+    }
+
+    Out-TaskFileArm -InputObject $armObj
+}
+
+#Original file: Set-Arm.Connections.ManagedApis.Servicebus.ManagedIdentity.Advanced.AsArmObject.AzCli.task.ps1
+$parm = @{
+    Description = @"
+Loops all `$connections children
+-Validates that is of the type servicebus and is using the Managed Identity authentication scheme
+--Creates a new resource in the ARM template, for the ApiConnection object
+--With matching ARM Parameters, for the Namespace
+--Makes sure the ARM Parameters logicAppLocation exists
+--The type is based on the Managed Identity authentication
+--Name & Displayname is extracted from the Api Connection Object
+"@
+    Alias       = "Arm.Set-Arm.Connections.ManagedApis.Servicebus.ManagedIdentity.Advanced.AsArmObject.AzCli"
+}
+
+Task -Name "Set-Arm.Connections.ManagedApis.Servicebus.ManagedIdentity.Advanced.AsArmObject.AzCli" @parm -Action {
+    Set-TaskWorkDirectory
+    
+    $found = $false
+    $conType = "servicebus"
+
+    $armObj = Get-TaskWorkObject
+
+    foreach ($connectionObj in $armObj.resources[0].properties.parameters.'$connections'.value.PsObject.Properties) {
+        if ($connectionObj.Value.id -like "*managedApis/servicebus*") {
+
+            # This should only handle Managed Identity Servicebus connections
+            if ($connectionObj.Value.connectionProperties.authentication.type -ne "ManagedServiceIdentity") { continue }
+
+            $found = $true
+
+            # Fetch the details from the connection object
+            $uri = "{0}?api-version=2018-07-01-preview" -f $($connectionObj.Value.connectionId)
+            $resObj = az rest --url $uri | ConvertFrom-Json
+            
+            # Use the display name as the name of the resource
+            $conName = $resObj.Name
+            $displayName = $resObj.Properties.DisplayName
+            $resName = $displayName #fallback default value
+
+            if ($resObj.Properties.parameterValueSet.values.namespaceEndpoint.value -match "sb://(.*).servicebus.windows.net") {
+                $resName = $Matches[1]
+            }
+
+            # Fetch base template
+            $pathArms = "$(Get-PSFConfigValue -FullName PsLogicAppExtractor.ModulePath.Base)\internal\arms"
+            $apiObj = Get-Content -Path "$pathArms\API.SB.Managed.json" -Raw | ConvertFrom-Json
+
+            # Set the names of the parameters
+            $Prefix = Get-PSFConfigValue -FullName PsLogicAppExtractor.prefixsuffix.connection.prefix
+            $idPreSuf = Format-Name -Type "Connection" -Value "$($connectionObj.Name)"
+            $displayPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_DisplayName" -Value "$($connectionObj.Name)"
+            $nsPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_Namespace" -Value "$($connectionObj.Name)"
+
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$nsPreSuf" `
+                -Type "string" `
+                -Value "$resName" `
+                -Description "The name of the servicebus namespace. ($($connectionObj.Name))"
+
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$idPreSuf" `
+                -Type "string" `
+                -Value $conName `
+                -Description "The name / id of the ManagedApi connection object that is being utilized by the Logic App. Will be for the trigger and other actions that depend on connections."
+
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$displayPreSuf" `
+                -Type "string" `
+                -Value $displayName `
+                -Description "The display name of the ManagedApi connection object that is being utilized by the Logic App."
+
+            # Update the api object properties
+            $apiObj.Name = "[parameters('$idPreSuf')]"
+            $apiObj.properties.displayName = "[parameters('$displayPreSuf')]"
+            $apiObj.properties.parameterValueSet.values.namespaceEndpoint.value = $apiObj.properties.parameterValueSet.values.namespaceEndpoint.value.Replace("'##NAMESPACE##'", "parameters('$nsPreSuf')")
+
+            # Append the new resource to the ARM template
+            $armObj.resources += $apiObj
+
+            if ($null -eq $armObj.resources[0].dependsOn) {
+                # Create the dependsOn array if it does not exist
+                $armObj.resources[0] | Add-Member -MemberType NoteProperty -Name "dependsOn" -Value @()
+            }
+            
+            # Add the new resource to the dependsOn array, so that the deployment will work
+            $armObj.resources[0].dependsOn += "[resourceId('Microsoft.Web/connections', parameters('$idPreSuf'))]"
+
+            # Adjust the connection object to depend on the same name
+            $connectionObj.Value.connectionId = "[resourceId('Microsoft.Web/connections', parameters('$idPreSuf'))]"
+            $connectionObj.Value.connectionName = "[parameters('$idPreSuf')]"
+            $connectionObj.Value.id = "[format('/subscriptions/{0}/providers/Microsoft.Web/locations/{1}/managedApis/$conType', subscription().subscriptionId, parameters('logicAppLocation'))]"
+        }
+
+    }
+
+    if ($found) {
+        # We need the location parameter
+        if ($null -eq $armObj.parameters.logicAppLocation) {
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "logicAppLocation" `
+                -Type "string" `
+                -Value "[resourceGroup().location]" `
+                -Description "Location of the Logic App. Best practice recommendation is to make this depending on the Resource Group and its location."
+        }
+    }
+
+    Out-TaskFileArm -InputObject $armObj
+}
+
+#Original file: Set-Arm.Connections.ManagedApis.Servicebus.ManagedIdentity.AsArmObject.AzAccount.task.ps1
+$parm = @{
+    Description = @"
+Loops all `$connections children
+-Validates that is of the type servicebus and is using the Managed Identity authentication scheme
 --Creates a new resource in the ARM template, for the ApiConnection object
 --With matching ARM Parameters, for the Namespace
 --Makes sure the ARM Parameters logicAppLocation exists
 --The type is based on the Managed Identity authentication
 --Name & Displayname is extracted from the ConnectionName property
 "@
-    Alias       = "Arm.Set-Arm.Connections.ManagedApis.Servicebus.ManagedIdentity.AsArmObject"
+    Alias       = "Arm.Set-Arm.Connections.ManagedApis.Servicebus.ManagedIdentity.AsArmObject.AzAccount"
 }
 
-Task -Name "Set-Arm.Connections.ManagedApis.Servicebus.ManagedIdentity.AsArmObject" @parm -Action {
+Task -Name "Set-Arm.Connections.ManagedApis.Servicebus.ManagedIdentity.AsArmObject.AzAccount" @parm -Action {
     Set-TaskWorkDirectory
     
     $found = $false
+    $conType = "servicebus"
 
     $armObj = Get-TaskWorkObject
 
-    $armObj.resources[0].properties.parameters.'$connections'.value.PsObject.Properties | ForEach-Object {
+    foreach ($connectionObj in $armObj.resources[0].properties.parameters.'$connections'.value.PsObject.Properties) {
+        if ($connectionObj.Value.id -like "*managedApis/servicebus*") {
 
-        if ($_.Value.id -like "*managedApis/servicebus*") {
+            # This should only handle Managed Identity Servicebus connections
+            if ($connectionObj.Value.connectionProperties.authentication.type -ne "ManagedServiceIdentity") { continue }
+
             $found = $true
 
+            # Fetch the details from the connection object
+            $uri = "{0}?api-version=2018-07-01-preview" -f $($_.Value.connectionId)
+            $resObj = Invoke-AzRestMethod -Path $uri -Method Get | Select-Object -ExpandProperty content | ConvertFrom-Json
+            
+            # Use the display name as the name of the resource
+            $conName = $resObj.Properties.DisplayName
+            $resName = $resObj.Properties.DisplayName #fallback default value
+
+            if ($resObj.Properties.parameterValueSet.values.namespaceEndpoint.value -match "sb://(.*).servicebus.windows.net") {
+                $resName = $Matches[1]
+            }
+
+            # Fetch base template
             $pathArms = "$(Get-PSFConfigValue -FullName PsLogicAppExtractor.ModulePath.Base)\internal\arms"
+            $apiObj = Get-Content -Path "$pathArms\API.SB.Managed.json" -Raw | ConvertFrom-Json
 
-            $sbObj = Get-Content -Path "$pathArms\API.SB.Managed.json" -Raw | ConvertFrom-Json
-
-            $sbObj.Name = $_.Value.connectionName
-            $sbObj.properties.displayName = $_.Value.connectionName
-
-            $nsPreSuf = Format-Name -Type "Connection" -Prefix $Parm_Prefix -Suffix "_Namespace" -Value "$($_.Name)"
+            # Set the names of the parameters
+            $Prefix = Get-PSFConfigValue -FullName PsLogicAppExtractor.prefixsuffix.connection.prefix
+            $idPreSuf = Format-Name -Type "Connection" -Value "$($connectionObj.Name)"
+            $nsPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_Namespace" -Value "$($connectionObj.Name)"
 
             $armObj = Add-ArmParameter -InputObject $armObj -Name "$nsPreSuf" `
                 -Type "string" `
-                -Value "" `
-                -Description "The name of the servicebus namespace. ($($_.Name))"
+                -Value "$resName" `
+                -Description "The name of the servicebus namespace. ($($connectionObj.Name))"
 
-            $sbObj.properties.parameterValueSet.values.namespaceEndpoint.value = $sbObj.properties.parameterValueSet.values.namespaceEndpoint.value.Replace("'##NAMESPACE##'", "parameters('$nsPreSuf')")
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$idPreSuf" `
+                -Type "string" `
+                -Value $conName `
+                -Description "The name / id of the ManagedApi connection object that is being utilized by the Logic App. Will be for the trigger and other actions that depend on connections."
 
-            $armObj.resources += $sbObj
+            # Update the api object properties
+            $apiObj.Name = "[parameters('$idPreSuf')]"
+            $apiObj.properties.displayName = "[parameters('$idPreSuf')]"
+            $apiObj.properties.parameterValueSet.values.namespaceEndpoint.value = $apiObj.properties.parameterValueSet.values.namespaceEndpoint.value.Replace("'##NAMESPACE##'", "parameters('$nsPreSuf')")
+
+            # Append the new resource to the ARM template
+            $armObj.resources += $apiObj
 
             if ($null -eq $armObj.resources[0].dependsOn) {
+                # Create the dependsOn array if it does not exist
                 $armObj.resources[0] | Add-Member -MemberType NoteProperty -Name "dependsOn" -Value @()
             }
+            
+            # Add the new resource to the dependsOn array, so that the deployment will work
+            $armObj.resources[0].dependsOn += "[resourceId('Microsoft.Web/connections', parameters('$idPreSuf'))]"
 
-            if ($($_.Value.connectionName) -match "\[(.*)\]") {
-                $armObj.resources[0].dependsOn += "[resourceId('Microsoft.Web/connections', $($Matches[1]))]"
-            }
-            else {
-                $armObj.resources[0].dependsOn += "[resourceId('Microsoft.Web/connections', '$($_.Value.connectionName)')]"
-            }
+            # Adjust the connection object to depend on the same name
+            $connectionObj.Value.connectionId = "[resourceId('Microsoft.Web/connections', parameters('$idPreSuf'))]"
+            $connectionObj.Value.connectionName = "[parameters('$idPreSuf')]"
+            $connectionObj.Value.id = "[format('/subscriptions/{0}/providers/Microsoft.Web/locations/{1}/managedApis/$conType', subscription().subscriptionId, parameters('logicAppLocation'))]"
         }
+
     }
 
     if ($found) {
+        # We need the location parameter
+        if ($null -eq $armObj.parameters.logicAppLocation) {
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "logicAppLocation" `
+                -Type "string" `
+                -Value "[resourceGroup().location]" `
+                -Description "Location of the Logic App. Best practice recommendation is to make this depending on the Resource Group and its location."
+        }
+    }
+
+    Out-TaskFileArm -InputObject $armObj
+}
+
+#Original file: Set-Arm.Connections.ManagedApis.Servicebus.ManagedIdentity.AsArmObject.AzCli.task.ps1
+$parm = @{
+    Description = @"
+Loops all `$connections children
+-Validates that is of the type servicebus and is using the Managed Identity authentication scheme
+--Creates a new resource in the ARM template, for the ApiConnection object
+--With matching ARM Parameters, for the Namespace
+--Makes sure the ARM Parameters logicAppLocation exists
+--The type is based on the Managed Identity authentication
+--Name & Displayname is extracted from the ConnectionName property
+"@
+    Alias       = "Arm.Set-Arm.Connections.ManagedApis.Servicebus.ManagedIdentity.AsArmObject.AzCli"
+}
+
+Task -Name "Set-Arm.Connections.ManagedApis.Servicebus.ManagedIdentity.AsArmObject.AzCli" @parm -Action {
+    Set-TaskWorkDirectory
+    
+    $found = $false
+    $conType = "servicebus"
+
+    $armObj = Get-TaskWorkObject
+
+    foreach ($connectionObj in $armObj.resources[0].properties.parameters.'$connections'.value.PsObject.Properties) {
+        if ($connectionObj.Value.id -like "*managedApis/servicebus*") {
+
+            # This should only handle Managed Identity Servicebus connections
+            if ($connectionObj.Value.connectionProperties.authentication.type -ne "ManagedServiceIdentity") { continue }
+
+            $found = $true
+
+            # Fetch the details from the connection object
+            $uri = "{0}?api-version=2018-07-01-preview" -f $($connectionObj.Value.connectionId)
+            $resObj = az rest --url $uri | ConvertFrom-Json
+            
+            # Use the display name as the name of the resource
+            $conName = $resObj.Properties.DisplayName
+            $resName = $resObj.Properties.DisplayName #fallback default value
+
+            if ($resObj.Properties.parameterValueSet.values.namespaceEndpoint.value -match "sb://(.*).servicebus.windows.net") {
+                $resName = $Matches[1]
+            }
+
+            # Fetch base template
+            $pathArms = "$(Get-PSFConfigValue -FullName PsLogicAppExtractor.ModulePath.Base)\internal\arms"
+            $apiObj = Get-Content -Path "$pathArms\API.SB.Managed.json" -Raw | ConvertFrom-Json
+
+            # Set the names of the parameters
+            $Prefix = Get-PSFConfigValue -FullName PsLogicAppExtractor.prefixsuffix.connection.prefix
+            $idPreSuf = Format-Name -Type "Connection" -Value "$($connectionObj.Name)"
+            $nsPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_Namespace" -Value "$($connectionObj.Name)"
+
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$nsPreSuf" `
+                -Type "string" `
+                -Value "$resName" `
+                -Description "The name of the servicebus namespace. ($($connectionObj.Name))"
+
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$idPreSuf" `
+                -Type "string" `
+                -Value $conName `
+                -Description "The name / id of the ManagedApi connection object that is being utilized by the Logic App. Will be for the trigger and other actions that depend on connections."
+
+            # Update the api object properties
+            $apiObj.Name = "[parameters('$idPreSuf')]"
+            $apiObj.properties.displayName = "[parameters('$idPreSuf')]"
+            $apiObj.properties.parameterValueSet.values.namespaceEndpoint.value = $apiObj.properties.parameterValueSet.values.namespaceEndpoint.value.Replace("'##NAMESPACE##'", "parameters('$nsPreSuf')")
+
+            # Append the new resource to the ARM template
+            $armObj.resources += $apiObj
+
+            if ($null -eq $armObj.resources[0].dependsOn) {
+                # Create the dependsOn array if it does not exist
+                $armObj.resources[0] | Add-Member -MemberType NoteProperty -Name "dependsOn" -Value @()
+            }
+            
+            # Add the new resource to the dependsOn array, so that the deployment will work
+            $armObj.resources[0].dependsOn += "[resourceId('Microsoft.Web/connections', parameters('$idPreSuf'))]"
+
+            # Adjust the connection object to depend on the same name
+            $connectionObj.Value.connectionId = "[resourceId('Microsoft.Web/connections', parameters('$idPreSuf'))]"
+            $connectionObj.Value.connectionName = "[parameters('$idPreSuf')]"
+            $connectionObj.Value.id = "[format('/subscriptions/{0}/providers/Microsoft.Web/locations/{1}/managedApis/$conType', subscription().subscriptionId, parameters('logicAppLocation'))]"
+        }
+
+    }
+
+    if ($found) {
+        # We need the location parameter
         if ($null -eq $armObj.parameters.logicAppLocation) {
             $armObj = Add-ArmParameter -InputObject $armObj -Name "logicAppLocation" `
                 -Type "string" `
@@ -965,6 +2300,30 @@ Task -Name "Set-Arm.LogicApp.Parm.AsVariable" @parm -Action {
     Out-TaskFileArm -InputObject $armObj
 }
 
+#Original file: Set-Arm.LogicApp.State.AsParameter.task.ps1
+$parm = @{
+    Description = @"
+Creates an Arm parameter: logicAppState
+-Sets the default value to the original state of the Logic App
+"@
+    Alias       = "Arm.Set-Arm.LogicApp.State.AsParameter"
+}
+
+Task -Name "Set-Arm.LogicApp.State.AsParameter" @parm -Action {
+    Set-TaskWorkDirectory
+
+    $armObj = Get-TaskWorkObject
+    $orgValue = $armObj.resources[0].properties.state
+    
+    $armObj = Add-ArmParameter -InputObject $armObj -Name "logicAppState" `
+        -Type "string" `
+        -Value "$orgValue" `
+        -Description "State of the Logic App when is being deployed. Makes it possible to override the name at deploy time."
+    $armObj.resources[0].properties.state = "[parameters('logicAppState')]"
+
+    Out-TaskFileArm -InputObject $armObj
+}
+
 #Original file: Set-Arm.Tags.AsParameter.task.ps1
 $parm = @{
     Description = @"
@@ -1206,6 +2565,86 @@ Task -Name "Set-Arm.UserAssignedIdentities.ResourceId.AsVariable" @parm -Action 
     }
     else {
         $armObj = $raw | ConvertFrom-Json
+    }
+
+    Out-TaskFileArm -InputObject $armObj
+}
+
+#Original file: Set-Arm.Workflow.IdFormatted.Simple.AsParameter.task.ps1
+$parm = @{
+    Description = @"
+"@
+    Alias       = "Arm.Set-Arm.Workflow.IdFormatted.Simple.AsParameter"
+}
+
+Task -Name "Set-Arm.Workflow.IdFormatted.Simple.AsParameter" @parm -Action {
+    Set-TaskWorkDirectory
+
+    $armObj = Get-TaskWorkObject
+
+    $counter = 0
+    $actions = $armObj.resources[0].properties.definition.actions.PsObject.Properties | ForEach-Object { Get-ActionsByType -InputObject $_ -Type "Workflow" }
+
+    foreach ($item in $actions) {
+        if (-not ($item.Value.inputs.host.workflow.id -like "*``[*``]*")) {
+
+            if ($item.Value.inputs.host.workflow.id -match "/subscriptions/.*/resourceGroups/.*/providers/Microsoft.Logic/workflows/(.*)") {
+                $counter += 1
+                $parmName = "workFlowId$($counter.ToString().PadLeft(3, "0"))"
+
+                $orgName = $Matches[1]
+                $item.Value.inputs.host.workflow.id = "[format('/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Logic/workflows/{2}', subscription().subscriptionId, resourceGroup().name, parameters('$parmName'))]"
+
+                $armObj = Add-ArmParameter -InputObject $armObj -Name $parmName `
+                    -Type "string" `
+                    -Value "$orgName" `
+                    -Description "The name / id of the WorkFlow (LogicApp) that is referenced by the Logic App."
+            }
+        }
+    }
+
+    Out-TaskFileArm -InputObject $armObj
+}
+
+#Original file: Set-Arm.Workflow.IdFormatted.Simple.WithTrigger.AsParameter.task.ps1
+$parm = @{
+    Description = @"
+"@
+    Alias       = "Arm.Set-Arm.Workflow.IdFormatted.Simple.WithTrigger.AsParameter"
+}
+
+Task -Name "Set-Arm.Workflow.IdFormatted.Simple.WithTrigger.AsParameter" @parm -Action {
+    Set-TaskWorkDirectory
+
+    $armObj = Get-TaskWorkObject
+
+    $counter = 0
+    $actions = $armObj.resources[0].properties.definition.actions.PsObject.Properties | ForEach-Object { Get-ActionsByType -InputObject $_ -Type "Workflow" }
+
+    foreach ($item in $actions) {
+        if (-not ($item.Value.inputs.host.workflow.id -like "*``[*``]*")) {
+
+            if ($item.Value.inputs.host.workflow.id -match "/subscriptions/.*/resourceGroups/.*/providers/Microsoft.Logic/workflows/(.*)") {
+                $counter += 1
+                $parmName = "workFlowId$($counter.ToString().PadLeft(3, "0"))"
+                $parmTrigger = "workFlowId$($counter.ToString().PadLeft(3, "0"))Trigger"
+
+                $orgName = $Matches[1]
+                $item.Value.inputs.host.workflow.id = "[format('/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Logic/workflows/{2}', subscription().subscriptionId, resourceGroup().name, parameters('$parmName'))]"
+
+                $armObj = Add-ArmParameter -InputObject $armObj -Name $parmName `
+                    -Type "string" `
+                    -Value "$orgName" `
+                    -Description "The name / id of the WorkFlow (LogicApp) that is referenced by the Logic App."
+
+                $orgValue = $item.Value.inputs.host.triggerName
+                $item.Value.inputs.host.triggerName = "[parameters('$parmTrigger')]"
+                $armObj = Add-ArmParameter -InputObject $armObj -Name $parmTrigger `
+                    -Type "string" `
+                    -Value "$orgValue" `
+                    -Description "The name the method exposed by the FunctionApp that is referenced by the Logic App."
+            }
+        }
     }
 
     Out-TaskFileArm -InputObject $armObj
@@ -1502,9 +2941,14 @@ Task -Name "Sort-Arm.Parameter" @parm -Action {
 
     $armObj = Get-TaskWorkObject
 
-    $connectionPattern = Format-Name -Type "Connection" -Prefix $Connection_Prefix -Suffix $Connection_Suffix -Value "*"
-    $parmPattern = Format-Name -Type "Parm" -Prefix $Parm_Prefix -Suffix $Parm_Suffix -Value "*"
-    $tagPattern = Format-Name -Type "Tag" -Prefix $Tag_Prefix -Suffix $Tag_Suffix -Value "*"
+    $PrefixConnection = Get-PSFConfigValue -FullName PsLogicAppExtractor.prefixsuffix.connection.prefix
+    $connectionPattern = Format-Name -Type "Connection" -Prefix $PrefixConnection -Value "*"
+
+    $PrefixParm = Get-PSFConfigValue -FullName PsLogicAppExtractor.prefixsuffix.parm.prefix
+    $parmPattern = Format-Name -Type "Parm" -Prefix $PrefixParm -Value "*"
+
+    $PrefixTag = Get-PSFConfigValue -FullName PsLogicAppExtractor.prefixsuffix.tag.prefix
+    $tagPattern = Format-Name -Type "Tag" -Prefix $PrefixTag -Value "*"
     
     $sorted = @(foreach ($item in $armObj.parameters.PsObject.Properties) {
             switch -Wildcard ($item.Name) {
