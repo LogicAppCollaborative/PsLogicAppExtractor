@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
 Split an ARM template into multiple files, based on the resource type
 

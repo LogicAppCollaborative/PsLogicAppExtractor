@@ -51,6 +51,7 @@ https://github.com/sandroasp/Azure-Learning-Path/blob/main/Logic-Apps/Find-Azure
 
 #>
 function Get-PsLaManagedApiConnectionByUsage.AzAccount {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseOutputTypeCorrectly', '')]
     [CmdletBinding(DefaultParameterSetName = "ResourceGroup")]
     param (
         [Parameter(Mandatory = $true, ParameterSetName = "Subscription")]
