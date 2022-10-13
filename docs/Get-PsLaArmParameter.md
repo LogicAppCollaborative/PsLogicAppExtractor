@@ -86,7 +86,7 @@ Path to the ARM template that you want to work against
 ```yaml
 Type: String
 Parameter Sets: (All)
-Aliases:
+Aliases: File
 
 Required: True
 Position: 1

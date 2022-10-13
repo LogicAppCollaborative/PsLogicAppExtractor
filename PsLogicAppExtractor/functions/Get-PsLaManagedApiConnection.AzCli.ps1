@@ -238,6 +238,8 @@
         
 #>
 function Get-PsLaManagedApiConnection.AzCli {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPositionalParameters', '')]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseOutputTypeCorrectly', '')]
     [CmdletBinding(DefaultParameterSetName = "ResourceGroup")]
     param (
         [Parameter(Mandatory = $true, ParameterSetName = "Subscription")]

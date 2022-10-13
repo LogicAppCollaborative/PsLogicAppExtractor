@@ -13,9 +13,14 @@ Task -Name "Sort-Arm.Parameter" @parm -Action {
 
     $armObj = Get-TaskWorkObject
 
-    $connectionPattern = Format-Name -Type "Connection" -Prefix $Connection_Prefix -Suffix $Connection_Suffix -Value "*"
-    $parmPattern = Format-Name -Type "Parm" -Prefix $Parm_Prefix -Suffix $Parm_Suffix -Value "*"
-    $tagPattern = Format-Name -Type "Tag" -Prefix $Tag_Prefix -Suffix $Tag_Suffix -Value "*"
+    $PrefixConnection = Get-PSFConfigValue -FullName PsLogicAppExtractor.prefixsuffix.connection.prefix
+    $connectionPattern = Format-Name -Type "Connection" -Prefix $PrefixConnection -Value "*"
+
+    $PrefixParm = Get-PSFConfigValue -FullName PsLogicAppExtractor.prefixsuffix.parm.prefix
+    $parmPattern = Format-Name -Type "Parm" -Prefix $PrefixParm -Value "*"
+
+    $PrefixTag = Get-PSFConfigValue -FullName PsLogicAppExtractor.prefixsuffix.tag.prefix
+    $tagPattern = Format-Name -Type "Tag" -Prefix $PrefixTag -Value "*"
     
     $sorted = @(foreach ($item in $armObj.parameters.PsObject.Properties) {
             switch -Wildcard ($item.Name) {

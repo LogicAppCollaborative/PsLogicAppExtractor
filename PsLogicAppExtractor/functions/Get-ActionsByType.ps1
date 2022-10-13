@@ -48,4 +48,13 @@ function Get-ActionsByType {
             Get-ActionsByType -InputObject $item -Type $Type
         }
     }
+    elseif ($InputObject.cases) {
+        foreach ($item in $InputObject.cases.PsObject.Properties) {
+            Get-ActionsByType -InputObject $item -Type $Type
+        }
+    }elseif ($InputObject.Value.cases) {
+        foreach ($item in $InputObject.Value.cases.PsObject.Properties) {
+            Get-ActionsByType -InputObject $item -Type $Type
+        }
+    }
 }

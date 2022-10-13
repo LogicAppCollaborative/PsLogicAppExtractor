@@ -39,6 +39,7 @@
         
 #>
 function Invoke-PsLaConsent.AzCli {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPositionalParameters', '')]
     [CmdletBinding()]
     param (
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]

@@ -1,15 +1,15 @@
 ﻿{
-  "type": "Microsoft.Web/connections",
-  "apiVersion": "2018-07-01-preview",
-  "name": "##NAME##",
-  "location": "[parameters('logicAppLocation')]",
-  "properties": {
-      "api": {
-          "id": "[subscriptionResourceId('Microsoft.Web/locations/managedApis', parameters('logicAppLocation'), 'servicebus')]"
-      },
-      "displayName": "##NAME##",
-      "parameterValues": {
-          "connectionString": "[listKeys(resourceId('##RESOURCEGROUPNAME##','Microsoft.ServiceBus/namespaces/authorizationRules', '##NAMESPACE##', '##KEYNAME##'), '2017-04-01').primaryConnectionString]"
-      }
-  }
+    "type": "Microsoft.Web/connections",
+    "apiVersion": "2018-07-01-preview",
+    "name": "##NAME##",
+    "location": "[parameters('logicAppLocation')]",
+    "properties": {
+        "api": {
+            "id": "[subscriptionResourceId('Microsoft.Web/locations/managedApis', parameters('logicAppLocation'), 'servicebus')]"
+        },
+        "displayName": "##NAME##",
+        "parameterValues": {
+            "connectionString": "[listKeys(resourceId('##SUSCRIPTIONID##', '##RESOURCEGROUPNAME##', 'Microsoft.ServiceBus/namespaces/authorizationRules', '##NAMESPACE##', '##KEYNAME##'), providers('Microsoft.ServiceBus', 'namespaces').apiVersions[0]).primaryConnectionString]"
+        }
+    }
 }

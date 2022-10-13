@@ -87,13 +87,7 @@ function Update-PsLaArmTemplate {
         $armObjDestination = Get-TaskWorkObject -Path $Destination
 
         if (-not $SkipParameters) {
-            # "Before ####"
-            # $armObjDestination.parameters | ConvertTo-Json -Depth 10
-            # "Before ####"
             $armObjDestination.parameters = $armObjSource.parameters | ConvertTo-Json -Depth 10 | ConvertFrom-Json -Depth 10
-            # "After ####"
-            # $armObjDestination.parameters | ConvertTo-Json -Depth 10
-            # "After ####"
         }
 
         if (-not $SkipResources) {
