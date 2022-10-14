@@ -21,8 +21,8 @@ jobs:
       if: steps.cacher.outputs.cache-hit != 'true'
       run: .\build\vsts-prerequisites.ps1
       shell: pwsh
-    - name: Validate
-      run: .\build\vsts-validate.ps1
+    # - name: Validate
+    #   run: .\build\vsts-validate.ps1
       shell: pwsh
     - name: Build
       run: .\build\vsts-build.ps1 -ApiKey $env:APIKEY -AutoVersion
