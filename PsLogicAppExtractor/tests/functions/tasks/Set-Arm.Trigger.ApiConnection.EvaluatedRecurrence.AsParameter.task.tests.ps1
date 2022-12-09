@@ -68,12 +68,12 @@
         $armObj.parameters.trigger_Interval.defaultValue | Should -BeExactly 1
     }
 
-    It 'Should be "[parameters(''trigger_Frequency'')]" in the properties.definition.triggers.evaluatedRecurrence.frequency property' {
-        @($armObj.resources[0].properties.definition.triggers.PsObject.Properties)[0].Value.evaluatedRecurrence.frequency | Should -BeExactly "[parameters('trigger_Frequency')]"
+    It 'Should be "[parameters(''trigger_EvalFrequency'')]" in the properties.definition.triggers.evaluatedRecurrence.frequency property' {
+        @($armObj.resources[0].properties.definition.triggers.PsObject.Properties)[0].Value.evaluatedRecurrence.frequency | Should -BeExactly "[parameters('trigger_EvalFrequency')]"
     }
 
-    It 'Should be "[parameters(''trigger_Interval'')]" in the properties.definition.triggers.evaluatedRecurrence.interval property' {
-        @($armObj.resources[0].properties.definition.triggers.PsObject.Properties)[0].Value.evaluatedRecurrence.interval | Should -BeExactly "[parameters('trigger_Interval')]"
+    It 'Should be "[parameters(''trigger_EvalInterval'')]" in the properties.definition.triggers.evaluatedRecurrence.interval property' {
+        @($armObj.resources[0].properties.definition.triggers.PsObject.Properties)[0].Value.evaluatedRecurrence.interval | Should -BeExactly "[parameters('trigger_EvalInterval')]"
     }
 
     # AfterAll {
