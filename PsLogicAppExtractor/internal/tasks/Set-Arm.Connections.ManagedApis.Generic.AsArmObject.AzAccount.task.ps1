@@ -21,7 +21,7 @@ Task -Name "Set-Arm.Connections.ManagedApis.Generic.AsArmObject.AzAccount" @parm
         if ($connectionObj.Value.id -match "/managedApis/(.*)") {
             
             # We have specialized templates for these types
-            if ($Matches[1] -in @("azureblob", "servicebus")) { continue }
+            if ($Matches[1] -in @("azureblob", "azurefile", "servicebus")) { continue }
 
             $found = $true
             $conType = $Matches[1]
