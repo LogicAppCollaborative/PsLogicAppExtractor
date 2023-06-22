@@ -24,11 +24,11 @@
         
     .PARAMETER Tools
         Instruct the cmdlet which tool to use
-
+        
         Options are:
         AzCli (azure cli)
         Az.Powershell (Az.Accounts+ PowerShell native modules)
-
+        
     .EXAMPLE
         PS C:\> Get-PsLaManagedApiConnectionByUsage -SubscriptionId "b466443d-6eac-4513-a7f0-3579502929f00" -ResourceGroup "TestRg"
         

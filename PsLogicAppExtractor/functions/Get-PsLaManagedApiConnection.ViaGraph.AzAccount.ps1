@@ -7,7 +7,7 @@
         Get the ApiConnection objects from a resource group
         
         Helps to identity ApiConnection objects that are orphaned, or which LogicApps is actually using the specific ApiConnection
-
+        
         Uses the current connected Az.Account session to pull the details from the azure portal
         
     .PARAMETER SubscriptionId
@@ -29,7 +29,7 @@
         Name                                     ResourceGroup             IsReferenced LogicApp
         ----                                     -------------             ------------ --------
         API-AzureBlob-ManagedIdentity            TestRg                            true LA-TestExport
-
+        
     .EXAMPLE
         PS C:\> Get-PsLaManagedApiConnection.ViaGraph.AzAccount -ResourceGroup "TestRg" -Summarized
         
@@ -37,11 +37,11 @@
         It will summarize how many LogicApps that is actually using the specific Api Connection
         
         Output example:
-
+        
         Name                                     ResourceGroup             References SubscriptionId
         ----                                     -------------             ---------- --------------
         API-AzureBlob-ManagedIdentity            TestRg                             1 b466443d-6eac-4513-a7f0-35795…
-                                                                                      
+        
     .NOTES
         
         Author: Mötz Jensen (@Splaxi)
