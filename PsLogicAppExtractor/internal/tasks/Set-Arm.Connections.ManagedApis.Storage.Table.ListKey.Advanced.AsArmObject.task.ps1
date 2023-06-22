@@ -1,41 +1,50 @@
 ﻿$parm = @{
     Description = @"
 Loops all `$connections children
--Validates that is of the type azureblob
+-Validates that is of the type azuretable
 --Creates a new resource in the ARM template, for the ApiConnection object
 --With matching ARM Parameters, for the SubscriptionId, ResourceGroup, Namespace, Key
 --Makes sure the ARM Parameters logicAppLocation exists
 --The type is based on ListKey / ConnectionString approach
 --Name & Displayname is extracted from the Api Connection Object
+Requires an authenticated session, either Az.Accounts or az cli
 "@
-    Alias       = "Arm.Set-Arm.Connections.ManagedApis.AzureBlob.ListKey.Advanced.AsArmObject.AzCli"
+    Alias       = "Arm.Set-Arm.Connections.ManagedApis.Storage.Table.ListKey.Advanced.AsArmObject"
 }
 
-Task -Name "Set-Arm.Connections.ManagedApis.AzureBlob.ListKey.Advanced.AsArmObject.AzCli" @parm -Action {
+Task -Name "Set-Arm.Connections.ManagedApis.Storage.Table.ListKey.Advanced.AsArmObject" @parm -Action {
     Set-TaskWorkDirectory
 
+    # We can either use the az cli or the Az modules
+    $tools = Get-PSFConfigValue -FullName PsLogicAppExtractor.Execution.Tools
+
     $found = $false
-    $conType = "azureblob"
     
     $armObj = Get-TaskWorkObject
 
     $armObj.resources[0].properties.parameters.'$connections'.value.PsObject.Properties | ForEach-Object {
 
-        if ($_.Value.id -like "*managedApis/azureblob*") {
+        if ($_.Value.id -like "*managedApis/azuretable*") {
             $found = $true
 
             # Fetch the details from the connection object
             $uri = "{0}?api-version=2018-07-01-preview" -f $($_.Value.connectionId)
-            $resObj = az rest --url $uri | ConvertFrom-Json
+
+            if ($tools -eq "AzCli") {
+                $resObj = az rest --url $uri | ConvertFrom-Json
+            }
+            else {
+                $resObj = Invoke-AzRestMethod -Path $uri -Method Get | Select-Object -ExpandProperty content | ConvertFrom-Json
+            }
 
             # Use the display name as the name of the resource
             $conName = $resObj.Name
             $displayName = $resObj.Properties.DisplayName
-            $resName = $resObj.Properties.ParameterValues.AccountName
+            $resName = $resObj.Properties.ParameterValues.storageaccount
 
             # Fetch base template
             $pathArms = "$(Get-PSFConfigValue -FullName PsLogicAppExtractor.ModulePath.Base)\internal\arms"
-            $apiObj = Get-Content -Path "$pathArms\API.AzureBlob.AccessKey.json" -Raw | ConvertFrom-Json
+            $apiObj = Get-Content -Path "$pathArms\API.Storage.Table.AccessKey.json" -Raw | ConvertFrom-Json
 
             # Set the names of the parameters
             $Prefix = Get-PSFConfigValue -FullName PsLogicAppExtractor.prefixsuffix.connection.prefix
@@ -74,8 +83,13 @@ Task -Name "Set-Arm.Connections.ManagedApis.AzureBlob.ListKey.Advanced.AsArmObje
             # Update the api object properties
             $apiObj.Name = "[parameters('$idPreSuf')]"
             $apiObj.properties.displayName = "[parameters('$displayPreSuf')]"
-            $apiObj.properties.parameterValues.accountName = "[parameters('$objPreSuf')]"
-            $apiObj.properties.parameterValues.accessKey = $apiObj.properties.parameterValues.accessKey.Replace("'##SUSCRIPTIONID##'", "parameters('$subPreSuf')").Replace("'##RESOURCEGROUPNAME##'", "parameters('$rgPreSuf')").Replace("'##ACCOUNTNAME##'", "parameters('$objPreSuf')")
+            $apiObj.properties.parameterValues.storageaccount = "[parameters('$objPreSuf')]"
+            $apiObj.properties.parameterValues.sharedkey = $apiObj.properties.parameterValues.sharedkey.Replace("'##SUSCRIPTIONID##'", "parameters('$subPreSuf')").Replace("'##RESOURCEGROUPNAME##'", "parameters('$rgPreSuf')").Replace("'##ACCOUNTNAME##'", "parameters('$objPreSuf')")
+
+            # Update the api connection object type
+            $_.Value.id -match "/managedApis/(.*)"
+            $conType = $Matches[1]
+            $apiObj.properties.api.id = $apiObj.properties.api.id.Replace("##TYPE##", $conType)
 
             # Append the new resource to the ARM template
             $armObj.resources += $apiObj

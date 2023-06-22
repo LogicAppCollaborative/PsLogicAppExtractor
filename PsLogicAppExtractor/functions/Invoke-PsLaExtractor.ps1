@@ -50,6 +50,13 @@
         
         This enables troubleshooting and comparison of input vs output, per task, as each task has an input file and the result of the work persisted in the same directory
         
+    .PARAMETER Tools
+        Instruct the cmdlet which tool to use
+
+        Options are:
+        AzCli (azure cli)
+        Az.Powershell (Az.Accounts+ PowerShell native modules)
+        
     .EXAMPLE
         PS C:\> Invoke-PsLaExtractor -Runbook "C:\temp\LogicApp.ExportOnly.psakefile.ps1" -ResourceGroup "TestRg" -Name TestLogicApp
         
@@ -119,7 +126,10 @@ function Invoke-PsLaExtractor {
         [PsfValidateScript('PSFramework.Validate.FSPath.Folder', ErrorString = 'PSFramework.Validate.FSPath.Folder')]
         [string] $OutputPath,
 
-        [switch] $KeepFiles
+        [switch] $KeepFiles,
+
+        [ValidateSet('AzCli', 'Az.Powershell')]
+        [string] $Tools = 'Az.Powershell'
     )
 
     if (-not ($WorkPath -like "*$([System.IO.Path]::GetTempPath())*")) {
@@ -136,6 +146,8 @@ function Invoke-PsLaExtractor {
     Set-PSFConfig -FullName PsLogicAppExtractor.Execution.TaskPath -Value ""
     Set-PSFConfig -FullName PsLogicAppExtractor.Execution.Name -Value ""
 
+    Set-PSFConfig -FullName PsLogicAppExtractor.Execution.Tools -Value ""
+
     #Make sure the work path is created and available
     New-Item -Path $WorkPath -ItemType Directory -Force -ErrorAction Ignore > $null
 
@@ -148,6 +160,8 @@ function Invoke-PsLaExtractor {
     }
     
     Set-PSFConfig -FullName PsLogicAppExtractor.Execution.WorkPath -Value $WorkPath
+
+    Set-PSFConfig -FullName PsLogicAppExtractor.Execution.Tools -Value $Tools
 
     $props = @{}
     if ($SubscriptionId) { $props.SubscriptionId = $SubscriptionId }

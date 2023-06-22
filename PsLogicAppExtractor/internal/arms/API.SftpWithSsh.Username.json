@@ -1,0 +1,23 @@
+{
+    "type": "Microsoft.Web/connections",
+    "apiVersion": "2018-07-01-preview",
+    "name": "##NAME##",
+    "location": "[parameters('logicAppLocation')]",
+    "kind": "V1",
+    "properties": {
+        "parameterValues": {
+            "hostName": "##HOSTNAME##",
+            "userName": "##USERNAME#",
+            "password": "##PASSWORD##",
+            "portNumber": "##PORTNUMBER##",
+            "rootFolder": "##ROOTFOLDER##",
+            "acceptAnySshHostKey": true,
+            "sshHostKeyFingerprint": ""
+        },
+        "displayName": "##NAME##",
+        "customParameterValues": {},
+        "api": {
+            "id": "[subscriptionResourceId('Microsoft.Web/locations/managedApis', parameters('logicAppLocation'), '##TYPE##')]"
+        }
+    }
+}

@@ -1,0 +1,18 @@
+﻿{
+    "type": "Microsoft.Web/connections",
+    "apiVersion": "2016-06-01",
+    "name": "##NAME##",
+    "location": "[parameters('logicAppLocation')]",
+    "properties": {
+        "api": {
+            "id": "[subscriptionResourceId('Microsoft.Web/locations/managedApis', parameters('logicAppLocation'), '##TYPE##')]"
+        },
+        "displayName": "##NAME##",
+        "parameterValues": {
+            "token:TenantId": "##TENANTID##",
+            "token:clientId": "##CLIENTID##",
+            "token:grantType": "client_credentials",
+            "token:clientSecret": "##CLIENTSECRET##"
+        }
+    }
+}

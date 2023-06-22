@@ -1,0 +1,4 @@
+resources
+| where type == 'microsoft.web/connections' ##FILTERS##
+| extend Props=todynamic(properties)
+| project Id=id, Name=name, ResourceGroup=resourceGroup, SubscriptionId=subscriptionId, DisplayName=Props["displayName"], State=Props["connectionState"], Status=Props["overallStatus"], ApiType=Props["api"]["name"], AuthenticatedUser=Props["authenticatedUser"]["name"], ParameterValues=Props["parameterValues"], StatusDetails=Props["statuses"]

@@ -12,7 +12,6 @@ Task -Name "Set-Arm.FunctionApp.IdFormatted.Advanced.AsParameter" @parm -Action 
     $counter = 0
     $actions = $armObj.resources[0].properties.definition.actions.PsObject.Properties | ForEach-Object { Get-ActionsByType -InputObject $_ -Type "Function" }
 
-
     foreach ($item in $actions) {
         if (-not ($item.Value.inputs.function.id -like "*``[*``]*")) {
             if ($item.Value.inputs.function.id -match "/subscriptions/.*/resourceGroups/(.*)/providers/Microsoft.Web/sites/(.*)/functions/(.*)") {

@@ -6,13 +6,17 @@ Loops all `$connections children
 --Makes sure the ARM Parameters logicAppLocation exists
 --Name & Displayname is extracted from the ConnectionName property
 --Extends the dependsOn property on the LogicApp resource, to depend on the ApiConnection object
+Requires an authenticated session, either Az.Accounts or az cli
 "@
-    Alias       = "Arm.Set-Arm.Connections.ManagedApis.Generic.AsArmObject.AzAccount"
+    Alias       = "Arm.Set-Arm.Connections.ManagedApis.Generic.AsArmObject"
 }
 
-Task -Name "Set-Arm.Connections.ManagedApis.Generic.AsArmObject.AzAccount" @parm -Action {
+Task -Name "Set-Arm.Connections.ManagedApis.Generic.AsArmObject" @parm -Action {
     Set-TaskWorkDirectory
 
+    # We can either use the az cli or the Az modules
+    $tools = Get-PSFConfigValue -FullName PsLogicAppExtractor.Execution.Tools
+        
     $found = $false
 
     $armObj = Get-TaskWorkObject
@@ -21,14 +25,20 @@ Task -Name "Set-Arm.Connections.ManagedApis.Generic.AsArmObject.AzAccount" @parm
         if ($connectionObj.Value.id -match "/managedApis/(.*)") {
             
             # We have specialized templates for these types
-            if ($Matches[1] -in @("azureblob", "servicebus")) { continue }
+            if ($Matches[1] -in @("azureblob", "azurefile", "azuretables", "servicebus")) { continue }
 
             $found = $true
             $conType = $Matches[1]
 
             # Fetch the details from the connection object
             $uri = "{0}?api-version=2018-07-01-preview" -f $($_.Value.connectionId)
-            $resObj = Invoke-AzRestMethod -Path $uri -Method Get | Select-Object -ExpandProperty content | ConvertFrom-Json
+            
+            if ($tools -eq "AzCli") {
+                $resObj = az rest --url $uri | ConvertFrom-Json
+            }
+            else {
+                $resObj = Invoke-AzRestMethod -Path $uri -Method Get | Select-Object -ExpandProperty content | ConvertFrom-Json
+            }
             
             # Use the display name as the name of the resource
             $conName = $resObj.Properties.DisplayName

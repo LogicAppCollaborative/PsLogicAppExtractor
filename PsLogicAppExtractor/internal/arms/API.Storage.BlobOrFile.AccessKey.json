@@ -1,0 +1,16 @@
+﻿{
+    "type": "Microsoft.Web/connections",
+    "apiVersion": "2016-06-01",
+    "name": "##NAME##",
+    "location": "[parameters('logicAppLocation')]",
+    "properties": {
+        "api": {
+            "id": "[subscriptionResourceId('Microsoft.Web/locations/managedApis', parameters('logicAppLocation'), '##TYPE##')]"
+        },
+        "displayName": "##NAME##",
+        "parameterValues": {
+            "accountName": "##ACCOUNTNAME##",
+            "accessKey": "[listKeys(resourceId('##SUSCRIPTIONID##', '##RESOURCEGROUPNAME##', 'Microsoft.Storage/storageAccounts', '##ACCOUNTNAME##'), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value]"
+        }
+    }
+}

@@ -42,10 +42,10 @@
 	# Functions to export from this module
 	FunctionsToExport = @(
 		'Get-PsLaArmParameter'
-		, 'Get-PsLaManagedApiConnection.AzAccount'
-		, 'Get-PsLaManagedApiConnection.AzCli'
-		, 'Get-PsLaManagedApiConnectionByUsage.AzAccount'
-		, 'Get-PsLaManagedApiConnectionByUsage.AzCli'
+		, 'Get-PsLaManagedApiConnection'
+		, 'Get-PsLaManagedApiConnection.Status.ViaGraph.AzAccount'
+		, 'Get-PsLaManagedApiConnection.ViaGraph.AzAccount'
+		, 'Get-PsLaManagedApiConnectionByUsage'
 		, 'Get-PsLaTask'
 		, 'Get-PsLaTaskByFile'
 		, 'Get-PsLaTaskByPath'

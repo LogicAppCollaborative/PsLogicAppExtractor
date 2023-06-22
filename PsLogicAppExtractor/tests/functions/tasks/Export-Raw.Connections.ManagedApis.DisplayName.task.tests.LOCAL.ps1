@@ -4,7 +4,7 @@ BeforeAll {
     }
 }
 
-Describe 'Testing Export-Raw.Connections.ManagedApis.DisplayName.AzAccount' {
+Describe 'Testing Export-Raw.Connections.ManagedApis.DisplayName' {
 
     BeforeAll {
         ."$PSScriptRoot\..\..\..\internal\classes\PsLogicAppExtractor.class.ps1"
@@ -14,7 +14,8 @@ Describe 'Testing Export-Raw.Connections.ManagedApis.DisplayName.AzAccount' {
         $parms.nologo = $true
         
         Set-PSFConfig -FullName PsLogicAppExtractor.Execution.TaskCounter -Value 0
-
+        Set-PSFConfig -FullName PsLogicAppExtractor.Execution.Tools -Value 'Az.Powershell'
+        
         $logicAppName = "LA-TEST-Exporter"
         $WorkPath = "$([System.IO.Path]::GetTempPath())PsLogicAppExtractor\$([System.Guid]::NewGuid().Guid)"
         New-Item -Path $WorkPath -ItemType Directory -Force -ErrorAction Ignore > $null
@@ -23,9 +24,9 @@ Describe 'Testing Export-Raw.Connections.ManagedApis.DisplayName.AzAccount' {
         Set-PSFConfig -FullName PsLogicAppExtractor.Execution.TaskInputNext -Value "$PSScriptRoot\_Raw.LogicApp.Action.Queue.json"
         Set-PSFConfig -FullName PsLogicAppExtractor.Pester.FileName -Value "$logicAppName.json"
 
-        Invoke-psake @parms -taskList "Export-Raw.Connections.ManagedApis.DisplayName.AzAccount"
+        Invoke-psake @parms -taskList "Export-Raw.Connections.ManagedApis.DisplayName"
         
-        $resPath = Get-ExtractOutput -Path $WorkPath
+        $resPath = Get-PSFConfigValue -FullName PsLogicAppExtractor.Execution.TaskInputNext
         $raw = Get-Content -Path $resPath -Raw
         $lgObj = [LogicApp]$(Get-Content -Path $resPath -Raw | ConvertFrom-Json)
     }

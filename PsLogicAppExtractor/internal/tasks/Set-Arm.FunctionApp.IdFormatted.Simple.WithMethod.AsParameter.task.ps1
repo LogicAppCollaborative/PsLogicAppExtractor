@@ -12,7 +12,6 @@ Task -Name "Set-Arm.FunctionApp.IdFormatted.Simple.WithMethod.AsParameter" @parm
     $counter = 0
     $actions = $armObj.resources[0].properties.definition.actions.PsObject.Properties | ForEach-Object { Get-ActionsByType -InputObject $_ -Type "Function" }
 
-
     foreach ($item in $actions) {
         if (-not ($item.Value.inputs.function.id -like "*``[*``]*")) {
             if ($item.Value.inputs.function.id -match "/sites/(.*)/functions/(.*)") {

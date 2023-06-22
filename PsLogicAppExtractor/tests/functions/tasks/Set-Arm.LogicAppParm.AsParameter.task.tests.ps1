@@ -19,7 +19,7 @@
         
         Invoke-psake @parms -taskList "Set-Raw.ApiVersion", "Set-Raw.Actions.Http.Uri.AsParm", "Set-Raw.Actions.Http.Audience.AsParm", "ConvertTo-Arm", "Set-Arm.LogicApp.Parm.AsParameter"
 
-        $resPath = Get-ExtractOutput -Path $WorkPath
+        $resPath = Get-PSFConfigValue -FullName PsLogicAppExtractor.Execution.TaskInputNext
         $raw = Get-Content -Path $resPath -Raw
         $armObj = [ArmTemplate]$(Get-Content -Path $resPath -Raw | ConvertFrom-Json)
     }
