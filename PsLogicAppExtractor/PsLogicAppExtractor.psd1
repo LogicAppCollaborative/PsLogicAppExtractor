@@ -3,7 +3,7 @@
 	RootModule        = 'PsLogicAppExtractor.psm1'
 	
 	# Version number of this module.
-	ModuleVersion     = '0.5.1'
+	ModuleVersion     = '0.6.1'
 	
 	# ID used to uniquely identify this module
 	GUID              = 'a8d35904-1748-4271-9970-a0520b13c9c4'
@@ -42,10 +42,10 @@
 	# Functions to export from this module
 	FunctionsToExport = @(
 		'Get-PsLaArmParameter'
-		, 'Get-PsLaManagedApiConnection.AzAccount'
-		, 'Get-PsLaManagedApiConnection.AzCli'
-		, 'Get-PsLaManagedApiConnectionByUsage.AzAccount'
-		, 'Get-PsLaManagedApiConnectionByUsage.AzCli'
+		, 'Get-PsLaManagedApiConnection'
+		, 'Get-PsLaManagedApiConnection.Status.ViaGraph.AzAccount'
+		, 'Get-PsLaManagedApiConnection.ViaGraph.AzAccount'
+		, 'Get-PsLaManagedApiConnectionByUsage'
 		, 'Get-PsLaTask'
 		, 'Get-PsLaTaskByFile'
 		, 'Get-PsLaTaskByPath'

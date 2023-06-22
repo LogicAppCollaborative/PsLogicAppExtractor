@@ -19,7 +19,7 @@
 
         Invoke-psake @parms -taskList  "Sort-Raw.LogicApp.Tag"
 
-        $resPath = Get-ExtractOutput -Path $WorkPath
+        $resPath = Get-PSFConfigValue -FullName PsLogicAppExtractor.Execution.TaskInputNext
         $raw = Get-Content -Path $resPath -Raw
         $lgObj = [LogicApp]$(Get-Content -Path $resPath -Raw | ConvertFrom-Json)
     }

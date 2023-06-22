@@ -6,14 +6,18 @@ Loops all `$connections children
 --With matching ARM Parameters, for the Namespace
 --Makes sure the ARM Parameters logicAppLocation exists
 --The type is based on the Managed Identity authentication
---Name & Displayname is extracted from the ConnectionName property
+--Name & Displayname is extracted from the Api Connection Object
+Requires an authenticated session, either Az.Accounts or az cli
 "@
-    Alias       = "Arm.Set-Arm.Connections.ManagedApis.Servicebus.ManagedIdentity.AsArmObject.AzAccount"
+    Alias       = "Arm.Set-Arm.Connections.ManagedApis.Servicebus.ManagedIdentity.Advanced.AsArmObject"
 }
 
-Task -Name "Set-Arm.Connections.ManagedApis.Servicebus.ManagedIdentity.AsArmObject.AzAccount" @parm -Action {
+Task -Name "Set-Arm.Connections.ManagedApis.Servicebus.ManagedIdentity.Advanced.AsArmObject" @parm -Action {
     Set-TaskWorkDirectory
     
+    # We can either use the az cli or the Az modules
+    $tools = Get-PSFConfigValue -FullName PsLogicAppExtractor.Execution.Tools
+        
     $found = $false
     $conType = "servicebus"
 
@@ -28,12 +32,19 @@ Task -Name "Set-Arm.Connections.ManagedApis.Servicebus.ManagedIdentity.AsArmObje
             $found = $true
 
             # Fetch the details from the connection object
-            $uri = "{0}?api-version=2018-07-01-preview" -f $($_.Value.connectionId)
-            $resObj = Invoke-AzRestMethod -Path $uri -Method Get | Select-Object -ExpandProperty content | ConvertFrom-Json
+            $uri = "{0}?api-version=2018-07-01-preview" -f $($connectionObj.Value.connectionId)
+            
+            if ($tools -eq "AzCli") {
+                $resObj = az rest --url $uri | ConvertFrom-Json
+            }
+            else {
+                $resObj = Invoke-AzRestMethod -Path $uri -Method Get | Select-Object -ExpandProperty content | ConvertFrom-Json
+            }
             
             # Use the display name as the name of the resource
-            $conName = $resObj.Properties.DisplayName
-            $resName = $resObj.Properties.DisplayName #fallback default value
+            $conName = $resObj.Name
+            $displayName = $resObj.Properties.DisplayName
+            $resName = $displayName #fallback default value
 
             if ($resObj.Properties.parameterValueSet.values.namespaceEndpoint.value -match "sb://(.*).servicebus.windows.net") {
                 $resName = $Matches[1]
@@ -46,6 +57,7 @@ Task -Name "Set-Arm.Connections.ManagedApis.Servicebus.ManagedIdentity.AsArmObje
             # Set the names of the parameters
             $Prefix = Get-PSFConfigValue -FullName PsLogicAppExtractor.prefixsuffix.connection.prefix
             $idPreSuf = Format-Name -Type "Connection" -Value "$($connectionObj.Name)"
+            $displayPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_DisplayName" -Value "$($connectionObj.Name)"
             $nsPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_Namespace" -Value "$($connectionObj.Name)"
 
             $armObj = Add-ArmParameter -InputObject $armObj -Name "$nsPreSuf" `
@@ -58,9 +70,14 @@ Task -Name "Set-Arm.Connections.ManagedApis.Servicebus.ManagedIdentity.AsArmObje
                 -Value $conName `
                 -Description "The name / id of the ManagedApi connection object that is being utilized by the Logic App. Will be for the trigger and other actions that depend on connections."
 
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$displayPreSuf" `
+                -Type "string" `
+                -Value $displayName `
+                -Description "The display name of the ManagedApi connection object that is being utilized by the Logic App."
+
             # Update the api object properties
             $apiObj.Name = "[parameters('$idPreSuf')]"
-            $apiObj.properties.displayName = "[parameters('$idPreSuf')]"
+            $apiObj.properties.displayName = "[parameters('$displayPreSuf')]"
             $apiObj.properties.parameterValueSet.values.namespaceEndpoint.value = $apiObj.properties.parameterValueSet.values.namespaceEndpoint.value.Replace("'##NAMESPACE##'", "parameters('$nsPreSuf')")
 
             # Append the new resource to the ARM template

@@ -15,25 +15,26 @@ Execute the extractor process of the LogicApp
 ### PreppedFile (Default)
 ```
 Invoke-PsLaExtractor -Runbook <String> [-Task <String[]>] [-WorkPath <String>] [-OutputPath <String>]
- [-KeepFiles] [<CommonParameters>]
+ [-KeepFiles] [-Tools <String>] [<CommonParameters>]
 ```
 
 ### Subscription
 ```
 Invoke-PsLaExtractor -Runbook <String> -SubscriptionId <String> -ResourceGroup <String> -Name <String>
- [-Task <String[]>] [-WorkPath <String>] [-OutputPath <String>] [-KeepFiles] [<CommonParameters>]
+ [-Task <String[]>] [-WorkPath <String>] [-OutputPath <String>] [-KeepFiles] [-Tools <String>]
+ [<CommonParameters>]
 ```
 
 ### ResourceGroup
 ```
 Invoke-PsLaExtractor -Runbook <String> -ResourceGroup <String> -Name <String> [-Task <String[]>]
- [-WorkPath <String>] [-OutputPath <String>] [-KeepFiles] [<CommonParameters>]
+ [-WorkPath <String>] [-OutputPath <String>] [-KeepFiles] [-Tools <String>] [<CommonParameters>]
 ```
 
 ### NameOnly
 ```
 Invoke-PsLaExtractor -Runbook <String> -Name <String> [-Task <String[]>] [-WorkPath <String>]
- [-OutputPath <String>] [-KeepFiles] [<CommonParameters>]
+ [-OutputPath <String>] [-KeepFiles] [-Tools <String>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -222,6 +223,25 @@ Aliases:
 Required: False
 Position: Named
 Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Tools
+Instruct the cmdlet which tool to use
+
+Options are:
+AzCli (azure cli)
+Az.Powershell (Az.Accounts+ PowerShell native modules)
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: Az.Powershell
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

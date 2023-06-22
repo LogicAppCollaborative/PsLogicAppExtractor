@@ -6,15 +6,18 @@ Loops all `$connections children
 --With matching ARM Parameters, for the ResourceGroup, Namespace, AccessKey
 --Makes sure the ARM Parameters logicAppLocation exists
 --The type is based on ListKey / ConnectionString approach
---Displayname is extracted from the Api Connection Object
---The displayname will be configured to be the same as the name of the connection
+--Name & Displayname is extracted from the Api Connection Object
+Requires an authenticated session, either Az.Accounts or az cli
 "@
-    Alias       = "Arm.Set-Arm.Connections.ManagedApis.Servicebus.ListKey.AsArmObject.AzAccount"
+    Alias       = "Arm.Set-Arm.Connections.ManagedApis.Servicebus.ListKey.Advanced.AsArmObject"
 }
 
-Task -Name "Set-Arm.Connections.ManagedApis.Servicebus.ListKey.AsArmObject.AzAccount" @parm -Action {
+Task -Name "Set-Arm.Connections.ManagedApis.Servicebus.ListKey.Advanced.AsArmObject" @parm -Action {
     Set-TaskWorkDirectory
 
+    # We can either use the az cli or the Az modules
+    $tools = Get-PSFConfigValue -FullName PsLogicAppExtractor.Execution.Tools
+        
     $found = $false
     $conType = "servicebus"
 
@@ -29,11 +32,18 @@ Task -Name "Set-Arm.Connections.ManagedApis.Servicebus.ListKey.AsArmObject.AzAcc
             $found = $true
         
             # Fetch the details from the connection object
-            $uri = "{0}?api-version=2018-07-01-preview" -f $($_.Value.connectionId)
-            $resObj = Invoke-AzRestMethod -Path $uri -Method Get | Select-Object -ExpandProperty content | ConvertFrom-Json
-
+            $uri = "{0}?api-version=2018-07-01-preview" -f $($connectionObj.Value.connectionId)
+            
+            if ($tools -eq "AzCli") {
+                $resObj = az rest --url $uri | ConvertFrom-Json
+            }
+            else {
+                $resObj = Invoke-AzRestMethod -Path $uri -Method Get | Select-Object -ExpandProperty content | ConvertFrom-Json
+            }
+            
             # Use the display name as the name of the resource
-            $conName = $resObj.Properties.DisplayName
+            $conName = $resObj.Name
+            $displayName = $resObj.Properties.DisplayName
 
             # Fetch base template
             $pathArms = "$(Get-PSFConfigValue -FullName PsLogicAppExtractor.ModulePath.Base)\internal\arms"
@@ -47,6 +57,7 @@ Task -Name "Set-Arm.Connections.ManagedApis.Servicebus.ListKey.AsArmObject.AzAcc
             $keyPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_Key" -Value "$($connectionObj.Name)"
 
             $idPreSuf = Format-Name -Type "Connection" -Value "$($connectionObj.Name)"
+            $displayPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_DisplayName" -Value "$($connectionObj.Name)"
             
             $armObj = Add-ArmParameter -InputObject $armObj -Name "$subPreSuf" `
                 -Type "string" `
@@ -68,6 +79,11 @@ Task -Name "Set-Arm.Connections.ManagedApis.Servicebus.ListKey.AsArmObject.AzAcc
                 -Value $conName `
                 -Description "The name / id of the ManagedApi connection object that is being utilized by the Logic App. Will be for the trigger and other actions that depend on connections."
 
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$displayPreSuf" `
+                -Type "string" `
+                -Value $displayName `
+                -Description "The display name of the ManagedApi connection object that is being utilized by the Logic App."
+                
             $armObj = Add-ArmParameter -InputObject $armObj -Name "$keyPreSuf" `
                 -Type "string" `
                 -Value "RootManageSharedAccessKey" `
@@ -75,7 +91,7 @@ Task -Name "Set-Arm.Connections.ManagedApis.Servicebus.ListKey.AsArmObject.AzAcc
             
             # Update the api object properties
             $apiObj.Name = "[parameters('$idPreSuf')]"
-            $apiObj.properties.displayName = "[parameters('$idPreSuf')]"
+            $apiObj.properties.displayName = "[parameters('$displayPreSuf')]"
             $apiObj.properties.parameterValues.connectionString = $apiObj.properties.parameterValues.connectionString.Replace("'##SUSCRIPTIONID##'", "parameters('$subPreSuf')").Replace("'##RESOURCEGROUPNAME##'", "parameters('$rgPreSuf')").Replace("'##NAMESPACE##'", "parameters('$objPreSuf')").Replace("'##KEYNAME##'", "parameters('$keyPreSuf')")
             
             # Append the new resource to the ARM template

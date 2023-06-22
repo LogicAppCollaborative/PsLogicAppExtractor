@@ -22,21 +22,28 @@
     .PARAMETER IncludeLogicAppResourceNotFound
         Instructions the cmdlet to include Api Connections that are referenced by Logic Apps, but where the Api Connection doesn't exists
         
+    .PARAMETER Tools
+        Instruct the cmdlet which tool to use
+        
+        Options are:
+        AzCli (azure cli)
+        Az.Powershell (Az.Accounts+ PowerShell native modules)
+        
     .EXAMPLE
-        PS C:\> Get-PsLaManagedApiConnectionByUsage.AzCli -SubscriptionId "b466443d-6eac-4513-a7f0-3579502929f00" -ResourceGroup "TestRg"
+        PS C:\> Get-PsLaManagedApiConnectionByUsage -SubscriptionId "b466443d-6eac-4513-a7f0-3579502929f00" -ResourceGroup "TestRg"
         
         This will list all Api Connections in the resource group "TestRg" in the subscription "b466443d-6eac-4513-a7f0-3579502929f00".
         It will only list Api Connections that are NOT referenced by any Logic App
         
     .EXAMPLE
-        PS C:\> Get-PsLaManagedApiConnectionByUsage.AzCli -SubscriptionId "b466443d-6eac-4513-a7f0-3579502929f00" -ResourceGroup "TestRg" -IncludeUsed
+        PS C:\> Get-PsLaManagedApiConnectionByUsage -SubscriptionId "b466443d-6eac-4513-a7f0-3579502929f00" -ResourceGroup "TestRg" -IncludeUsed
         
         This will list all Api Connections in the resource group "TestRg" in the subscription "b466443d-6eac-4513-a7f0-3579502929f00".
         It will list Api Connections that are NOT referenced by any Logic App.
         It will list Api Connections that are referenced by Logic Apps.
         
     .EXAMPLE
-        PS C:\> Get-PsLaManagedApiConnectionByUsage.AzCli -SubscriptionId "b466443d-6eac-4513-a7f0-3579502929f00" -ResourceGroup "TestRg" -IncludeLogicAppResourceNotFound
+        PS C:\> Get-PsLaManagedApiConnectionByUsage -SubscriptionId "b466443d-6eac-4513-a7f0-3579502929f00" -ResourceGroup "TestRg" -IncludeLogicAppResourceNotFound
         
         This will list all Api Connections in the resource group "TestRg" in the subscription "b466443d-6eac-4513-a7f0-3579502929f00".
         It will list Api Connections that are NOT referenced by any Logic App.
@@ -51,8 +58,7 @@
         https://github.com/sandroasp/Azure-Learning-Path/blob/main/Logic-Apps/Find-Azure-Orphaned-API-Connectors-powershell/Find-Orphaned-API-Connectors.ps1
         
 #>
-function Get-PsLaManagedApiConnectionByUsage.AzCli {
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPositionalParameters', '')]
+function Get-PsLaManagedApiConnectionByUsage {
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseOutputTypeCorrectly', '')]
     [CmdletBinding(DefaultParameterSetName = "ResourceGroup")]
     param (
@@ -65,7 +71,10 @@ function Get-PsLaManagedApiConnectionByUsage.AzCli {
 
         [switch] $IncludeUsed,
 
-        [switch] $IncludeLogicAppResourceNotFound
+        [switch] $IncludeLogicAppResourceNotFound,
+
+        [ValidateSet('AzCli', 'Az.Powershell')]
+        [string] $Tools = 'Az.Powershell'
 
     )
     
@@ -83,8 +92,13 @@ function Get-PsLaManagedApiConnectionByUsage.AzCli {
     do {
         # Fething the Api Connections
         # The do while supports paging / nextLink to load all objects from the resource group
-        $resGet = az rest --url "$localUri" | ConvertFrom-Json -Depth 100
-              
+        if ($Tools -eq 'Az.Powershell') {
+            $resGet = Invoke-AzRest -Path "$localUri" -Method GET | Select-Object -ExpandProperty Content | ConvertFrom-Json -Depth 100
+        }
+        else {
+            $resGet = az rest --url "$localUri" | ConvertFrom-Json -Depth 100
+        }
+        
         $resArray.AddRange($resGet.Value)
             
         if ($($resGet.nextLink) -match ".*(/subscriptions/.*)") {
@@ -101,8 +115,13 @@ function Get-PsLaManagedApiConnectionByUsage.AzCli {
     do {
         # Fething the Logic Apps
         # The do while supports paging / nextLink to load all objects from the resource group
-        $resLocal = az rest --url "$localUri" #| ConvertFrom-Json -Depth 100 -AsHashTable
-           
+        if ($Tools -eq 'Az.Powershell') {
+            $resLocal = Invoke-AzRest -Path "$localUri" -Method GET | Select-Object -ExpandProperty Content
+        }
+        else {
+            $resLocal = az rest --url "$localUri"
+        }
+
         # Hack to handle any errors in the response, which cannot be handled by the ConvertFrom-Json
         $resGet = $resLocal.Replace('""', '"Dummy"') | ConvertFrom-Json -Depth 100
         $resArray.AddRange($resGet.Value)
