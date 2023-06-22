@@ -19,7 +19,7 @@
         
         Invoke-psake @parms -taskList "Set-Raw.Trigger.Servicebus.Queue.AsParm"
 
-        $resPath = Get-ExtractOutput -Path $WorkPath
+        $resPath = Get-PSFConfigValue -FullName PsLogicAppExtractor.Execution.TaskInputNext
         $raw = Get-Content -Path $resPath -Raw
         $lgObj = [LogicApp]$(Get-Content -Path $resPath -Raw | ConvertFrom-Json)
     }

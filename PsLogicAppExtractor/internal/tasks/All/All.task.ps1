@@ -72,65 +72,6 @@ Task -Name "ConvertTo-Raw" @parm -Action {
     Out-TaskFileLogicApp -InputObject $lgObj
 }
 
-#Original file: Export-LogicApp.AzAccount.task.ps1
-$parm = @{
-    Description = "Exports the raw version of the Logic App from the Azure Portal"
-    Alias       = "Exporter.Export-LogicApp.AzAccount"
-}
-
-Task -Name "Export-LogicApp.AzAccount" @parm -Action {
-    Set-TaskWorkDirectory
-    
-    $params = @{
-        ResourceGroupName    = "$ResourceGroup"
-        ResourceProviderName = 'Microsoft.Logic'
-        ResourceType         = 'workflows'
-        Name                 = "$Name"
-        ApiVersion           = "2019-05-01"
-        Method               = 'GET'
-    }
-
-    if ($SubscriptionId) {
-        $params.SubscriptionId = "$SubscriptionId"
-    }
-
-    $lg = Invoke-AzRestMethod @params
-    
-    if ($null -eq $lg) {
-        #TODO! We need to throw an error
-        Throw
-    }
-    
-    $res = $lg.Content
-    Out-TaskFile -Content $res
-}
-
-#Original file: Export-LogicApp.AzCli.task.ps1
-$parm = @{
-    Description = "Exports the raw version of the Logic App from the Azure Portal"
-    Alias       = "Exporter.Export-LogicApp.AzCli"
-}
-
-Task -Name "Export-LogicApp.AzCli" @parm -Action {
-    Set-TaskWorkDirectory
-    
-    if ($SubscriptionId -and $ResourceGroup) {
-        $lg = az rest --url "https://management.azure.com/subscriptions/$SubscriptionId/resourceGroups/$ResourceGroup/providers/Microsoft.Logic/workflows/$Name" --url-parameters api-version=2019-05-01
-    }
-    else {
-        $id = az resource show --resource-group $ResourceGroup --resource-type "Microsoft.Logic/workflows" --Name $Name --query "id" | ConvertFrom-Json
-        $lg = az rest --url "$id" --url-parameters api-version=2019-05-01
-    }
-    
-    if ($null -eq $lg) {
-        #TODO! We need to throw an error
-        Throw
-    }
-    
-    $res = $lg -join ""
-    Out-TaskFile -Content $res
-}
-
 #Original file: Export-LogicApp.task.ps1
 $parm = @{
     Description = "Exports the raw version of the Logic App from the Azure Portal"
@@ -175,44 +116,6 @@ Task -Name "Export-LogicApp" @parm -Action {
     }
     
     Out-TaskFile -InputObject $resObj
-}
-
-#Original file: Export-Raw.Connections.ManagedApis.DisplayName.task.ps1
-$parm = @{
-    Description = @"
-Loops all `$connections children
--Exports the DisplayName of the ManagedApis based on the ConnectionId / ResourceId
---Sets connectionName to the DisplayName, extracted via the ConnectionId
-Requires an authenticated session, either Az.Accounts or az cli
-"@
-    Alias       = "Exporter.Export-Raw.Connections.ManagedApis.DisplayName"
-}
-
-Task -Name "Export-Raw.Connections.ManagedApis.DisplayName" @parm -Action {
-    Set-TaskWorkDirectory
-    
-    # We can either use the az cli or the Az modules
-    $tools = Get-PSFConfigValue -FullName PsLogicAppExtractor.Execution.Tools
-        
-    $lgObj = Get-TaskWorkObject
-    $lgObj.properties.parameters.'$connections'.value.PsObject.Properties | ForEach-Object {
-        if ($_.Value.id -like "*managedApis*") {
-
-            $uri = "{0}?api-version=2018-07-01-preview" -f $($_.Value.connectionId)
-
-            if ($tools -eq "AzCli") {
-                $resObj = az rest --url $uri | ConvertFrom-Json
-            }
-            else {
-                $resObj = Invoke-AzRestMethod -Path $uri -Method Get | Select-Object -ExpandProperty content | ConvertFrom-Json
-            }
-
-            $conName = $resObj.Properties.DisplayName
-            $_.Value.connectionName = $conName
-        }
-    }
-
-    Out-TaskFileLogicApp -InputObject $lgObj
 }
 
 #Original file: Set-Arm.Connections.ManagedApis.AsParameter.task.ps1
@@ -309,13 +212,9 @@ Task -Name "Set-Arm.Connections.ManagedApis.AzureBlob.ManagedIdentity.AsArmObjec
 
     $armObj = Get-TaskWorkObject
 
-    Write-host "Hitting the sweet spot"
-
     foreach ($connectionObj in $armObj.resources[0].properties.parameters.'$connections'.value.PsObject.Properties) {
         if ($connectionObj.Value.id -like "*managedApis/azureblob*") {
 
-            # Write-host "Hitting the sweet spot - $($connectionObj | ConvertTo-Json -Depth 100)"
-            
             # This should only handle Managed Identity AzureBlob connections
             if ($connectionObj.Value.connectionProperties.authentication.type -ne "ManagedServiceIdentity") { continue }
 

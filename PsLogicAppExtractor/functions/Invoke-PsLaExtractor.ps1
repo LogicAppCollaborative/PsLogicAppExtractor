@@ -50,6 +50,13 @@
         
         This enables troubleshooting and comparison of input vs output, per task, as each task has an input file and the result of the work persisted in the same directory
         
+    .PARAMETER Tools
+        Instruct the cmdlet which tool to use
+
+        Options are:
+        AzCli (azure cli)
+        Az.Powershell (Az.Accounts+ PowerShell native modules)
+        
     .EXAMPLE
         PS C:\> Invoke-PsLaExtractor -Runbook "C:\temp\LogicApp.ExportOnly.psakefile.ps1" -ResourceGroup "TestRg" -Name TestLogicApp
         

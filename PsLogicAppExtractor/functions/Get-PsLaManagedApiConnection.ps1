@@ -33,6 +33,13 @@
     .PARAMETER Detailed
         Instruct the cmdlet to output with the detailed format directly
         
+    .PARAMETER Tools
+        Instruct the cmdlet which tool to use
+
+        Options are:
+        AzCli (azure cli)
+        Az.Powershell (Az.Accounts+ PowerShell native modules)
+
     .EXAMPLE
         PS C:\> Get-PsLaManagedApiConnection -ResourceGroup "TestRg"
         

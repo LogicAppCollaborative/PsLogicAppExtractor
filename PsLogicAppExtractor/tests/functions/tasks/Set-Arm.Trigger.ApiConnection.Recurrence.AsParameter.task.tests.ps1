@@ -19,7 +19,7 @@
         
         Invoke-psake @parms -taskList "Set-Raw.ApiVersion", "ConvertTo-Arm", "Set-Arm.Trigger.ApiConnection.Recurrence.AsParameter"
 
-        $resPath = Get-ExtractOutput -Path $WorkPath
+        $resPath = Get-PSFConfigValue -FullName PsLogicAppExtractor.Execution.TaskInputNext
         $raw = Get-Content -Path $resPath -Raw
         $armObj = [ArmTemplate]$(Get-Content -Path $resPath -Raw | ConvertFrom-Json)
     }

@@ -2,10 +2,10 @@
   Description = @"
 Requires an authenticated session, either Az.Accounts or az cli
 "@
-  Alias       = "Arm.Set-Arm.Diagnostics.Settings.Workspace.AsArmObject.AzAccount"
+  Alias       = "Arm.Set-Arm.Diagnostics.Settings.Workspace.AsArmObject"
 }
 
-Task -Name "Set-Arm.Diagnostics.Settings.Workspace.AsArmObject.AzAccount" @parm -Action {
+Task -Name "Set-Arm.Diagnostics.Settings.Workspace.AsArmObject" @parm -Action {
   Set-TaskWorkDirectory
 
   # We can either use the az cli or the Az modules
@@ -30,13 +30,18 @@ Task -Name "Set-Arm.Diagnostics.Settings.Workspace.AsArmObject.AzAccount" @parm 
 
   $diagSettings = @($resObj | Select-Object -ExpandProperty Value)
 
+  if($null -eq $diagSettings -or $diagSettings.Count -eq 0) {
+    $diagFake = '{"name": "Diagnostics","properties": {"logs": [{"category": null,"categoryGroup": "allLogs","enabled": true,"retentionPolicy": {"days": 0,"enabled": false}}],"metrics": [{"timeGrain": null,"enabled": true,"retentionPolicy": {"days": 0,"enabled": false},"category": "AllMetrics"}],"workspaceId": "/subscriptions/0000/resourceGroups/RG/providers/Microsoft.OperationalInsights/workspaces/##WORKSPACEID##","logAnalyticsDestinationType": null}}' | ConvertFrom-Json
+    $diagSettings = @($diagFake)
+  }
+
   $counter = 0
 
   foreach ($diag in $diagSettings) {
     if ([System.String]::IsNullOrEmpty($diag.properties.workspaceId)) {
       continue
     }
-
+    
     $orgName = $diag.name
     $orgWorkspace = $diag.properties.workspaceId.Split("/") | Select-Object -Last 1
 
@@ -45,8 +50,6 @@ Task -Name "Set-Arm.Diagnostics.Settings.Workspace.AsArmObject.AzAccount" @parm 
     $parmName = "diagnostic$($counter.ToString().PadLeft(3, "0"))_Name"
     $parmWorkspace = "diagnostic$($counter.ToString().PadLeft(3, "0"))_WorkspaceId"
 
-    $diag.properties.workspaceId = "[format('/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.OperationalInsights/workspaces/{2}', subscription().subscriptionId, resourceGroup().name, parameters('$parmName'))]"
-        
     $armObj = Add-ArmParameter -InputObject $armObj -Name $parmName `
       -Type "string" `
       -Value "$orgName" `

@@ -19,7 +19,7 @@
 
         Invoke-psake @parms -taskList "ConvertTo-Arm", "Set-Arm.Tags.AsParameter"
 
-        $resPath = Get-ExtractOutput -Path $WorkPath
+        $resPath = Get-PSFConfigValue -FullName PsLogicAppExtractor.Execution.TaskInputNext
         $raw = Get-Content -Path $resPath -Raw
         $armObj = [ArmTemplate]$(Get-Content -Path $resPath -Raw | ConvertFrom-Json)
     }
