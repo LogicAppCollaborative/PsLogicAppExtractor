@@ -33,7 +33,7 @@ Task -Name "Set-Arm.Workflow.IdFormatted.Simple.WithTrigger.AsParameter" @parm -
                 $armObj = Add-ArmParameter -InputObject $armObj -Name $parmTrigger `
                     -Type "string" `
                     -Value "$orgValue" `
-                    -Description "The name the method exposed by the FunctionApp that is referenced by the Logic App."
+                    -Description "The Trigger name of the WorkFlow (LogicApp) that is referenced by the Logic App."
             }
         }
     }

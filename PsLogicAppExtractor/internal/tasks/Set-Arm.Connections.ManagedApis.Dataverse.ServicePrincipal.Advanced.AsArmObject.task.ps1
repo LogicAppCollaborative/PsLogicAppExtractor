@@ -1,18 +1,10 @@
 ﻿$parm = @{
     Description = @"
-Loops all `$connections children
--Validates that is of the type azureblob or azurefile
---Creates a new resource in the ARM template, for the ApiConnection object
---With matching ARM Parameters, for the SubscriptionId, ResourceGroup, Namespace, Key
---Makes sure the ARM Parameters logicAppLocation exists
---The type is based on ListKey / ConnectionString approach
---Name & Displayname is extracted from the Api Connection Object
-Requires an authenticated session, either Az.Accounts or az cli
 "@
-    Alias       = "Arm.Set-Arm.Connections.ManagedApis.Storage.BlobOrFile.ListKey.Advanced.AsArmObject"
+    Alias       = "Arm.Set-Arm.Connections.ManagedApis.Dataverse.ServicePrincipal.Advanced.AsArmObject"
 }
 
-Task -Name "Set-Arm.Connections.ManagedApis.Storage.BlobOrFile.ListKey.Advanced.AsArmObject" @parm -Action {
+Task -Name "Set-Arm.Connections.ManagedApis.Dataverse.ServicePrincipal.Advanced.AsArmObject" @parm -Action {
     Set-TaskWorkDirectory
 
     # We can either use the az cli or the Az modules
@@ -24,7 +16,7 @@ Task -Name "Set-Arm.Connections.ManagedApis.Storage.BlobOrFile.ListKey.Advanced.
 
     $armObj.resources[0].properties.parameters.'$connections'.value.PsObject.Properties | ForEach-Object {
 
-        if ($_.Value.id -like "*managedApis/azureblob*" -or $_.Value.id -like "*managedApis/azurefile*") {
+        if ($_.Value.id -like "*managedApis/commondataservice*") {
             $found = $true
 
             # Fetch the details from the connection object
@@ -40,40 +32,41 @@ Task -Name "Set-Arm.Connections.ManagedApis.Storage.BlobOrFile.ListKey.Advanced.
             # Use the display name as the name of the resource
             $conName = $resObj.Name
             $displayName = $resObj.Properties.DisplayName
-            $resName = $resObj.Properties.ParameterValues.AccountName
-
+            $tenantId = $resObj.Properties.ParameterValues."token:TenantId"
+            $clientId = $resObj.Properties.ParameterValues."token:clientId"
+            
             # Fetch base template
             $pathArms = "$(Get-PSFConfigValue -FullName PsLogicAppExtractor.ModulePath.Base)\internal\arms"
-            $apiObj = Get-Content -Path "$pathArms\API.Storage.BlobOrFile.AccessKey.json" -Raw | ConvertFrom-Json
+            $apiObj = Get-Content -Path "$pathArms\API.Dataverse.ServicePrincipal.json" -Raw | ConvertFrom-Json
 
             # Set the names of the parameters
             $Prefix = Get-PSFConfigValue -FullName PsLogicAppExtractor.prefixsuffix.connection.prefix
-            $subPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_Subscription" -Value "$($_.Name)"
-            $rgPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_ResourceGroup" -Value "$($_.Name)"
-            $objPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_StorageAccount" -Value "$($_.Name)"
+            $tenantPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_TenantId" -Value "$($_.Name)"
+            $clientPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_ClientId" -Value "$($_.Name)"
+            $secretPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_ClientSecret" -Value "$($_.Name)"
             
             $idPreSuf = Format-Name -Type "Connection" -Value "$($_.Name)"
             $displayPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_DisplayName" -Value "$($_.Name)"
             
-            $armObj = Add-ArmParameter -InputObject $armObj -Name "$subPreSuf" `
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$tenantPreSuf" `
                 -Type "string" `
-                -Value "[subscription().subscriptionId]" `
-                -Description "The subscription where the storage account is located. ($($_.Name))"
+                -Value "$tenantId" `
+                -Description "The Azure tenant id that the Dataverse instance is connected to. ($($_.Name))"
 
-            $armObj = Add-ArmParameter -InputObject $armObj -Name "$rgPreSuf" `
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$clientPreSuf" `
                 -Type "string" `
-                -Value "[resourceGroup().name]" `
-                -Description "The resource group where the storage account is located. ($($_.Name))"
+                -Value "$clientId" `
+                -Description "The ClientId used to authenticate against the Dataverse instance. ($($_.Name))"
 
-            $armObj = Add-ArmParameter -InputObject $armObj -Name "$objPreSuf" `
-                -Type "string" `
-                -Value "$resName" `
-                -Description "The name of the storage account. ($($_.Name))"
-            
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$secretPreSuf" `
+                -Type "SecureString" `
+                -Value "" `
+                -Description "The ClientSecret used to authenticate against the Dataverse instance. ($($_.Name))"
+                
             $armObj = Add-ArmParameter -InputObject $armObj -Name "$idPreSuf" `
                 -Type "string" `
                 -Value $conName `
-                -Description "The name / id of the ManagedApi connection object that is being utilized by the Logic App. Will be for the trigger and other actions that depend on connections."
+                -Description "The id/name of the ManagedApi connection object that is being utilized by the Logic App."
 
             $armObj = Add-ArmParameter -InputObject $armObj -Name "$displayPreSuf" `
                 -Type "string" `
@@ -83,8 +76,9 @@ Task -Name "Set-Arm.Connections.ManagedApis.Storage.BlobOrFile.ListKey.Advanced.
             # Update the api object properties
             $apiObj.Name = "[parameters('$idPreSuf')]"
             $apiObj.properties.displayName = "[parameters('$displayPreSuf')]"
-            $apiObj.properties.parameterValues.accountName = "[parameters('$objPreSuf')]"
-            $apiObj.properties.parameterValues.accessKey = $apiObj.properties.parameterValues.accessKey.Replace("'##SUSCRIPTIONID##'", "parameters('$subPreSuf')").Replace("'##RESOURCEGROUPNAME##'", "parameters('$rgPreSuf')").Replace("'##ACCOUNTNAME##'", "parameters('$objPreSuf')")
+            $apiObj.Properties.ParameterValues."token:TenantId" = "[parameters('$tenantPreSuf')]"
+            $apiObj.Properties.ParameterValues."token:clientId" = "[parameters('$clientPreSuf')]"
+            $apiObj.Properties.ParameterValues."token:clientSecret" = "[parameters('$secretPreSuf')]"
 
             # Update the api connection object type
             $_.Value.id -match "/managedApis/(.*)"

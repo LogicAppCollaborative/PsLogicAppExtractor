@@ -119,7 +119,10 @@ function Invoke-PsLaExtractor {
         [PsfValidateScript('PSFramework.Validate.FSPath.Folder', ErrorString = 'PSFramework.Validate.FSPath.Folder')]
         [string] $OutputPath,
 
-        [switch] $KeepFiles
+        [switch] $KeepFiles,
+
+        [ValidateSet('AzCli', 'Az.Powershell')]
+        [string] $Tools = 'Az.Powershell'
     )
 
     if (-not ($WorkPath -like "*$([System.IO.Path]::GetTempPath())*")) {
@@ -136,6 +139,8 @@ function Invoke-PsLaExtractor {
     Set-PSFConfig -FullName PsLogicAppExtractor.Execution.TaskPath -Value ""
     Set-PSFConfig -FullName PsLogicAppExtractor.Execution.Name -Value ""
 
+    Set-PSFConfig -FullName PsLogicAppExtractor.Execution.Tools -Value ""
+
     #Make sure the work path is created and available
     New-Item -Path $WorkPath -ItemType Directory -Force -ErrorAction Ignore > $null
 
@@ -148,6 +153,8 @@ function Invoke-PsLaExtractor {
     }
     
     Set-PSFConfig -FullName PsLogicAppExtractor.Execution.WorkPath -Value $WorkPath
+
+    Set-PSFConfig -FullName PsLogicAppExtractor.Execution.Tools -Value $Tools
 
     $props = @{}
     if ($SubscriptionId) { $props.SubscriptionId = $SubscriptionId }

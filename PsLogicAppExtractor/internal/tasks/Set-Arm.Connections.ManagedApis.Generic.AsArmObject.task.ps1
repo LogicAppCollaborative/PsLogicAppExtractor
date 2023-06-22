@@ -1,75 +1,65 @@
 ﻿$parm = @{
     Description = @"
 Loops all `$connections children
--Validates that is of the type servicebus and is using the Managed Identity authentication scheme
+-Validates that is of the type ManagedApi
 --Creates a new resource in the ARM template, for the ApiConnection object
---With matching ARM Parameters, for the Namespace
 --Makes sure the ARM Parameters logicAppLocation exists
---The type is based on the Managed Identity authentication
---Name & Displayname is extracted from the Api Connection Object
+--Name & Displayname is extracted from the ConnectionName property
+--Extends the dependsOn property on the LogicApp resource, to depend on the ApiConnection object
+Requires an authenticated session, either Az.Accounts or az cli
 "@
-    Alias       = "Arm.Set-Arm.Connections.ManagedApis.Servicebus.ManagedIdentity.Advanced.AsArmObject.AzCli"
+    Alias       = "Arm.Set-Arm.Connections.ManagedApis.Generic.AsArmObject"
 }
 
-Task -Name "Set-Arm.Connections.ManagedApis.Servicebus.ManagedIdentity.Advanced.AsArmObject.AzCli" @parm -Action {
+Task -Name "Set-Arm.Connections.ManagedApis.Generic.AsArmObject" @parm -Action {
     Set-TaskWorkDirectory
-    
+
+    # We can either use the az cli or the Az modules
+    $tools = Get-PSFConfigValue -FullName PsLogicAppExtractor.Execution.Tools
+        
     $found = $false
-    $conType = "servicebus"
 
     $armObj = Get-TaskWorkObject
 
     foreach ($connectionObj in $armObj.resources[0].properties.parameters.'$connections'.value.PsObject.Properties) {
-        if ($connectionObj.Value.id -like "*managedApis/servicebus*") {
-
-            # This should only handle Managed Identity Servicebus connections
-            if ($connectionObj.Value.connectionProperties.authentication.type -ne "ManagedServiceIdentity") { continue }
+        if ($connectionObj.Value.id -match "/managedApis/(.*)") {
+            
+            # We have specialized templates for these types
+            if ($Matches[1] -in @("azureblob", "azurefile", "azuretables", "servicebus")) { continue }
 
             $found = $true
+            $conType = $Matches[1]
 
             # Fetch the details from the connection object
-            $uri = "{0}?api-version=2018-07-01-preview" -f $($connectionObj.Value.connectionId)
-            $resObj = az rest --url $uri | ConvertFrom-Json
+            $uri = "{0}?api-version=2018-07-01-preview" -f $($_.Value.connectionId)
+            
+            if ($tools -eq "AzCli") {
+                $resObj = az rest --url $uri | ConvertFrom-Json
+            }
+            else {
+                $resObj = Invoke-AzRestMethod -Path $uri -Method Get | Select-Object -ExpandProperty content | ConvertFrom-Json
+            }
             
             # Use the display name as the name of the resource
-            $conName = $resObj.Name
-            $displayName = $resObj.Properties.DisplayName
-            $resName = $displayName #fallback default value
-
-            if ($resObj.Properties.parameterValueSet.values.namespaceEndpoint.value -match "sb://(.*).servicebus.windows.net") {
-                $resName = $Matches[1]
-            }
-
+            $conName = $resObj.Properties.DisplayName
+            
             # Fetch base template
             $pathArms = "$(Get-PSFConfigValue -FullName PsLogicAppExtractor.ModulePath.Base)\internal\arms"
-            $apiObj = Get-Content -Path "$pathArms\API.SB.Managed.json" -Raw | ConvertFrom-Json
+            $apiObj = Get-Content -Path "$pathArms\API.Managed.json" -Raw | ConvertFrom-Json
 
             # Set the names of the parameters
-            $Prefix = Get-PSFConfigValue -FullName PsLogicAppExtractor.prefixsuffix.connection.prefix
             $idPreSuf = Format-Name -Type "Connection" -Value "$($connectionObj.Name)"
-            $displayPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_DisplayName" -Value "$($connectionObj.Name)"
-            $nsPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_Namespace" -Value "$($connectionObj.Name)"
-
-            $armObj = Add-ArmParameter -InputObject $armObj -Name "$nsPreSuf" `
-                -Type "string" `
-                -Value "$resName" `
-                -Description "The name of the servicebus namespace. ($($connectionObj.Name))"
 
             $armObj = Add-ArmParameter -InputObject $armObj -Name "$idPreSuf" `
                 -Type "string" `
                 -Value $conName `
                 -Description "The name / id of the ManagedApi connection object that is being utilized by the Logic App. Will be for the trigger and other actions that depend on connections."
 
-            $armObj = Add-ArmParameter -InputObject $armObj -Name "$displayPreSuf" `
-                -Type "string" `
-                -Value $displayName `
-                -Description "The display name of the ManagedApi connection object that is being utilized by the Logic App."
-
             # Update the api object properties
             $apiObj.Name = "[parameters('$idPreSuf')]"
-            $apiObj.properties.displayName = "[parameters('$displayPreSuf')]"
-            $apiObj.properties.parameterValueSet.values.namespaceEndpoint.value = $apiObj.properties.parameterValueSet.values.namespaceEndpoint.value.Replace("'##NAMESPACE##'", "parameters('$nsPreSuf')")
-
+            $apiObj.properties.displayName = "[parameters('$idPreSuf')]"
+            $apiObj.properties.api.id = $apiObj.properties.api.id.Replace("##TYPE##", $conType)
+            
             # Append the new resource to the ARM template
             $armObj.resources += $apiObj
 
@@ -86,11 +76,9 @@ Task -Name "Set-Arm.Connections.ManagedApis.Servicebus.ManagedIdentity.Advanced.
             $connectionObj.Value.connectionName = "[parameters('$idPreSuf')]"
             $connectionObj.Value.id = "[format('/subscriptions/{0}/providers/Microsoft.Web/locations/{1}/managedApis/$conType', subscription().subscriptionId, parameters('logicAppLocation'))]"
         }
-
     }
 
     if ($found) {
-        # We need the location parameter
         if ($null -eq $armObj.parameters.logicAppLocation) {
             $armObj = Add-ArmParameter -InputObject $armObj -Name "logicAppLocation" `
                 -Type "string" `

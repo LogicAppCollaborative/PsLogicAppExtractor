@@ -34,7 +34,7 @@
         Instruct the cmdlet to output with the detailed format directly
         
     .EXAMPLE
-        PS C:\> Get-PsLaManagedApiConnection.AzAccount -ResourceGroup "TestRg"
+        PS C:\> Get-PsLaManagedApiConnection -ResourceGroup "TestRg"
         
         This will fetch all ApiConnection objects from the "TestRg" Resource Group
         
@@ -49,7 +49,7 @@
         office365-1      MyPersonalCon..  Connected     /subscriptions/467c… {"status": "Connect…
         
     .EXAMPLE
-        PS C:\> Get-PsLaManagedApiConnection.AzAccount -ResourceGroup "TestRg" -Detailed
+        PS C:\> Get-PsLaManagedApiConnection -ResourceGroup "TestRg" -Detailed
 
         This will fetch all ApiConnection objects from the "TestRg" Resource Group
         It will display detailed information about the ApiConnection object
@@ -118,7 +118,7 @@
                             }
 
         .EXAMPLE
-        PS C:\> Get-PsLaManagedApiConnection.AzAccount -ResourceGroup "TestRg" -IncludeStatus Error -Detailed
+        PS C:\> Get-PsLaManagedApiConnection -ResourceGroup "TestRg" -IncludeStatus Error -Detailed
         
         This will fetch all ApiConnection objects from the "TestRg" Resource Group
         Filters the list to show only the ones with error
@@ -166,12 +166,12 @@
                             }
 
         .EXAMPLE
-        PS C:\> Get-PsLaManagedApiConnection.AzAccount -ResourceGroup "TestRg" -FilterError Unauthenticated -Detailed
+        PS C:\> Get-PsLaManagedApiConnection -ResourceGroup "TestRg" -FilterError Unauthenticated -Detailed
         
         This will fetch all ApiConnection objects from the "TestRg" Resource Group
         Filters the list to show only the ones with error of the type Unauthenticated
 
-        This is useful in combination with the Invoke-PsLaConsent.AzAccount cmdlet
+        This is useful in combination with the Invoke-PsLaConsent cmdlet
         
         Output example:
         
@@ -192,7 +192,7 @@
                             }
 
         .EXAMPLE
-        PS C:\> Get-PsLaManagedApiConnection.AzAccount -ResourceGroup "TestRg" -FilterError Unauthorized -Detailed
+        PS C:\> Get-PsLaManagedApiConnection -ResourceGroup "TestRg" -FilterError Unauthorized -Detailed
         
         This will fetch all ApiConnection objects from the "TestRg" Resource Group
         Filters the list to show only the ones with error of the type Unauthenticated
@@ -224,20 +224,20 @@
                             }
 
         .EXAMPLE
-        PS C:\> Get-PsLaManagedApiConnection.AzAccount -ResourceGroup "TestRg" -FilterError Unauthenticated | Invoke-PsLaConsent.AzAccount
+        PS C:\> Get-PsLaManagedApiConnection -ResourceGroup "TestRg" -FilterError Unauthenticated | Invoke-PsLaConsent
         
         This will fetch all ApiConnection objects from the "TestRg" Resource Group
         Filters the list to show only the ones with error of the type Unauthenticated
-        Will pipe the objects to Invoke-PsLaConsent.AzAccount, which will prompt you to enter a valid user account / credentials
+        Will pipe the objects to Invoke-PsLaConsent, which will prompt you to enter a valid user account / credentials
         
-        Note: Read more about Invoke-PsLaConsent.AzAccount before running this command, to ensure you understand what it does
+        Note: Read more about Invoke-PsLaConsent before running this command, to ensure you understand what it does
 
     .NOTES
         
         Author: Mötz Jensen (@Splaxi)
         
 #>
-function Get-PsLaManagedApiConnection.AzAccount {
+function Get-PsLaManagedApiConnection {
     [CmdletBinding(DefaultParameterSetName = "ResourceGroup")]
     param (
         [Parameter(Mandatory = $true, ParameterSetName = "Subscription")]
@@ -253,22 +253,48 @@ function Get-PsLaManagedApiConnection.AzAccount {
         [ValidateSet('Connected', 'Error')]
         [string] $IncludeStatus,
 
-        [switch] $Detailed
+        [switch] $Detailed,
+
+        [ValidateSet('AzCli', 'Az.Powershell')]
+        [string] $Tools = 'Az.Powershell'
     )
     
-    $parms = @{}
-    $parms.ResourceGroupName = $ResourceGroup
-    $parms.ApiVersion = "2018-07-01-preview"
-    $parms.ResourceProviderName = "Microsoft.Web"
-    $parms.ResourceType = "connections"
+    if ($Tools -eq 'Az.Powershell') {
+        $parms = @{}
+        $parms.ResourceGroupName = $ResourceGroup
+        $parms.ApiVersion = "2018-07-01-preview"
+        $parms.ResourceProviderName = "Microsoft.Web"
+        $parms.ResourceType = "connections"
 
-    if ($SubscriptionId) {
-        $parms.SubscriptionId = $SubscriptionId
+        if ($SubscriptionId) {
+            $parms.SubscriptionId = $SubscriptionId
+        }
+
+        $res = Invoke-AzRestMethod -Method Get @parms
+
+        if ($null -eq $res) {
+            #TODO! We need to throw an error
+            Throw
+        }
+        
+        $cons = $res.Content | ConvertFrom-Json -Depth 20 | Select-Object -ExpandProperty Value
     }
+    else {
+        $uri = "/subscriptions/{subscriptionId}/resourceGroups/$ResourceGroup/providers/Microsoft.Web/connections?api-version=2018-07-01-preview"
 
-    $res = Invoke-AzRestMethod -Method Get @parms
+        if ($SubscriptionId) {
+            $uri = $uri.Replace("{subscriptionId}", $SubscriptionId)
+        }
 
-    $cons = $res.Content | ConvertFrom-Json -Depth 20 | Select-Object -ExpandProperty Value
+        $res = az rest --url "$uri" | ConvertFrom-Json -Depth 10
+    
+        if ($null -eq $res) {
+            #TODO! We need to throw an error
+            Throw
+        }
+
+        $cons = $res | Select-Object -ExpandProperty Value
+    }
 
     $temp = $cons | Select-PSFObject -TypeName PsLaExtractor.ManagedConnection -Property id, Name,
     @{Label = "DisplayName"; Expression = { $_.properties.DisplayName } },

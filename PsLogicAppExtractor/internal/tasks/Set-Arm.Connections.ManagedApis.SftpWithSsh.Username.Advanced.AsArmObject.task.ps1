@@ -1,7 +1,7 @@
 ﻿$parm = @{
     Description = @"
 Loops all `$connections children
--Validates that is of the type azureblob or azurefile
+-Validates that is of the type azuretable
 --Creates a new resource in the ARM template, for the ApiConnection object
 --With matching ARM Parameters, for the SubscriptionId, ResourceGroup, Namespace, Key
 --Makes sure the ARM Parameters logicAppLocation exists
@@ -9,10 +9,10 @@ Loops all `$connections children
 --Name & Displayname is extracted from the Api Connection Object
 Requires an authenticated session, either Az.Accounts or az cli
 "@
-    Alias       = "Arm.Set-Arm.Connections.ManagedApis.Storage.BlobOrFile.ListKey.Advanced.AsArmObject"
+    Alias       = "Arm.Set-Arm.Connections.ManagedApis.SftpWithSsh.Username.Advanced.AsArmObject"
 }
 
-Task -Name "Set-Arm.Connections.ManagedApis.Storage.BlobOrFile.ListKey.Advanced.AsArmObject" @parm -Action {
+Task -Name "Set-Arm.Connections.ManagedApis.SftpWithSsh.Username.Advanced.AsArmObject" @parm -Action {
     Set-TaskWorkDirectory
 
     # We can either use the az cli or the Az modules
@@ -24,7 +24,7 @@ Task -Name "Set-Arm.Connections.ManagedApis.Storage.BlobOrFile.ListKey.Advanced.
 
     $armObj.resources[0].properties.parameters.'$connections'.value.PsObject.Properties | ForEach-Object {
 
-        if ($_.Value.id -like "*managedApis/azureblob*" -or $_.Value.id -like "*managedApis/azurefile*") {
+        if ($_.Value.id -like "*managedApis/sftpwithssh*") {
             $found = $true
 
             # Fetch the details from the connection object
@@ -40,41 +40,66 @@ Task -Name "Set-Arm.Connections.ManagedApis.Storage.BlobOrFile.ListKey.Advanced.
             # Use the display name as the name of the resource
             $conName = $resObj.Name
             $displayName = $resObj.Properties.DisplayName
-            $resName = $resObj.Properties.ParameterValues.AccountName
+            $hostName = $resObj.Properties.ParameterValues.hostName
+            $userName = $resObj.Properties.ParameterValues.userName
+            $portNumber = $resObj.Properties.ParameterValues.portNumber
+            $rootFolder = $resObj.Properties.ParameterValues.rootFolder
+            $accept = $resObj.Properties.ParameterValues.acceptAnySshHostKey
+            $fingerprint = $resObj.Properties.ParameterValues.sshHostKeyFingerprint
+            
 
             # Fetch base template
             $pathArms = "$(Get-PSFConfigValue -FullName PsLogicAppExtractor.ModulePath.Base)\internal\arms"
-            $apiObj = Get-Content -Path "$pathArms\API.Storage.BlobOrFile.AccessKey.json" -Raw | ConvertFrom-Json
+            $apiObj = Get-Content -Path "$pathArms\API.Storage.Table.AccessKey.json" -Raw | ConvertFrom-Json
 
             # Set the names of the parameters
             $Prefix = Get-PSFConfigValue -FullName PsLogicAppExtractor.prefixsuffix.connection.prefix
-            $subPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_Subscription" -Value "$($_.Name)"
-            $rgPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_ResourceGroup" -Value "$($_.Name)"
-            $objPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_StorageAccount" -Value "$($_.Name)"
+            $hostPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_Hostname" -Value "$($_.Name)"
+            $userPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_Username" -Value "$($_.Name)"
+            $passPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_Password" -Value "$($_.Name)"
+            $portPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_Portnumber" -Value "$($_.Name)"
+            $rootPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_Rootfolder" -Value "$($_.Name)"
+            $acceptPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_AcceptAnySshHostkey" -Value "$($_.Name)"
+            $fingerPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_SshHostKeyFingerprint" -Value "$($_.Name)"
             
             $idPreSuf = Format-Name -Type "Connection" -Value "$($_.Name)"
             $displayPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_DisplayName" -Value "$($_.Name)"
             
-            $armObj = Add-ArmParameter -InputObject $armObj -Name "$subPreSuf" `
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$hostPreSuf" `
                 -Type "string" `
-                -Value "[subscription().subscriptionId]" `
-                -Description "The subscription where the storage account is located. ($($_.Name))"
+                -Value "$hostName" `
+                -Description "The host / server address for the Sftp server. ($($_.Name))"
 
-            $armObj = Add-ArmParameter -InputObject $armObj -Name "$rgPreSuf" `
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$userPreSuf" `
                 -Type "string" `
-                -Value "[resourceGroup().name]" `
-                -Description "The resource group where the storage account is located. ($($_.Name))"
+                -Value "$userName" `
+                -Description "The username used to authenticate against the Sftp server. ($($_.Name))"
 
-            $armObj = Add-ArmParameter -InputObject $armObj -Name "$objPreSuf" `
-                -Type "string" `
-                -Value "$resName" `
-                -Description "The name of the storage account. ($($_.Name))"
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$passPreSuf" `
+                -Type "SecureString" `
+                -Value "" `
+                -Description "The password used to authenticate against the Sftp server. ($($_.Name))"
             
-            $armObj = Add-ArmParameter -InputObject $armObj -Name "$idPreSuf" `
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$portPreSuf" `
                 -Type "string" `
-                -Value $conName `
-                -Description "The name / id of the ManagedApi connection object that is being utilized by the Logic App. Will be for the trigger and other actions that depend on connections."
+                -Value "$portNumber" `
+                -Description "The port used to communicate with the Sftp server. ($($_.Name))"
 
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$rootPreSuf" `
+                -Type "string" `
+                -Value "$rootFolder" `
+                -Description "The root folder path on the Sftp server. ($($_.Name))"
+                
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$acceptPreSuf" `
+                -Type "boolean" `
+                -Value $accept `
+                -Description "True will accept any Ssh Host Keys presented from the Sftp server. ($($_.Name))"
+            
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$fingerPreSuf" `
+                -Type "string" `
+                -Value "$fingerprint" `
+                -Description "The fingerprint that you expect during the initial communication with the Sftp server. ($($_.Name))"
+                
             $armObj = Add-ArmParameter -InputObject $armObj -Name "$displayPreSuf" `
                 -Type "string" `
                 -Value $displayName `
@@ -83,8 +108,13 @@ Task -Name "Set-Arm.Connections.ManagedApis.Storage.BlobOrFile.ListKey.Advanced.
             # Update the api object properties
             $apiObj.Name = "[parameters('$idPreSuf')]"
             $apiObj.properties.displayName = "[parameters('$displayPreSuf')]"
-            $apiObj.properties.parameterValues.accountName = "[parameters('$objPreSuf')]"
-            $apiObj.properties.parameterValues.accessKey = $apiObj.properties.parameterValues.accessKey.Replace("'##SUSCRIPTIONID##'", "parameters('$subPreSuf')").Replace("'##RESOURCEGROUPNAME##'", "parameters('$rgPreSuf')").Replace("'##ACCOUNTNAME##'", "parameters('$objPreSuf')")
+            $resObj.Properties.ParameterValues.hostName = "[parameters('$hostPreSuf')]"
+            $resObj.Properties.ParameterValues.userName = "[parameters('$userPreSuf')]"
+            $resObj.Properties.ParameterValues.password = "[parameters('$passPreSuf')]"
+            $resObj.Properties.ParameterValues.portNumber = "[parameters('$portPreSuf')]"
+            $resObj.Properties.ParameterValues.rootFolder = "[parameters('$rootPreSuf')]"
+            $resObj.Properties.ParameterValues.acceptAnySshHostKey = "[parameters('$acceptPreSuf')]"
+            $resObj.Properties.ParameterValues.sshHostKeyFingerprint = "[parameters('$fingerPreSuf')]"
 
             # Update the api connection object type
             $_.Value.id -match "/managedApis/(.*)"

@@ -7,6 +7,7 @@ Loops all `$connections children
 --Makes sure the ARM Parameters logicAppLocation exists
 --The type is based on ListKey / ConnectionString approach
 --Name & Displayname is extracted from the ConnectionName property
+Requires an authenticated session, either Az.Accounts or az cli
 "@
     Alias       = "Arm.Set-Arm.Connections.ManagedApis.Storage.BlobOrFile.ListKey.AsArmObject"
 }

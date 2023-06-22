@@ -1,0 +1,15 @@
+resources
+| where type == 'microsoft.web/connections' ##FILTERS##
+| project id=tolower(id), name, resourceGroup, subscriptionId
+| join kind= leftouter
+    (
+    resources
+    | where type == 'microsoft.logic/workflows' ##FILTERS##
+    | mv-expand Conn=todynamic(properties)["parameters"]["$connections"]["value"]
+    | where notnull(Conn)
+    | extend connectionId=tolower(extract("\"connectionId\":\"(.*?)\"", 1, tostring(Conn)))
+    | project connectionId, LogicAppId=id, LogicAppResourceGroup=resourceGroup, LogicApp=name
+    )
+    on $left.id == $right.connectionId
+| project Name=name, ResourceGroup=resourceGroup, SubscriptionId=subscriptionId, IsLogicAppReferenced=iff(isnotempty(LogicAppId), "true", "false"), LogicApp, LogicAppResourceGroup, LogicAppId
+| order by ['Name'] asc
