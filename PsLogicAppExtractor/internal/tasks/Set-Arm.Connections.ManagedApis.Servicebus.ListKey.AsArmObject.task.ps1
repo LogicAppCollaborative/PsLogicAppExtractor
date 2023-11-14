@@ -47,7 +47,7 @@ Task -Name "Set-Arm.Connections.ManagedApis.Servicebus.ListKey.AsArmObject" @par
 
             # Fetch base template
             $pathArms = "$(Get-PSFConfigValue -FullName PsLogicAppExtractor.ModulePath.Base)\internal\arms"
-            $apiObj = Get-Content -Path "$pathArms\API.SB.ConnectionString.json" -Raw | ConvertFrom-Json
+            $apiObj = Get-Content -Path "$pathArms\API.SB.ListKey.json" -Raw | ConvertFrom-Json
 
             # Set the names of the parameters
             $Prefix = Get-PSFConfigValue -FullName PsLogicAppExtractor.prefixsuffix.connection.prefix

@@ -59,6 +59,8 @@ $listTasks += "Sort-Arm.Parameter"
 $listTasks += "Sort-Arm.Variable"
 $listTasks += "Sort-Raw.LogicApp.Parm"
 $listTasks += "Sort-Raw.LogicApp.Tag"
+
+$listTasks += "Set-Arm.Connections.ManagedApis.Servicebus.ConnectionString.AsArmObject"
     
 # Default tasks, the via the dependencies will run all tasks
 Task -Name "default" -Depends $listTasks

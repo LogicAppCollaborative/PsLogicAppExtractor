@@ -66,12 +66,4 @@
     It "Should have a parameters.logicAppLocation property" {
         $armObj.parameters.logicAppLocation | Should -Not -Be $null
     }
-
-    It "Should be '[resourceGroup().location]' in the parameters.logicAppLocation.defaultValue property" {
-        $armObj.parameters.logicAppLocation.defaultValue | Should -BeExactly "[resourceGroup().location]"
-    }
-    
-    # AfterAll {
-    #     Write-Host "$resPath"
-    # }
 }

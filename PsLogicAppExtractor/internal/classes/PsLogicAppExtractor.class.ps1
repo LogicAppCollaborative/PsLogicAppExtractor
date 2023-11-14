@@ -1,4 +1,7 @@
-﻿class Helper {
+﻿<#
+."..\PsLogicAppExtractor\internal\classes\PsLogicAppExtractor.class.ps1"
+#>
+class Helper {
     Helper([object] $values) {
         if ($values -is [System.Collections.IDictionary]) {
             foreach ($key in $values.Keys) {

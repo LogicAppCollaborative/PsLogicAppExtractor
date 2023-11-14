@@ -9,7 +9,7 @@
         },
         "displayName": "##NAME##",
         "parameterValues": {
-            "connectionString": "[parameters('##CONNECTIONSTRING##')]"
+            "connectionString": "[listKeys(resourceId('##SUSCRIPTIONID##', '##RESOURCEGROUPNAME##', 'Microsoft.ServiceBus/namespaces/authorizationRules', '##NAMESPACE##', '##KEYNAME##'), providers('Microsoft.ServiceBus', 'namespaces').apiVersions[0]).primaryConnectionString]"
         }
     }
 }
