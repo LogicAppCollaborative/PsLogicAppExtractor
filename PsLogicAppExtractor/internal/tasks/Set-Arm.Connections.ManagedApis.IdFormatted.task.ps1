@@ -14,11 +14,14 @@ Task -Name "Set-Arm.Connections.ManagedApis.IdFormatted" @parm -Action {
 
     $armObj = Get-TaskWorkObject
 
-    $armObj.resources[0].properties.parameters.'$connections'.value.PsObject.Properties | ForEach-Object {
-        if ($_.Value.id -like "*managedApis*") {
+    foreach ($connectionObj in $armObj.resources[0].properties.parameters.'$connections'.value.PsObject.Properties) {
+        if ($connectionObj.Value.id -like "*managedApis*" `
+                -and (-not ($connectionObj.Value.id -like "*[*(*)*]*")) `
+        ) {
             $found = $true
-            $conType = $_.Value.id.Split("/") | Select-Object -Last 1
-            $_.Value.id = "[format('/subscriptions/{0}/providers/Microsoft.Web/locations/{1}/managedApis/$conType', subscription().subscriptionId, parameters('logicAppLocation'))]"
+
+            $conType = $connectionObj.Value.id.Split("/") | Select-Object -Last 1
+            $connectionObj.Value.id = "[format('/subscriptions/{0}/providers/Microsoft.Web/locations/{1}/managedApis/$conType', subscription().subscriptionId, parameters('logicAppLocation'))]"
         }
     }
 

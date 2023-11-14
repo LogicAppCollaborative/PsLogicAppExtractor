@@ -14,18 +14,22 @@ Task -Name "Set-Arm.Connections.ManagedApis.Name.AsParameter" @parm -Action {
 
     $armObj = Get-TaskWorkObject
 
-    $armObj.resources[0].properties.parameters.'$connections'.value.PsObject.Properties | ForEach-Object {
-        if ($_.Value.id -like "*managedApis*") {
-            $conName = $_.Value.connectionName
-            $namePreSuf = Format-Name -Type "Connection" -Prefix $Connection_Prefix -Suffix $Connection_Suffix -Value $_.Name
-            
+    foreach ($connectionObj in $armObj.resources[0].properties.parameters.'$connections'.value.PsObject.Properties) {
+        if ($connectionObj.Value.id -like "*managedApis*" `
+                -and (-not ($connectionObj.Value.connectionName -like "*[*(*)*]*")) `
+                -and (-not ($connectionObj.Value.id -like "*[*(*)*]*")) `
+        ) {
+            $Prefix = Get-PSFConfigValue -FullName PsLogicAppExtractor.prefixsuffix.connection.prefix
+            $conName = $connectionObj.Value.connectionName
+            $namePreSuf = Format-Name -Type "Connection" -Value $connectionObj.Name
+
             $armObj = Add-ArmParameter -InputObject $armObj -Name "$namePreSuf" `
                 -Type "string" `
                 -Value $conName `
                 -Description "The name / id of the ManagedApi connection object that is being utilized by the Logic App. Will be for the trigger and other actions that depend on connections."
     
-            $_.Value.connectionId = "[resourceId('Microsoft.Web/connections', parameters('$namePreSuf'))]"
-            $_.Value.connectionName = "[parameters('$namePreSuf')]"
+            $connectionObj.Value.connectionId = "[resourceId('Microsoft.Web/connections', parameters('$namePreSuf'))]"
+            $connectionObj.Value.connectionName = "[parameters('$namePreSuf')]"
         }
     }
 

@@ -50,7 +50,7 @@ Task -Name "Set-Arm.Connections.ManagedApis.SftpWithSsh.Username.Advanced.AsArmO
 
             # Fetch base template
             $pathArms = "$(Get-PSFConfigValue -FullName PsLogicAppExtractor.ModulePath.Base)\internal\arms"
-            $apiObj = Get-Content -Path "$pathArms\API.Storage.Table.AccessKey.json" -Raw | ConvertFrom-Json
+            $apiObj = Get-Content -Path "$pathArms\API.SftpWithSsh.Username.json" -Raw | ConvertFrom-Json
 
             # Set the names of the parameters
             $Prefix = Get-PSFConfigValue -FullName PsLogicAppExtractor.prefixsuffix.connection.prefix
@@ -91,7 +91,7 @@ Task -Name "Set-Arm.Connections.ManagedApis.SftpWithSsh.Username.Advanced.AsArmO
                 -Description "The root folder path on the Sftp server. ($($_.Name))"
                 
             $armObj = Add-ArmParameter -InputObject $armObj -Name "$acceptPreSuf" `
-                -Type "boolean" `
+                -Type "bool" `
                 -Value $accept `
                 -Description "True will accept any Ssh Host Keys presented from the Sftp server. ($($_.Name))"
             
@@ -105,16 +105,21 @@ Task -Name "Set-Arm.Connections.ManagedApis.SftpWithSsh.Username.Advanced.AsArmO
                 -Value $displayName `
                 -Description "The display name of the ManagedApi connection object that is being utilized by the Logic App."
 
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$idPreSuf" `
+                -Type "string" `
+                -Value $conName `
+                -Description "The name / id of the ManagedApi connection object that is being utilized by the Logic App. Will be for the trigger and other actions that depend on connections."
+                
             # Update the api object properties
             $apiObj.Name = "[parameters('$idPreSuf')]"
             $apiObj.properties.displayName = "[parameters('$displayPreSuf')]"
-            $resObj.Properties.ParameterValues.hostName = "[parameters('$hostPreSuf')]"
-            $resObj.Properties.ParameterValues.userName = "[parameters('$userPreSuf')]"
-            $resObj.Properties.ParameterValues.password = "[parameters('$passPreSuf')]"
-            $resObj.Properties.ParameterValues.portNumber = "[parameters('$portPreSuf')]"
-            $resObj.Properties.ParameterValues.rootFolder = "[parameters('$rootPreSuf')]"
-            $resObj.Properties.ParameterValues.acceptAnySshHostKey = "[parameters('$acceptPreSuf')]"
-            $resObj.Properties.ParameterValues.sshHostKeyFingerprint = "[parameters('$fingerPreSuf')]"
+            $apiObj.Properties.ParameterValues.hostName = "[parameters('$hostPreSuf')]"
+            $apiObj.Properties.ParameterValues.userName = "[parameters('$userPreSuf')]"
+            $apiObj.Properties.ParameterValues.password = "[parameters('$passPreSuf')]"
+            $apiObj.Properties.ParameterValues.portNumber = "[parameters('$portPreSuf')]"
+            $apiObj.Properties.ParameterValues.rootFolder = "[parameters('$rootPreSuf')]"
+            $apiObj.Properties.ParameterValues.acceptAnySshHostKey = "[parameters('$acceptPreSuf')]"
+            $apiObj.Properties.ParameterValues.sshHostKeyFingerprint = "[parameters('$fingerPreSuf')]"
 
             # Update the api connection object type
             $_.Value.id -match "/managedApis/(.*)"
