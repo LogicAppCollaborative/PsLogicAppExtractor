@@ -10,8 +10,7 @@
         "displayName": "##NAME##",
         "parameterValues": {
             "integrationAccountId": "[format('/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Logic/integrationAccounts/{2}', subscription().subscriptionId, parameters('integrationAccountResourceGroup'), parameters('integrationAccount'))]",
-            "integrationAccountUrl": "[listCallbackUrl(format('/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Logic/integrationAccounts/{2}', subscription().subscriptionId, parameters('integrationAccountResourceGroup'), parameters('integrationAccount')), '2019-05-01').value]",
-            "controlNumbersBlockSize": ""
+            "integrationAccountUrl": "[listCallbackUrl(format('/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Logic/integrationAccounts/{2}', subscription().subscriptionId, parameters('integrationAccountResourceGroup'), parameters('integrationAccount')), '2019-05-01').value]"
         }
     }
 }
