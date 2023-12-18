@@ -807,7 +807,7 @@ Task -Name "Set-Arm.Connections.ManagedApis.KeyVault.ManagedIdentity.AsArmObject
     foreach ($connectionObj in $armObj.resources[0].properties.parameters.'$connections'.value.PsObject.Properties) {
         if ($connectionObj.Value.id -like "*managedApis/keyvault*") {
 
-            # This should only handle Managed Identity Servicebus connections
+            # This should only handle Managed Identity KeyVault connections
             if ($connectionObj.Value.connectionProperties.authentication.type -ne "ManagedServiceIdentity") { continue }
 
             $found = $true
