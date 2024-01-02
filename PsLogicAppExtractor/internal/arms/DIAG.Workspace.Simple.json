@@ -1,14 +1,33 @@
 ﻿{
-    "type": "Microsoft.Insights/diagnosticSettings",
+    "type": "Microsoft.Logic/workflows/providers/diagnosticSettings",
     "apiVersion": "2021-05-01-preview",
-    "scope": "[format('Microsoft.Logic/workflows/{0}', parameters('logicAppName'))]",
-    "name": "##NAME##",
+    "name": "Diagnostics",
     "dependsOn": [
         "[parameters('logicAppName')]"
     ],
     "properties": {
-        "workspaceId": "##WORKSPACEID##",
-        "logs": [],
-        "metrics": []
+        "workspaceId": "/subscriptions/0000/resourceGroups/RG/providers/Microsoft.OperationalInsights/workspaces/##WORKSPACEID##",
+        "logs": [
+            {
+                "category": null,
+                "categoryGroup": "allLogs",
+                "enabled": true,
+                "retentionPolicy": {
+                    "days": 0,
+                    "enabled": false
+                }
+            }
+        ],
+        "metrics": [
+            {
+                "timeGrain": null,
+                "category": "AllMetrics",
+                "enabled": true,
+                "retentionPolicy": {
+                    "days": 0,
+                    "enabled": false
+                }
+            }
+        ]
     }
 }
