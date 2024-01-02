@@ -121,7 +121,7 @@ Task -Name "Export-LogicApp" @parm -Action {
 #Original file: Set-Arm.Connections.ManagedApis.AsParameter.task.ps1
 $parm = @{
     Description = @"
-Depricated. Use Set-Arm.Connections.ManagedApis.Id.AsParameter.task instead.
+Depricated. Use Set-Arm.Connections.ManagedApis.Id.AsParameter instead.
 
 Loops all `$connections children
 -Creates an Arm parameter, with prefix & suffix
@@ -2023,9 +2023,108 @@ Task -Name "Set-Arm.Connections.ManagedApis.Storage.Table.ListKey.Advanced.AsArm
     Out-TaskFileArm -InputObject $armObj
 }
 
+#Original file: Set-Arm.Diagnostics.Settings.Workspace.Advanced.AsArmObject.task.ps1
+$parm = @{
+  Description = @"
+Loops all diagnosticSettings children for the Logic App
+-Validates that is of the type Log Analytics (Workspace)
+--Creates a new resource in the ARM template, for the diagnosticSettings object
+--With matching ARM Parameters, for the WorkspaceId, WorkspaceResourceGroup, Name
+--WorkspaceId, WorkspaceResourceGroup & Name is extracted from the DiagnosticSettings Object
+Requires an authenticated session, either Az.Accounts or az cli
+"@
+  Alias       = "Arm.Set-Arm.Diagnostics.Settings.Workspace.Advanced.AsArmObject"
+}
+
+Task -Name "Set-Arm.Diagnostics.Settings.Workspace.Advanced.AsArmObject" @parm -Action {
+  Set-TaskWorkDirectory
+
+  # We can either use the az cli or the Az modules
+  $tools = Get-PSFConfigValue -FullName PsLogicAppExtractor.Execution.Tools
+  $pathArms = "$(Get-PSFConfigValue -FullName PsLogicAppExtractor.ModulePath.Base)\internal\arms"
+
+  $armObj = Get-TaskWorkObject
+
+  $subLocal = (Get-AzContext).Subscription.Id
+
+  if ($SubscriptionId) {
+    $subLocal = $SubscriptionId
+  }
+   
+  $uri = "/subscriptions/$subLocal/resourceGroups/$ResourceGroup/providers/Microsoft.Logic/workflows/$Name/providers/Microsoft.Insights/diagnosticSettings?api-version=2021-05-01-preview"
+
+  if ($tools -eq "AzCli") {
+    $resObj = az rest --url $uri | ConvertFrom-Json
+  }
+  else {
+    $resObj = Invoke-AzRestMethod -Path $uri -Method Get | Select-Object -ExpandProperty content | ConvertFrom-Json
+  }
+
+  $diagSettings = @($resObj | Select-Object -ExpandProperty Value)
+
+  if ($null -eq $diagSettings -or $diagSettings.Count -eq 0) {
+    $diagFake = Get-Content -Path "$pathArms\DIAG.Workspace.Simple.json" -Raw | ConvertFrom-Json
+    $diagSettings = @($diagFake)
+  }
+
+  $counter = 0
+
+  foreach ($diag in $diagSettings) {
+    if ([System.String]::IsNullOrEmpty($diag.properties.workspaceId)) {
+      continue
+    }
+    
+    $orgName = $diag.name
+    $orgResourceGroup = ($diag.properties.workspaceId | Select-String -Pattern ".*/resourceGroups/(.*?)/providers/").Matches[0].Groups[1].Value
+    $orgWorkspace = $diag.properties.workspaceId.Split("/") | Select-Object -Last 1
+
+    $counter += 1
+
+    $parmName = "diagnostic$($counter.ToString().PadLeft(3, "0"))_Name"
+    $parmWorkspace = "diagnostic$($counter.ToString().PadLeft(3, "0"))_WorkspaceId"
+    $parmRgWorkspace = "diagnostic$($counter.ToString().PadLeft(3, "0"))_ResourceGroup"
+
+    $armObj = Add-ArmParameter -InputObject $armObj -Name $parmName `
+      -Type "string" `
+      -Value "$orgName" `
+      -Description "The name of diagnostic setting / profile for the Logic App."
+
+    $armObj = Add-ArmParameter -InputObject $armObj -Name "$parmRgWorkspace" `
+      -Type "string" `
+      -Value "$orgResourceGroup" `
+      -Description "The resource group where the Log Analytics (Workspace) is located."
+                
+    $armObj = Add-ArmParameter -InputObject $armObj -Name $parmWorkspace `
+      -Type "string" `
+      -Value "$orgWorkspace" `
+      -Description "The name / id of the Log Analytics (Workspace) that is referenced by the Logic App and its diagnostic settings."
+      
+    # Fetch base template
+    
+    $diagObj = Get-Content -Path "$pathArms\DIAG.Workspace.Simple.json" -Raw | ConvertFrom-Json
+    
+    $diagObj.Name = "[format('{0}/Microsoft.Insights/{1}', parameters('logicAppName'), parameters('$parmName'))]"
+    $diagObj.Type = "Microsoft.Logic/workflows/providers/diagnosticSettings"
+    $diagObj.properties.workspaceId = "[resourceId(parameters('$parmRgWorkspace'), 'Microsoft.OperationalInsights/workspaces', parameters('$parmWorkspace'))]"
+    $diagObj.properties.logs = $diag.properties.logs
+    $diagObj.properties.metrics = $diag.properties.metrics
+    
+    $diagObj.psobject.Properties.Remove("scope")
+    
+    $armObj.resources += $diagObj
+  }
+
+  Out-TaskFileArm -InputObject $armObj
+}
+
 #Original file: Set-Arm.Diagnostics.Settings.Workspace.AsArmObject.task.ps1
 $parm = @{
   Description = @"
+Loops all diagnosticSettings children for the Logic App
+-Validates that is of the type Log Analytics (Workspace)
+--Creates a new resource in the ARM template, for the diagnosticSettings object
+--With matching ARM Parameters, for the WorkspaceId, Name
+--WorkspaceId & Name is extracted from the DiagnosticSettings Object
 Requires an authenticated session, either Az.Accounts or az cli
 "@
   Alias       = "Arm.Set-Arm.Diagnostics.Settings.Workspace.AsArmObject"
@@ -2036,6 +2135,7 @@ Task -Name "Set-Arm.Diagnostics.Settings.Workspace.AsArmObject" @parm -Action {
 
   # We can either use the az cli or the Az modules
   $tools = Get-PSFConfigValue -FullName PsLogicAppExtractor.Execution.Tools
+  $pathArms = "$(Get-PSFConfigValue -FullName PsLogicAppExtractor.ModulePath.Base)\internal\arms"
       
   $armObj = Get-TaskWorkObject
 
@@ -2056,8 +2156,8 @@ Task -Name "Set-Arm.Diagnostics.Settings.Workspace.AsArmObject" @parm -Action {
 
   $diagSettings = @($resObj | Select-Object -ExpandProperty Value)
 
-  if($null -eq $diagSettings -or $diagSettings.Count -eq 0) {
-    $diagFake = '{"name": "Diagnostics","properties": {"logs": [{"category": null,"categoryGroup": "allLogs","enabled": true,"retentionPolicy": {"days": 0,"enabled": false}}],"metrics": [{"timeGrain": null,"enabled": true,"retentionPolicy": {"days": 0,"enabled": false},"category": "AllMetrics"}],"workspaceId": "/subscriptions/0000/resourceGroups/RG/providers/Microsoft.OperationalInsights/workspaces/##WORKSPACEID##","logAnalyticsDestinationType": null}}' | ConvertFrom-Json
+  if ($null -eq $diagSettings -or $diagSettings.Count -eq 0) {
+    $diagFake = Get-Content -Path "$pathArms\DIAG.Workspace.Simple.json" -Raw | ConvertFrom-Json
     $diagSettings = @($diagFake)
   }
 
@@ -2087,15 +2187,17 @@ Task -Name "Set-Arm.Diagnostics.Settings.Workspace.AsArmObject" @parm -Action {
       -Description "The name / id of the Log Analytics (Workspace) that is referenced by the Logic App and its diagnostic settings."
       
     # Fetch base template
-    $pathArms = "$(Get-PSFConfigValue -FullName PsLogicAppExtractor.ModulePath.Base)\internal\arms"
     $diagObj = Get-Content -Path "$pathArms\DIAG.Workspace.Simple.json" -Raw | ConvertFrom-Json
     
-    $diagObj.Name = "[parameters('$parmName')]"
-    $diagObj.properties.workspaceId = "[format('/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.OperationalInsights/workspaces/{2}', subscription().subscriptionId, resourceGroup().name, parameters('$parmWorkspace'))]"
+    $diagObj.Name = "[format('{0}/Microsoft.Insights/{1}', parameters('logicAppName'), parameters('$parmName'))]"
+    $diagObj.Type = "Microsoft.Logic/workflows/providers/diagnosticSettings"
+    $diagObj.properties.workspaceId = "[resourceId(resourceGroup().name, 'Microsoft.OperationalInsights/workspaces', parameters('$parmWorkspace'))]"
     $diagObj.properties.logs = $diag.properties.logs
     $diagObj.properties.metrics = $diag.properties.metrics
+    
+    $diagObj.psobject.Properties.Remove("scope")
+    
     $armObj.resources += $diagObj
-
   }
 
   Out-TaskFileArm -InputObject $armObj
