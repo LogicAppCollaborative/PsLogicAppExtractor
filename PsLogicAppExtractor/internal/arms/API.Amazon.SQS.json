@@ -11,7 +11,7 @@
         "parameterValues": {
             "queueUrl": "[parameters('##QUEUEURL##')]",
             "accessKeyId": "[parameters('##ACCESSKEYID##')]",
-            "secretAccessKey": "[parameters('##SECRETACCESSKEY##')]"
+            "accessKeySecret": "[parameters('##ACCESSKEYSECRET##')]"
         }
     }
 }

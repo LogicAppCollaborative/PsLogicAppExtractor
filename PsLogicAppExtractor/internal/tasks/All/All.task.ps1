@@ -173,7 +173,7 @@ Task -Name "Set-Arm.Connections.ManagedApis.AmazonSQS.AsArmObject" @parm -Action
 
             $parmApicQueueUrl = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_QueueUrl" -Value "$($connectionObj.Name)"
             $parmApicAccessKeyId = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_AccessKeyId" -Value "$($connectionObj.Name)"
-            $parmApicSecretAccessKey = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_SecretAccessKey" -Value "$($connectionObj.Name)"
+            $parmApicAccessKeySecret = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_AccessKeySecret" -Value "$($connectionObj.Name)"
             
             $armObj = Add-ArmParameter -InputObject $armObj -Name "$parmApicId" `
                 -Type "string" `
@@ -190,7 +190,7 @@ Task -Name "Set-Arm.Connections.ManagedApis.AmazonSQS.AsArmObject" @parm -Action
                 -Value "$($resObj.Properties.parameterValues.accessKeyId)" `
                 -Description "The Access Key as provided from Amazon."
 
-            $armObj = Add-ArmParameter -InputObject $armObj -Name "$parmApicSecretAccessKey" `
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$parmApicAccessKeySecret" `
                 -Type "SecureString" `
                 -Value "" `
                 -Description "The Secret Access Key as provided from Amazon."
@@ -201,7 +201,7 @@ Task -Name "Set-Arm.Connections.ManagedApis.AmazonSQS.AsArmObject" @parm -Action
             
             $apiObj.properties.parameterValues.queueUrl = "[parameters('$parmApicQueueUrl')]"
             $apiObj.properties.parameterValues.accessKeyId = "[parameters('$parmApicAccessKeyId')]"
-            $apiObj.properties.parameterValues.secretAccessKey = "[parameters('$parmApicSecretAccessKey')]"
+            $apiObj.properties.parameterValues.accessKeySecret = "[parameters('$parmApicAccessKeySecret')]"
 
             # Append the new resource to the ARM template
             $armObj.resources += $apiObj
