@@ -1,0 +1,15 @@
+﻿{
+    "type": "Microsoft.Web/connections",
+    "apiVersion": "2018-07-01-preview",
+    "name": "##NAME##",
+    "location": "[parameters('logicAppLocation')]",
+    "properties": {
+        "api": {
+            "id": "[subscriptionResourceId('Microsoft.Web/locations/managedApis', parameters('logicAppLocation'), 'eventhubs')]"
+        },
+        "displayName": "##NAME##",
+        "parameterValues": {
+            "connectionString": "[listKeys(resourceId('##SUSCRIPTIONID##', '##RESOURCEGROUPNAME##', 'Microsoft.EventHub/eventhubs/authorizationRules', '##NAMESPACE##', '##KEYNAME##'), providers('Microsoft.EventHub', 'eventhubs').apiVersions[0]).primaryConnectionString]"
+        }
+    }
+}
