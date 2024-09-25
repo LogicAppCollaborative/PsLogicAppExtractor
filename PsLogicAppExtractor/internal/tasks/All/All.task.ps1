@@ -1279,23 +1279,30 @@ Task -Name "Set-Arm.Connections.ManagedApis.LogAnalyticsDataCollector.AsArmObjec
             $Prefix = Get-PSFConfigValue -FullName PsLogicAppExtractor.prefixsuffix.connection.prefix
             $parmApicId = Format-Name -Type "Connection" -Prefix $Prefix -Value "$($connectionObj.Name)"
 
+            $parmApicWorkspaceId = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_WorkspaceId" -Value "$($connectionObj.Name)"
             $parmApicInstrumentKey = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_InstrumentKey" -Value "$($connectionObj.Name)"
             
             $armObj = Add-ArmParameter -InputObject $armObj -Name "$parmApicId" `
                 -Type "string" `
                 -Value $conName `
                 -Description "The name / id of the ManagedApi connection object that is being utilized by the Logic App. Will be for the trigger and other actions that depend on connections."
-            
-            $armObj = Add-ArmParameter -InputObject $armObj -Name "$parmApicInstrumentKey" `
+
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$parmApicWorkspaceId" `
                 -Type "string" `
                 -Value "$($resObj.Properties.parameterValues.username)" `
-                -Description "The InstrumentKey / Username as provided from Azure Log Analytics."
+                -Description "The WorkspaceId / Username as provided from Azure Log Analytics."
+                
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$parmApicInstrumentKey" `
+                -Type "string" `
+                -Value '' `
+                -Description "The InstrumentKey as provided from Azure Log Analytics."
                 
             # Update the api object properties
             $apiObj.Name = "[parameters('$parmApicId')]"
             $apiObj.properties.displayName = "[parameters('$parmApicId')]"
             
-            $apiObj.properties.parameterValues.username = "[parameters('$parmApicInstrumentKey')]"
+            $apiObj.properties.parameterValues.username = "[parameters('$parmApicWorkspaceId')]"
+            $apiObj.properties.parameterValues.password = "[parameters('$parmApicInstrumentKey')]"
 
             # Append the new resource to the ARM template
             $armObj.resources += $apiObj
