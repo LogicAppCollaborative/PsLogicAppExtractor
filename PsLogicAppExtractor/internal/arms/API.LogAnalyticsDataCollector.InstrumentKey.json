@@ -9,7 +9,8 @@
         },
         "displayName": "##NAME##",
         "parameterValues": {
-            "username": "[parameters('##USERNAME##')]"
+            "username": "[parameters('##USERNAME##')]",
+            "password": "[parameters('##PASSWORD##')]"
         }
     }
 }
