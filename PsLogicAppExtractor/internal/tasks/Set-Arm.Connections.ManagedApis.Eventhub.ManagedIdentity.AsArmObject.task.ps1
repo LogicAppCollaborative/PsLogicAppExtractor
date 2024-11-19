@@ -19,7 +19,7 @@ Task -Name "Set-Arm.Connections.ManagedApis.Eventhub.ManagedIdentity.AsArmObject
     $tools = Get-PSFConfigValue -FullName PsLogicAppExtractor.Execution.Tools
         
     $found = $false
-    $conType = "servicebus"
+    $conType = "eventhubs"
 
     $armObj = Get-TaskWorkObject
 
@@ -72,24 +72,6 @@ Task -Name "Set-Arm.Connections.ManagedApis.Eventhub.ManagedIdentity.AsArmObject
             $apiObj.Name = "[parameters('$parmApicId')]"
             $apiObj.properties.displayName = "[parameters('$parmApicId')]"
             $apiObj.properties.parameterValueSet.values.namespaceEndpoint.value = $apiObj.properties.parameterValueSet.values.namespaceEndpoint.value.Replace("'##NAMESPACE##'", "parameters('$parmApicNamespace')")
-
-            # $idPreSuf = Format-Name -Type "Connection" -Value "$($connectionObj.Name)"
-            # $nsPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_Namespace" -Value "$($connectionObj.Name)"
-
-            # $armObj = Add-ArmParameter -InputObject $armObj -Name "$nsPreSuf" `
-            #     -Type "string" `
-            #     -Value "$resName" `
-            #     -Description "The name of the servicebus namespace. ($($connectionObj.Name))"
-
-            # $armObj = Add-ArmParameter -InputObject $armObj -Name "$idPreSuf" `
-            #     -Type "string" `
-            #     -Value $conName `
-            #     -Description "The name / id of the ManagedApi connection object that is being utilized by the Logic App. Will be for the trigger and other actions that depend on connections."
-
-            # # Update the api object properties
-            # $apiObj.Name = "[parameters('$idPreSuf')]"
-            # $apiObj.properties.displayName = "[parameters('$idPreSuf')]"
-            # $apiObj.properties.parameterValueSet.values.namespaceEndpoint.value = $apiObj.properties.parameterValueSet.values.namespaceEndpoint.value.Replace("'##NAMESPACE##'", "parameters('$nsPreSuf')")
 
             # Append the new resource to the ARM template
             $armObj.resources += $apiObj
