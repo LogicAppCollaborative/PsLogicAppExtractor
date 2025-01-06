@@ -2367,6 +2367,10 @@ Task -Name "Set-Arm.Connections.ManagedApis.Storage.BlobOrFile.ListKey.AsArmObje
     $armObj.resources[0].properties.parameters.'$connections'.value.PsObject.Properties | ForEach-Object {
 
         if ($_.Value.id -like "*managedApis/azureblob*" -or $_.Value.id -like "*managedApis/azurefile*") {
+            
+            # This should avoid Managed Identity based connections
+            if ($_.Value.connectionProperties.authentication.type -eq "ManagedServiceIdentity") { return }
+
             $found = $true
 
             # Fetch the details from the connection object
