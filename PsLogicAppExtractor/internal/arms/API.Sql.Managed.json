@@ -1,0 +1,19 @@
+﻿{
+    "type": "Microsoft.Web/connections",
+    "apiVersion": "2018-07-01-preview",
+    "name": "##NAME##",
+    "location": "[parameters('logicAppLocation')]",
+    "kind": "V1",
+    "properties": {
+        "alternativeParameterValues": {},
+        "api": {
+            "id": "[subscriptionResourceId('Microsoft.Web/locations/managedApis', parameters('logicAppLocation'), 'sql')]"
+        },
+        "customParameterValues": {},
+        "displayName": "##NAME##",
+        "parameterValueSet": {
+            "name": "oauthMI",
+            "values": {}
+        }
+    }
+}
