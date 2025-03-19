@@ -1,17 +1,17 @@
 ﻿$parm = @{
     Description = @"
 Loops all `$connections children
--Validates that is of the type sftp
+-Validates that is of the type ftp
 --Creates a new resource in the ARM template, for the ApiConnection object
 --With matching ARM Parameters, for the Hostname, Username, Password
 --Makes sure the ARM Parameters logicAppLocation exists
 --Name & Displayname is extracted from the Api Connection Object
 Requires an authenticated session, either Az.Accounts or az cli
 "@
-    Alias       = "Arm.Set-Arm.Connections.ManagedApis.SftpWithSsh.Username.Advanced.AsArmObject"
+    Alias       = "Arm.Set-Arm.Connections.ManagedApis.FtpWithSsl.Username.Advanced.AsArmObject"
 }
 
-Task -Name "Set-Arm.Connections.ManagedApis.SftpWithSsh.Username.Advanced.AsArmObject" @parm -Action {
+Task -Name "Set-Arm.Connections.ManagedApis.FtpWithSsl.Username.Advanced.AsArmObject" @parm -Action {
     Set-TaskWorkDirectory
 
     # We can either use the az cli or the Az modules
@@ -23,7 +23,7 @@ Task -Name "Set-Arm.Connections.ManagedApis.SftpWithSsh.Username.Advanced.AsArmO
 
     $armObj.resources[0].properties.parameters.'$connections'.value.PsObject.Properties | ForEach-Object {
 
-        if ($_.Value.id -like "*managedApis/sftpwithssh*") {
+        if ($_.Value.id -like "*managedApis/ftp*") {
             $found = $true
 
             # Fetch the details from the connection object
@@ -39,17 +39,18 @@ Task -Name "Set-Arm.Connections.ManagedApis.SftpWithSsh.Username.Advanced.AsArmO
             # Use the display name as the name of the resource
             $conName = $resObj.Name
             $displayName = $resObj.Properties.DisplayName
-            $hostName = $resObj.Properties.ParameterValues.hostName
+            $hostName = $resObj.Properties.ParameterValues.serverAddress
             $userName = $resObj.Properties.ParameterValues.userName
-            $portNumber = $resObj.Properties.ParameterValues.portNumber
-            $rootFolder = $resObj.Properties.ParameterValues.rootFolder
-            $accept = $resObj.Properties.ParameterValues.acceptAnySshHostKey
-            $fingerprint = $resObj.Properties.ParameterValues.sshHostKeyFingerprint
+            $portNumber = $resObj.Properties.ParameterValues.serverPort
+            $sslEnabled = $resObj.Properties.ParameterValues.isSSL
+            $disableCertVali = $resObj.Properties.ParameterValues.disableCertificateValidation
+            $binary = $resObj.Properties.ParameterValues.isBinaryTransport
+            $closeCon = $resObj.Properties.ParameterValues.closeConnectionAfterRequestCompletion
             
 
             # Fetch base template
             $pathArms = "$(Get-PSFConfigValue -FullName PsLogicAppExtractor.ModulePath.Base)\internal\arms"
-            $apiObj = Get-Content -Path "$pathArms\API.SftpWithSsh.Username.json" -Raw | ConvertFrom-Json
+            $apiObj = Get-Content -Path "$pathArms\API.FtpWithSsl.Username.json" -Raw | ConvertFrom-Json
 
             # Set the names of the parameters
             $Prefix = Get-PSFConfigValue -FullName PsLogicAppExtractor.prefixsuffix.connection.prefix
@@ -57,9 +58,10 @@ Task -Name "Set-Arm.Connections.ManagedApis.SftpWithSsh.Username.Advanced.AsArmO
             $userPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_Username" -Value "$($_.Name)"
             $passPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_Password" -Value "$($_.Name)"
             $portPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_Portnumber" -Value "$($_.Name)"
-            $rootPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_Rootfolder" -Value "$($_.Name)"
-            $acceptPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_AcceptAnySshHostkey" -Value "$($_.Name)"
-            $fingerPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_SshHostKeyFingerprint" -Value "$($_.Name)"
+            $sslPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_SslEnabled" -Value "$($_.Name)"
+            $disableCertValiPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_DisableCertificateValidation" -Value "$($_.Name)"
+            $binaryPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_BinaryTransport" -Value "$($_.Name)"
+            $closePreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_CloseConnectionAfterRequest" -Value "$($_.Name)"
             
             $idPreSuf = Format-Name -Type "Connection" -Value "$($_.Name)"
             $displayPreSuf = Format-Name -Type "Connection" -Prefix $Prefix -Suffix "_DisplayName" -Value "$($_.Name)"
@@ -67,37 +69,42 @@ Task -Name "Set-Arm.Connections.ManagedApis.SftpWithSsh.Username.Advanced.AsArmO
             $armObj = Add-ArmParameter -InputObject $armObj -Name "$hostPreSuf" `
                 -Type "string" `
                 -Value "$hostName" `
-                -Description "The host / server address for the Sftp server. ($($_.Name))"
+                -Description "The host / server address for the ftp server. ($($_.Name))"
 
             $armObj = Add-ArmParameter -InputObject $armObj -Name "$userPreSuf" `
                 -Type "string" `
                 -Value "$userName" `
-                -Description "The username used to authenticate against the Sftp server. ($($_.Name))"
+                -Description "The username used to authenticate against the ftp server. ($($_.Name))"
 
             $armObj = Add-ArmParameter -InputObject $armObj -Name "$passPreSuf" `
                 -Type "SecureString" `
                 -Value "" `
-                -Description "The password used to authenticate against the Sftp server. ($($_.Name))"
+                -Description "The password used to authenticate against the ftp server. ($($_.Name))"
             
             $armObj = Add-ArmParameter -InputObject $armObj -Name "$portPreSuf" `
                 -Type "string" `
                 -Value "$portNumber" `
-                -Description "The port used to communicate with the Sftp server. ($($_.Name))"
+                -Description "The port used to communicate with the ftp server. ($($_.Name))"
 
-            $armObj = Add-ArmParameter -InputObject $armObj -Name "$rootPreSuf" `
-                -Type "string" `
-                -Value "$rootFolder" `
-                -Description "The root folder path on the Sftp server. ($($_.Name))"
-                
-            $armObj = Add-ArmParameter -InputObject $armObj -Name "$acceptPreSuf" `
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$sslPreSuf" `
                 -Type "bool" `
-                -Value $accept `
-                -Description "True will accept any Ssh Host Keys presented from the Sftp server. ($($_.Name))"
+                -Value $sslEnabled `
+                -Description "True will make sure to use SSL connection against ftp server. ($($_.Name))"
+                
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$disableCertValiPreSuf" `
+                -Type "bool" `
+                -Value $disableCertVali `
+                -Description "True will accept any certificate presented from the ftp server. ($($_.Name))"
             
-            $armObj = Add-ArmParameter -InputObject $armObj -Name "$fingerPreSuf" `
-                -Type "string" `
-                -Value "$fingerprint" `
-                -Description "The fingerprint that you expect during the initial communication with the Sftp server. ($($_.Name))"
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$binaryPreSuf" `
+                -Type "bool" `
+                -Value $binary `
+                -Description "True will force communication with the ftp server to be binary based. ($($_.Name))"
+                
+            $armObj = Add-ArmParameter -InputObject $armObj -Name "$closePreSuf" `
+                -Type "bool" `
+                -Value $closeCon `
+                -Description "True will close/terminate the connection with the ftp server when a command is completed. ($($_.Name))"
                 
             $armObj = Add-ArmParameter -InputObject $armObj -Name "$displayPreSuf" `
                 -Type "string" `
@@ -112,13 +119,14 @@ Task -Name "Set-Arm.Connections.ManagedApis.SftpWithSsh.Username.Advanced.AsArmO
             # Update the api object properties
             $apiObj.Name = "[parameters('$idPreSuf')]"
             $apiObj.properties.displayName = "[parameters('$displayPreSuf')]"
-            $apiObj.Properties.ParameterValues.hostName = "[parameters('$hostPreSuf')]"
+            $apiObj.Properties.ParameterValues.serverAddress = "[parameters('$hostPreSuf')]"
             $apiObj.Properties.ParameterValues.userName = "[parameters('$userPreSuf')]"
             $apiObj.Properties.ParameterValues.password = "[parameters('$passPreSuf')]"
-            $apiObj.Properties.ParameterValues.portNumber = "[parameters('$portPreSuf')]"
-            $apiObj.Properties.ParameterValues.rootFolder = "[parameters('$rootPreSuf')]"
-            $apiObj.Properties.ParameterValues.acceptAnySshHostKey = "[parameters('$acceptPreSuf')]"
-            $apiObj.Properties.ParameterValues.sshHostKeyFingerprint = "[parameters('$fingerPreSuf')]"
+            $apiObj.Properties.ParameterValues.serverPort = "[parameters('$portPreSuf')]"
+            $apiObj.Properties.ParameterValues.isSSL = "[parameters('$sslPreSuf')]"
+            $apiObj.Properties.ParameterValues.disableCertificateValidation = "[parameters('$disableCertValiPreSuf')]"
+            $apiObj.Properties.ParameterValues.isBinaryTransport = "[parameters('$binaryPreSuf')]"
+            $apiObj.Properties.ParameterValues.closeConnectionAfterRequestCompletion = "[parameters('$closePreSuf')]"
 
             # Update the api connection object type
             $_.Value.id -match "/managedApis/(.*)"
