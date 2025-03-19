@@ -36,7 +36,7 @@ Task -Name "Set-Arm.Trigger.ApiConnection.EvaluatedRecurrence.AsParameter" @parm
         $armObj = Add-ArmParameter -InputObject $armObj -Name "$frequencyPreSuf" `
             -Type "string" `
             -Value $orgFrequency `
-            -Description "The frequency used for the trigger to evalutate."
+            -Description "The frequency used for the trigger to evaluate."
 
         $armObj.resources[0].properties.definition.triggers.PsObject.Properties.Value.evaluatedRecurrence.frequency = "[parameters('$frequencyPreSuf')]"
         
@@ -45,7 +45,7 @@ Task -Name "Set-Arm.Trigger.ApiConnection.EvaluatedRecurrence.AsParameter" @parm
         $armObj = Add-ArmParameter -InputObject $armObj -Name "$intervalPreSuf" `
             -Type "int" `
             -Value $orgInterval `
-            -Description "The interval used for the trigger to evalutate."
+            -Description "The interval used for the trigger to evaluate."
 
         $armObj.resources[0].properties.definition.triggers.PsObject.Properties.Value.evaluatedRecurrence.interval = "[parameters('$intervalPreSuf')]"
 
@@ -55,7 +55,7 @@ Task -Name "Set-Arm.Trigger.ApiConnection.EvaluatedRecurrence.AsParameter" @parm
             $armObj = Add-ArmParameter -InputObject $armObj -Name "$startTimePreSuf" `
                 -Type "string" `
                 -Value $orgStartTime `
-                -Description "The start time used for the trigger to evalutate."
+                -Description "The start time used for the trigger to evaluate."
 
             $armObj.resources[0].properties.definition.triggers.PsObject.Properties.Value.evaluatedRecurrence.startTime = "[parameters('$startTimePreSuf')]"
         }
@@ -66,7 +66,7 @@ Task -Name "Set-Arm.Trigger.ApiConnection.EvaluatedRecurrence.AsParameter" @parm
             $armObj = Add-ArmParameter -InputObject $armObj -Name "$timeZonePreSuf" `
                 -Type "string" `
                 -Value $orgTimeZone `
-                -Description "The time zone used for the trigger to evalutate."
+                -Description "The time zone used for the trigger to evaluate."
 
             $armObj.resources[0].properties.definition.triggers.PsObject.Properties.Value.evaluatedRecurrence.timeZone = "[parameters('$timeZonePreSuf')]"
         }

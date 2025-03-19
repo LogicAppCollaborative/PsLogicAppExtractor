@@ -47,7 +47,7 @@ Task -Name "Set-Arm.Trigger.ApiConnection.Recurrence.AsParameter" @parm -Action 
             $armObj = Add-ArmParameter -InputObject $armObj -Name "$startTimePreSuf" `
                 -Type "string" `
                 -Value $orgStartTime `
-                -Description "The start time used for the trigger to evalutate."
+                -Description "The start time used for the trigger to evaluate."
 
             $armObj.resources[0].properties.definition.triggers.PsObject.Properties.Value.recurrence.startTime = "[parameters('$startTimePreSuf')]"
         }
@@ -58,7 +58,7 @@ Task -Name "Set-Arm.Trigger.ApiConnection.Recurrence.AsParameter" @parm -Action 
             $armObj = Add-ArmParameter -InputObject $armObj -Name "$timeZonePreSuf" `
                 -Type "string" `
                 -Value $orgTimeZone `
-                -Description "The time zone used for the trigger to evalutate."
+                -Description "The time zone used for the trigger to evaluate."
 
             $armObj.resources[0].properties.definition.triggers.PsObject.Properties.Value.recurrence.timeZone = "[parameters('$timeZonePreSuf')]"
         }
