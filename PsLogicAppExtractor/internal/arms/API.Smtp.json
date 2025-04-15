@@ -1,0 +1,21 @@
+{
+    "type": "Microsoft.Web/connections",
+    "apiVersion": "2018-07-01-preview",
+    "name": "##NAME##",
+    "location": "[parameters('logicAppLocation')]",
+    "kind": "V1",
+    "properties": {
+        "parameterValues": {
+            "serverAddress": "##HOSTNAME##",
+            "userName": "##USERNAME#",
+            "password": "##PASSWORD##",
+            "port": "##PORTNUMBER##",
+            "enableSSL": "##ENABLESSL##"
+        },
+        "displayName": "##NAME##",
+        "customParameterValues": {},
+        "api": {
+            "id": "[subscriptionResourceId('Microsoft.Web/locations/managedApis', parameters('logicAppLocation'), '##TYPE##')]"
+        }
+    }
+}
